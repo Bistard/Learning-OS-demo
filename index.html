@@ -1,14 +1,18 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learning OS Demo</title>
+    <title>小墨冲刺 Demo</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <noscript>请启用 JavaScript 以查看页面内容。</noscript>
-    <div id="app"></div>
+    <div class="app-layout">
+      <div id="app" class="app-shell"></div>
+      <aside id="chat-panel" class="chat-shell"></aside>
+    </div>
+    <div id="toast-area" class="toast-area"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
