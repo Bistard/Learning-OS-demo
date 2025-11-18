@@ -14,7 +14,7 @@ import studyRouteTemplate from '../data/templates/studyRoute.json';
 import weeklyPlanTemplate from '../data/templates/weeklyPlan.json';
 import taskTreeTemplate from '../data/templates/taskTree.json';
 import resourceHighlightsTemplate from '../data/templates/resourceHighlights.json';
-import knowledgeSectionsTemplate from '../data/templates/knowledgeSections.json';
+import knowledgeBaseTemplateData from '../data/templates/knowledgeBase.json';
 import workspaceTemplateData from '../data/templates/workspace.json';
 import chatHistoryTemplate from '../data/templates/chatHistory.json';
 import timelineTemplate from '../data/templates/timeline.json';
@@ -106,33 +106,39 @@ export interface GoalCreationDraft {
   dailyMinutes: number;
 }
 
-export type KnowledgeFolderType =
-  | 'cards'
-  | 'errors'
-  | 'chat'
+export type KnowledgeCategoryKind =
+  | 'flashcards'
+  | 'mistakes'
+  | 'aiChats'
+  | 'links'
+  | 'uploads'
   | 'notes'
-  | 'uploads';
+  | 'uncategorized'
+  | 'custom';
 
-export interface KnowledgeFolder {
+export interface KnowledgeItem {
   id: string;
-  title: string;
-  description: string;
-  type: KnowledgeFolderType;
-  items: number;
-  relatedGoalId?: string;
-  lastSynced: string;
+  summary: string;
+  detail: string;
+  source: string;
+  updatedAt: string;
+  goalId?: string;
+  href?: string;
 }
 
-export interface KnowledgeSection {
+export interface KnowledgeCategory {
   id: string;
   title: string;
-  description: string;
-  folders: KnowledgeFolder[];
+  kind: KnowledgeCategoryKind;
+  isFixed: boolean;
+  items: KnowledgeItem[];
 }
 
 export interface KnowledgeBaseState {
-  sections: KnowledgeSection[];
+  categories: KnowledgeCategory[];
 }
+
+export const KNOWLEDGE_UNSORTED_CATEGORY_ID = 'kb-uncategorized';
 
 export interface WorkspaceAsset {
   id: string;
@@ -204,25 +210,12 @@ interface GoalSeed {
   progress: Omit<GoalProgress, 'remainingDays'>;
 }
 
-interface KnowledgeFolderTemplate extends Omit<KnowledgeFolder, 'relatedGoalId'> {}
-
-interface CurrentGoalSectionTemplate {
-  id: string;
-  titleTemplate: string;
-  description: string;
-  folders: KnowledgeFolderTemplate[];
+interface KnowledgeCategoryTemplate extends KnowledgeCategory {
+  items: KnowledgeItem[];
 }
 
-interface KnowledgeSectionTemplate {
-  id: string;
-  title: string;
-  description: string;
-  folders: KnowledgeFolderTemplate[];
-}
-
-interface KnowledgeSectionsConfig {
-  currentGoalSection: CurrentGoalSectionTemplate;
-  additionalSections: KnowledgeSectionTemplate[];
+interface KnowledgeBaseTemplate {
+  categories: KnowledgeCategoryTemplate[];
   connectedVaults: {
     activeGoal: string[];
     newGoal: string[];
@@ -236,13 +229,13 @@ const studyRouteData = studyRouteTemplate as StudyRouteItem[];
 const weeklyPlanData = weeklyPlanTemplate as WeeklyPlanItem[];
 const taskTreeData = taskTreeTemplate as TaskNode[];
 const resourceHighlightsData = resourceHighlightsTemplate as ResourceHighlight[];
-const knowledgeSectionsConfig = knowledgeSectionsTemplate as KnowledgeSectionsConfig;
+const knowledgeBaseTemplate = knowledgeBaseTemplateData as KnowledgeBaseTemplate;
 const workspaceTemplate = workspaceTemplateData as WorkspaceState;
 const chatHistorySeeds = chatHistoryTemplate as ChatMessageSeed[];
 const timelineData = timelineTemplate as CalendarEvent[];
 
 export const NEW_GOAL_CONNECTED_VAULTS = Object.freeze([
-  ...knowledgeSectionsConfig.connectedVaults.newGoal,
+  ...knowledgeBaseTemplate.connectedVaults.newGoal,
 ]);
 
 /**
@@ -282,6 +275,18 @@ export const createTaskTree = (): TaskNode[] => taskTreeData.map(cloneTaskNode);
 export const createResourceHighlights = (): ResourceHighlight[] =>
   resourceHighlightsData.map((highlight) => ({ ...highlight }));
 
+/**
+ * Creates the knowledge base snapshot with cloned categories and items.
+ *
+ * @returns A KnowledgeBaseState value decoupled from the template file.
+ */
+export const createKnowledgeBase = (): KnowledgeBaseState => ({
+  categories: knowledgeBaseTemplate.categories.map((category) => ({
+    ...category,
+    items: category.items.map((item) => ({ ...item })),
+  })),
+});
+
 const createGoal = (): StudyGoal => {
   const deadline = nextDeadlineIso(goalSeed.profile.deadlineDaysFromNow);
   const profile: GoalProfile = {
@@ -308,7 +313,7 @@ const createGoal = (): StudyGoal => {
     weeklyPlan: createWeeklyPlan(),
     taskTree: createTaskTree(),
     highlights: createResourceHighlights(),
-    connectedKnowledgeVaults: [...knowledgeSectionsConfig.connectedVaults.activeGoal],
+    connectedKnowledgeVaults: [...knowledgeBaseTemplate.connectedVaults.activeGoal],
   };
 };
 
@@ -319,26 +324,6 @@ export const createGoalDraft = (): GoalCreationDraft => ({
   materials: [],
   dailyMinutes: DEFAULT_DAILY_MINUTES,
 });
-
-export const createKnowledgeSections = (goal: StudyGoal): KnowledgeSection[] => {
-  const template = knowledgeSectionsConfig.currentGoalSection;
-  const current: KnowledgeSection = {
-    id: template.id,
-    title: template.titleTemplate.replace('{goalName}', goal.name),
-    description: template.description,
-    folders: template.folders.map((folder) => ({
-      ...folder,
-      relatedGoalId: goal.id,
-    })),
-  };
-  const additional = knowledgeSectionsConfig.additionalSections.map((section) => ({
-    id: section.id,
-    title: section.title,
-    description: section.description,
-    folders: section.folders.map((folder) => ({ ...folder })),
-  }));
-  return [current, ...additional];
-};
 
 const createWorkspaceState = (): WorkspaceState => ({
   activeAsset: { ...workspaceTemplate.activeAsset },
@@ -369,9 +354,7 @@ export const createInitialState = (): LearningOsState => {
     goals: [goal],
     activeGoalId: goal.id,
     creationDraft: createGoalDraft(),
-    knowledgeBase: {
-      sections: createKnowledgeSections(goal),
-    },
+    knowledgeBase: createKnowledgeBase(),
     chatHistory: createChatHistory(goal.id),
     workspace: createWorkspaceState(),
     timeline: createTimeline(),

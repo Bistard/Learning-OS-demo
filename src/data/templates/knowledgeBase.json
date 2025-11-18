@@ -1,0 +1,177 @@
+{
+  "connectedVaults": {
+    "activeGoal": [
+      "kb-flashcards",
+      "kb-mistakes",
+      "kb-notes"
+    ],
+    "newGoal": [
+      "kb-uncategorized",
+      "kb-notes"
+    ]
+  },
+  "categories": [
+    {
+      "id": "kb-flashcards",
+      "title": "记忆卡片",
+      "kind": "flashcards",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-flash-1",
+          "summary": "极限七条黄金法则",
+          "detail": "当 ε > 0, 存在 δ > 0 使 |f(x) - L| < ε, |x - a| < δ。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:26",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-2",
+          "summary": "链式求导示例 f(g(x))",
+          "detail": "d/dx f(g(x)) = f'(g(x)) · g'(x)。可结合复合函数熟练记忆。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:32",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-mistakes",
+      "title": "错题本",
+      "kind": "mistakes",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-mistake-1",
+          "summary": "定积分换元忘记限",
+          "detail": "换元后上下限需同步替换, 否则区间仍是原变量。",
+          "source": "错题回流",
+          "updatedAt": "昨日 22:41",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-2",
+          "summary": "麦克劳林展开抄错符号",
+          "detail": "记住 (-1)^n 保持在导数表达式前, 展开到 n=3 即可。",
+          "source": "错题回流",
+          "updatedAt": "昨日 21:18",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-ai-chat",
+      "title": "AI 对话记录",
+      "kind": "aiChats",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-chat-1",
+          "summary": "AI：如何把握证明题节奏？",
+          "detail": "答：先列已知与待证, 明确变量关系, 再按 \"构造-变形-结论\" 三段展开。",
+          "source": "AI 对话",
+          "updatedAt": "今日 07:55",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-chat-2",
+          "summary": "AI：有无三分钟复习方案？",
+          "detail": "建议：刷 2 道链式求导, 1 道极限夹逼, 复盘错题 1 条。",
+          "source": "AI 对话",
+          "updatedAt": "今日 07:58",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-links",
+      "title": "网站收藏",
+      "kind": "links",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-link-1",
+          "summary": "哈佛微积分公开课 · 章节 05",
+          "detail": "对比导数与极限的直观关系, 适合快速回顾。",
+          "source": "Website",
+          "updatedAt": "本周 04:13",
+          "goalId": "goal-linear",
+          "href": "https://example.com/calculus"
+        },
+        {
+          "id": "kb-item-link-2",
+          "summary": "Brilliant - 练习集 12",
+          "detail": "精选 10 道链式求导题, 逐步提示。",
+          "source": "Website",
+          "updatedAt": "本周 02:40",
+          "goalId": "goal-linear",
+          "href": "https://example.com/brilliant"
+        }
+      ]
+    },
+    {
+      "id": "kb-uploads",
+      "title": "上传资料",
+      "kind": "uploads",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-upload-1",
+          "summary": "Lecture-05.pdf",
+          "detail": "PPT OCR 完成, 自动抽取 18 段摘要。",
+          "source": "上传",
+          "updatedAt": "本周 02:08",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-2",
+          "summary": "Mock-2023-A.jpg",
+          "detail": "拍照笔记 6 张, 已转文字并打上极限标签。",
+          "source": "上传",
+          "updatedAt": "本周 01:51",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-notes",
+      "title": "笔记",
+      "kind": "notes",
+      "isFixed": false,
+      "items": [
+        {
+          "id": "kb-item-note-1",
+          "summary": "三步判断函数凹凸",
+          "detail": "1) 求一阶导 monotonic, 2) 二阶导符号, 3) 结合区间。",
+          "source": "即时笔记",
+          "updatedAt": "今日 07:52",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-2",
+          "summary": "考试 20 天复盘 checklist",
+          "detail": "每日 Quiz 2 套, 周末整理错题再入 AI。",
+          "source": "即时笔记",
+          "updatedAt": "今日 07:58",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-uncategorized",
+      "title": "未分类",
+      "kind": "uncategorized",
+      "isFixed": true,
+      "items": [
+        {
+          "id": "kb-item-unsorted-1",
+          "summary": "待整理：把线性代数笔记搬过来",
+          "detail": "需要判断与本目标是否相关, 暂缓分配。",
+          "source": "临时记录",
+          "updatedAt": "今日 06:40",
+          "goalId": "goal-linear"
+        }
+      ]
+    }
+  ]
+}

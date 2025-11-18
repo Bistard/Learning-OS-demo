@@ -5,8 +5,9 @@
 import {
   ChatMessage,
   GoalCreationDraft,
-  KnowledgeFolder,
-  KnowledgeSection,
+  KnowledgeBaseState,
+  KnowledgeCategory,
+  KnowledgeItem,
   LearningOsState,
   Page,
   ResourceHighlight,
@@ -16,8 +17,8 @@ import {
   WorkspaceState,
   createGoalDraft,
   createInitialState,
-  createKnowledgeSections,
   NEW_GOAL_CONNECTED_VAULTS,
+  KNOWLEDGE_UNSORTED_CATEGORY_ID,
   createStudyRoute,
   createTaskTree,
   createWeeklyPlan,
@@ -64,12 +65,10 @@ export class LearningOsViewModel {
 
   public selectGoal(goalId: string, targetPage?: Page): void {
     if (this.state.activeGoalId === goalId && !targetPage) return;
-    const goal = this.state.goals.find((item) => item.id === goalId);
-    if (!goal) return;
-    const sections = this.replaceGoalKnowledgeSection(goal);
+    const goalExists = this.state.goals.some((item) => item.id === goalId);
+    if (!goalExists) return;
     this.updateState({
       activeGoalId: goalId,
-      knowledgeBase: { ...this.state.knowledgeBase, sections },
       page: targetPage ?? this.state.page,
     });
   }
@@ -108,13 +107,11 @@ export class LearningOsViewModel {
       return;
     }
     const newGoal = this.createGoalFromDraft(draft);
-    const knowledgeSections = this.replaceGoalKnowledgeSection(newGoal);
     this.state = {
       ...this.state,
       goals: [newGoal, ...this.state.goals],
       activeGoalId: newGoal.id,
       creationDraft: createGoalDraft(),
-      knowledgeBase: { ...this.state.knowledgeBase, sections: knowledgeSections },
       page: 'goalWorkspace',
     };
     this.publish();
@@ -176,7 +173,7 @@ export class LearningOsViewModel {
   public syncWorkspaceNote(): void {
     const content = this.state.workspace.noteDraft.trim();
     if (!content) {
-      this.emitToast('笔记内容为空，无法收录。', 'warning');
+      this.emitToast('笔记内容为空，无法收录～', 'warning');
       return;
     }
     const headline = content.split('\n')[0]?.replace(/^#+\s*/, '') || '即时笔记';
@@ -187,9 +184,112 @@ export class LearningOsViewModel {
       syncedNotes,
       lastSyncedAt: timestamp,
     };
-    const knowledgeBase = this.bumpKnowledgeFolder('kb-notes');
+    const noteItem: KnowledgeItem = {
+      id: `kb-note-${Date.now()}`,
+      summary: headline,
+      detail: content,
+      source: '即时笔记',
+      updatedAt: timestamp,
+      goalId: this.state.activeGoalId ?? undefined,
+    };
+    const knowledgeBase = this.prependKnowledgeItem('kb-notes', noteItem);
     this.updateState({ workspace, knowledgeBase });
-    this.emitToast('已自动沉入当前知识库并分类。', 'success');
+    this.emitToast('已自动沉入当前知识库并分类～', 'success');
+  }
+
+  public addKnowledgeCategory(title: string): void {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      this.emitToast('分类名称不能为空～', 'warning');
+      return;
+    }
+    const knowledgeBase = this.mutateKnowledgeCategories((categories) => [
+      ...categories,
+      {
+        id: `kb-category-${Date.now()}`,
+        title: trimmed,
+        kind: 'custom',
+        isFixed: false,
+        items: [],
+      },
+    ]);
+    this.updateState({ knowledgeBase });
+  }
+
+  public renameKnowledgeCategory(categoryId: string, title: string): void {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      this.emitToast('分类名称不能为空～', 'warning');
+      return;
+    }
+    const knowledgeBase = this.mutateKnowledgeCategories((categories) =>
+      categories.map((category) =>
+        category.id === categoryId && !category.isFixed
+          ? { ...category, title: trimmed }
+          : category
+      )
+    );
+    this.updateState({ knowledgeBase });
+  }
+
+  public deleteKnowledgeCategory(categoryId: string): void {
+    const knowledgeBase = this.mutateKnowledgeCategories((categories) => {
+      const target = categories.find((category) => category.id === categoryId);
+      if (!target || target.isFixed) {
+        return categories;
+      }
+      return categories
+        .filter((category) => category.id !== categoryId)
+        .map((category) =>
+          category.id === KNOWLEDGE_UNSORTED_CATEGORY_ID
+            ? { ...category, items: [...target.items, ...category.items] }
+            : category
+        );
+    });
+    this.updateState({ knowledgeBase });
+  }
+
+  public reorderKnowledgeCategories(order: string[]): void {
+    if (!order.length) return;
+    const map = new Map(
+      this.state.knowledgeBase.categories.map((category) => [category.id, category] as const)
+    );
+    const ordered: KnowledgeCategory[] = [];
+    order.forEach((id) => {
+      const category = map.get(id);
+      if (category) {
+        ordered.push(category);
+        map.delete(id);
+      }
+    });
+    map.forEach((category) => ordered.push(category));
+    const knowledgeBase: KnowledgeBaseState = {
+      ...this.state.knowledgeBase,
+      categories: ordered,
+    };
+    this.updateState({ knowledgeBase });
+  }
+
+  public moveKnowledgeItem(itemId: string, targetCategoryId: string, targetIndex = 0): void {
+    const { item } = this.locateKnowledgeItem(itemId);
+    if (!item) return;
+    const normalizedIndex = Number.isInteger(targetIndex) ? Number(targetIndex) : 0;
+    const targetId = this.resolveCategoryId(targetCategoryId);
+    const baseline = this.ensureUnsortedCategory(this.state.knowledgeBase.categories);
+    const withoutItem = baseline.map((category) => ({
+      ...category,
+      items: category.items.filter((candidate) => candidate.id !== itemId),
+    }));
+    const categories = withoutItem.map((category) => {
+      if (category.id !== targetId) {
+        return category;
+      }
+      const items = [...category.items];
+      const safeIndex = Math.max(0, Math.min(normalizedIndex, items.length));
+      items.splice(safeIndex, 0, item);
+      return { ...category, items };
+    });
+    this.updateState({ knowledgeBase: { ...this.state.knowledgeBase, categories } });
   }
 
   public sendChat(message: string): void {
@@ -268,26 +368,56 @@ export class LearningOsViewModel {
     return [newHighlight, ...existing].slice(0, 6);
   }
 
-  private bumpKnowledgeFolder(folderId: string) {
-    const sections = this.state.knowledgeBase.sections.map((section) => ({
-      ...section,
-      folders: section.folders.map((folder) =>
-        folder.id === folderId ? this.incrementFolder(folder) : folder
-      ),
-    }));
-    return { ...this.state.knowledgeBase, sections };
-  }
-
-  private incrementFolder(folder: KnowledgeFolder): KnowledgeFolder {
-    return { ...folder, items: folder.items + 1, lastSynced: this.formatTime() };
-  }
-
-  private replaceGoalKnowledgeSection(goal: StudyGoal): KnowledgeSection[] {
-    const [goalSection] = createKnowledgeSections(goal);
-    const otherSections = this.state.knowledgeBase.sections.filter(
-      (section) => section.id !== 'kb-current'
+  private prependKnowledgeItem(categoryId: string, item: KnowledgeItem): KnowledgeBaseState {
+    const targetId = this.resolveCategoryId(categoryId);
+    return this.mutateKnowledgeCategories((categories) =>
+      categories.map((category) =>
+        category.id === targetId ? { ...category, items: [item, ...category.items] } : category
+      )
     );
-    return [goalSection, ...otherSections];
+  }
+
+  private locateKnowledgeItem(
+    itemId: string
+  ): { item: KnowledgeItem | null; categoryId: string | null } {
+    for (const category of this.state.knowledgeBase.categories) {
+      const found = category.items.find((candidate) => candidate.id === itemId);
+      if (found) {
+        return { item: { ...found }, categoryId: category.id };
+      }
+    }
+    return { item: null, categoryId: null };
+  }
+
+  private mutateKnowledgeCategories(
+    mutator: (categories: KnowledgeCategory[]) => KnowledgeCategory[]
+  ): KnowledgeBaseState {
+    const baseline = this.ensureUnsortedCategory(this.state.knowledgeBase.categories);
+    return {
+      ...this.state.knowledgeBase,
+      categories: mutator(baseline),
+    };
+  }
+
+  private ensureUnsortedCategory(categories: KnowledgeCategory[]): KnowledgeCategory[] {
+    if (categories.some((category) => category.id === KNOWLEDGE_UNSORTED_CATEGORY_ID)) {
+      return categories;
+    }
+    const fallback: KnowledgeCategory = {
+      id: KNOWLEDGE_UNSORTED_CATEGORY_ID,
+      title: '未分类',
+      kind: 'uncategorized',
+      isFixed: true,
+      items: [],
+    };
+    return [...categories, fallback];
+  }
+
+  private resolveCategoryId(categoryId: string): string {
+    const exists = this.state.knowledgeBase.categories.some(
+      (category) => category.id === categoryId
+    );
+    return exists ? categoryId : KNOWLEDGE_UNSORTED_CATEGORY_ID;
   }
 
   private composeAiResponse(message: string): string {
