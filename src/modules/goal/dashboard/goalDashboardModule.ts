@@ -41,7 +41,6 @@ class GoalDashboardView {
         <div>
           <p class="eyebrow">Step 0</p>
           <h2>你现在最重要的学习目标是什么？</h2>
-          <p class="microcopy">入口永远是目标；知识库永远是副产品，负责沉淀和上下文。</p>
           <div class="cta-group">
             <button class="btn primary" id="dashboard-create-goal">创建目标</button>
             <button class="btn ghost" id="dashboard-open-kb">查看知识库</button>
