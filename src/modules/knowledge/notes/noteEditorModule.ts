@@ -1,6 +1,6 @@
 import { KnowledgeNote, Page } from '../../../models/learningOsModel';
 import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
-import { bindClick, bindInput } from '../../../utils/dom';
+import { bindClick } from '../../../utils/dom';
 import { RenderRegions, UiModule } from '../../types';
 
 interface NoteEditorViewState {
@@ -61,25 +61,30 @@ class NoteEditorViewModel {
 }
 
 class NoteEditorView {
+  private host: HTMLElement | null = null;
+  private pendingFocus:
+    | { noteId: string; field: 'title' | 'body'; selectionStart: number; selectionEnd: number }
+    | null = null;
+  private composingField: { noteId: string; field: 'title' | 'body' } | null = null;
+
   constructor(private readonly viewModel: NoteEditorViewModel) {}
 
   public render(state: NoteEditorViewState, regions: RenderRegions): void {
     if (!state.note) {
+      this.host = regions.content;
+      this.pendingFocus = null;
       regions.content.innerHTML = this.renderEmpty();
       bindClick(regions.content, '#note-create-empty', () => this.viewModel.createNote());
       return;
     }
+    this.host = regions.content;
     regions.content.innerHTML = this.renderNote(state);
     const editor = regions.content.querySelector<HTMLTextAreaElement>('#note-body-input');
     if (editor) {
       editor.value = state.note.content;
     }
-    bindInput(regions.content, '#note-title-input', (value) =>
-      this.viewModel.rename(state.note!.id, String(value))
-    );
-    bindInput(regions.content, '#note-body-input', (value) =>
-      this.viewModel.updateContent(state.note!.id, String(value))
-    );
+    this.bindNoteInputs(state);
+    this.restoreFocus(state.note.id);
   }
 
   private renderEmpty(): string {
@@ -124,6 +129,91 @@ class NoteEditorView {
         </div>
       </section>
     `;
+  }
+
+  private bindNoteInputs(state: NoteEditorViewState): void {
+    if (!state.note || !this.host) return;
+    const noteId = state.note.id;
+    const titleInput = this.host.querySelector<HTMLInputElement>('#note-title-input');
+    const bodyInput = this.host.querySelector<HTMLTextAreaElement>('#note-body-input');
+    if (titleInput) {
+      titleInput.addEventListener('compositionstart', () => {
+        this.composingField = { field: 'title', noteId };
+      });
+      titleInput.addEventListener('compositionend', () => {
+        this.composingField = null;
+        this.captureFocus('title', titleInput, noteId);
+        this.viewModel.rename(noteId, titleInput.value);
+      });
+      titleInput.addEventListener('input', (event) => {
+        if (this.shouldDeferInput(event as InputEvent, 'title', noteId)) {
+          return;
+        }
+        const value = (event.target as HTMLInputElement).value;
+        this.captureFocus('title', titleInput, noteId);
+        this.viewModel.rename(noteId, value);
+      });
+    }
+    if (bodyInput) {
+      bodyInput.addEventListener('compositionstart', () => {
+        this.composingField = { field: 'body', noteId };
+      });
+      bodyInput.addEventListener('compositionend', () => {
+        this.composingField = null;
+        this.captureFocus('body', bodyInput, noteId);
+        this.viewModel.updateContent(noteId, bodyInput.value);
+      });
+      bodyInput.addEventListener('input', (event) => {
+        if (this.shouldDeferInput(event as InputEvent, 'body', noteId)) {
+          return;
+        }
+        const value = (event.target as HTMLTextAreaElement).value;
+        this.captureFocus('body', bodyInput, noteId);
+        this.viewModel.updateContent(noteId, value);
+      });
+    }
+  }
+
+  private captureFocus(
+    field: 'title' | 'body',
+    element: HTMLInputElement | HTMLTextAreaElement,
+    noteId: string
+  ): void {
+    const selectionStart = element.selectionStart ?? element.value.length;
+    const selectionEnd = element.selectionEnd ?? element.value.length;
+    this.pendingFocus = { field, noteId, selectionStart, selectionEnd };
+  }
+
+  private restoreFocus(noteId: string): void {
+    if (!this.pendingFocus || this.pendingFocus.noteId !== noteId || !this.host) {
+      if (this.pendingFocus && this.pendingFocus.noteId !== noteId) {
+        this.pendingFocus = null;
+      }
+      return;
+    }
+    const selector =
+      this.pendingFocus.field === 'title' ? '#note-title-input' : '#note-body-input';
+    const element = this.host.querySelector<HTMLInputElement | HTMLTextAreaElement>(selector);
+    if (!element) return;
+    element.focus();
+    if (typeof element.setSelectionRange === 'function') {
+      element.setSelectionRange(this.pendingFocus.selectionStart, this.pendingFocus.selectionEnd);
+    }
+    this.pendingFocus = null;
+  }
+
+  private shouldDeferInput(
+    event: InputEvent,
+    field: 'title' | 'body',
+    noteId: string
+  ): boolean {
+    if (event.isComposing) {
+      return true;
+    }
+    if (this.composingField && this.composingField.field === field && this.composingField.noteId === noteId) {
+      return true;
+    }
+    return false;
   }
 
   private renderMarkdown(markdown: string): string {
