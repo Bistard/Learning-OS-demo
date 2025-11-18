@@ -1,0 +1,6 @@
+﻿[
+  { "id": "week-mon", "day": "周一", "focus": "概念精读 + 例题", "hours": 2, "aiTip": "优先攻克抽象向量空间" },
+  { "id": "week-wed", "day": "周三", "focus": "拍照批改作业", "hours": 1.5, "aiTip": "针对 rank-nullity 追加题单" },
+  { "id": "week-fri", "day": "周五", "focus": "错题巩固 + Quiz", "hours": 1, "aiTip": "右栏生成 5 题小测" },
+  { "id": "week-sun", "day": "周日", "focus": "仿真模拟 + 复盘", "hours": 2, "aiTip": "输出雷达图反馈至 Knowledge Base" }
+]

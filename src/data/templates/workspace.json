@@ -1,0 +1,15 @@
+﻿{
+  "activeAsset": {
+    "id": "asset-pdf-w5",
+    "title": "Lecture Slides · Week 5 正交投影",
+    "type": "pdf",
+    "chapter": "Chapter 5 Projection",
+    "progress": 62,
+    "metadata": "120 页 · 已高亮 14 处 · 自动章节提取完成"
+  },
+  "noteDraft": "## 最小二乘推导\n- 从 Ax=b 开始，构造正规方程 `AᵀAx = Aᵀb`\n- 记得区分“投影点 P”与“坐标 x”\n",
+  "syncedNotes": ["正交基构建 3 步模型", "Quiz 重点错题总结"],
+  "lastSyncedAt": "08:12",
+  "quizQueue": ["生成 5 题判断题", "拍照错题，自动出解析"],
+  "coachFocus": "当前问题集中在「约束条件翻译」与「符号混淆」"
+}

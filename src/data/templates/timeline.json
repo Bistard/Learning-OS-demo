@@ -1,0 +1,5 @@
+﻿[
+  { "id": "cal-1", "day": "周三", "title": "AI 诊断 Quiz", "time": "19:30", "focus": "10 题冲刺 + 自动复盘" },
+  { "id": "cal-2", "day": "周五", "title": "错题本复盘", "time": "20:00", "focus": "拍照错题 + RAG 解析" },
+  { "id": "cal-3", "day": "周日", "title": "Final Mock", "time": "09:00", "focus": "60 分钟仿真 + 知识库整理" }
+]

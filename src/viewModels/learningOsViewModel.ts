@@ -17,6 +17,7 @@ import {
   createGoalDraft,
   createInitialState,
   createKnowledgeSections,
+  NEW_GOAL_CONNECTED_VAULTS,
   createStudyRoute,
   createTaskTree,
   createWeeklyPlan,
@@ -258,7 +259,7 @@ export class LearningOsViewModel {
       weeklyPlan,
       taskTree,
       highlights: [],
-      connectedKnowledgeVaults: ['kb-unsorted'],
+      connectedKnowledgeVaults: [...NEW_GOAL_CONNECTED_VAULTS],
     };
   }
 

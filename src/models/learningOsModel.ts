@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Learning OS domain model definitions refactored for the Goal x Knowledge Base
  * interaction design described in demo_dev_plan.md.
  *
@@ -8,6 +8,16 @@
  * console.log(state.page); // goalDashboard
  * ```
  */
+
+import initialGoalData from '../data/initialGoal.json';
+import studyRouteTemplate from '../data/templates/studyRoute.json';
+import weeklyPlanTemplate from '../data/templates/weeklyPlan.json';
+import taskTreeTemplate from '../data/templates/taskTree.json';
+import resourceHighlightsTemplate from '../data/templates/resourceHighlights.json';
+import knowledgeSectionsTemplate from '../data/templates/knowledgeSections.json';
+import workspaceTemplateData from '../data/templates/workspace.json';
+import chatHistoryTemplate from '../data/templates/chatHistory.json';
+import timelineTemplate from '../data/templates/timeline.json';
 
 export type Page =
   | 'goalDashboard'
@@ -184,6 +194,60 @@ export const COUNTDOWN_LOOKAHEAD_DAYS = 21;
 const GOAL_ID_LINEAR = 'goal-linear';
 const DEFAULT_DAILY_MINUTES = 120;
 
+interface GoalProfileSeed extends Omit<GoalProfile, 'deadline'> {
+  deadlineDaysFromNow: number;
+}
+
+interface GoalSeed {
+  id: string;
+  name: string;
+  focus: string;
+  status: StudyGoal['status'];
+  profile: GoalProfileSeed;
+  progress: Omit<GoalProgress, 'remainingDays'>;
+}
+
+interface KnowledgeFolderTemplate extends Omit<KnowledgeFolder, 'relatedGoalId'> {}
+
+interface CurrentGoalSectionTemplate {
+  id: string;
+  titleTemplate: string;
+  description: string;
+  folders: KnowledgeFolderTemplate[];
+}
+
+interface KnowledgeSectionTemplate {
+  id: string;
+  title: string;
+  description: string;
+  folders: KnowledgeFolderTemplate[];
+}
+
+interface KnowledgeSectionsConfig {
+  currentGoalSection: CurrentGoalSectionTemplate;
+  additionalSections: KnowledgeSectionTemplate[];
+  connectedVaults: {
+    activeGoal: string[];
+    newGoal: string[];
+  };
+}
+
+type ChatMessageSeed = Omit<ChatMessage, 'relatedGoalId'>;
+
+const goalSeed = initialGoalData as GoalSeed;
+const studyRouteData = studyRouteTemplate as StudyRouteItem[];
+const weeklyPlanData = weeklyPlanTemplate as WeeklyPlanItem[];
+const taskTreeData = taskTreeTemplate as TaskNode[];
+const resourceHighlightsData = resourceHighlightsTemplate as ResourceHighlight[];
+const knowledgeSectionsConfig = knowledgeSectionsTemplate as KnowledgeSectionsConfig;
+const workspaceTemplate = workspaceTemplateData as WorkspaceState;
+const chatHistorySeeds = chatHistoryTemplate as ChatMessageSeed[];
+const timelineData = timelineTemplate as CalendarEvent[];
+
+export const NEW_GOAL_CONNECTED_VAULTS = Object.freeze([
+  ...knowledgeSectionsConfig.connectedVaults.newGoal,
+]);
+
 /**
  * Returns the ISO string used by datetime-local inputs.
  *
@@ -205,143 +269,49 @@ const daysUntil = (deadline: string): number => {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
 
-export const createStudyRoute = (): StudyRouteItem[] => [
-  {
-    id: 'route-diagnose',
-    title: 'AI 诊断 · 10 题探底',
-    detail: '锁定线代弱项，用错题本回填知识库',
-    etaMinutes: 15,
-    status: 'available',
-    kind: 'concept',
-  },
-  {
-    id: 'route-ch3',
-    title: '章节 3 · 向量空间',
-    detail: '左栏阅读教材 PDF，右栏问 AI 输出例题',
-    etaMinutes: 40,
-    status: 'available',
-    kind: 'concept',
-  },
-  {
-    id: 'route-ch4',
-    title: '章节 4 · 矩阵分解练习',
-    detail: '10 道变换题 + 即时批改',
-    etaMinutes: 35,
-    status: 'locked',
-    kind: 'practice',
-  },
-  {
-    id: 'route-review',
-    title: '错题本复盘',
-    detail: 'AI 总结解题模板，沉入知识库',
-    etaMinutes: 20,
-    status: 'locked',
-    kind: 'review',
-  },
-];
+export const createStudyRoute = (): StudyRouteItem[] =>
+  studyRouteData.map((item) => ({ ...item }));
 
-export const createWeeklyPlan = (): WeeklyPlanItem[] => [
-  { id: 'week-mon', day: '周一', focus: '概念精读 + 例题', hours: 2, aiTip: '优先攻克抽象向量空间' },
-  { id: 'week-wed', day: '周三', focus: '拍照批改作业', hours: 1.5, aiTip: '针对 rank-nullity 追加题单' },
-  { id: 'week-fri', day: '周五', focus: '错题巩固 + Quiz', hours: 1, aiTip: '右栏生成 5 题小测' },
-  { id: 'week-sun', day: '周日', focus: '仿真模拟 + 复盘', hours: 2, aiTip: '输出雷达图反馈 Knowledge Base' },
-];
+export const createWeeklyPlan = (): WeeklyPlanItem[] =>
+  weeklyPlanData.map((plan) => ({ ...plan }));
 
-export const createTaskTree = (): TaskNode[] => [
-  {
-    id: 'node-foundation',
-    title: '基础刷新 · 行列式 / 向量空间',
-    type: 'concept',
-    status: 'available',
-    xp: 120,
-    summary: '补齐概念盲区，生成精华卡片',
-    children: [
-      {
-        id: 'node-eigen',
-        title: '特征值、特征向量',
-        type: 'concept',
-        status: 'available',
-        xp: 40,
-        summary: 'AI 推导 + 可视化理解',
-      },
-      {
-        id: 'node-rank',
-        title: 'Rank-Nullity 应用',
-        type: 'practice',
-        status: 'locked',
-        xp: 30,
-        summary: '自动抽题 + 逐题批改',
-      },
-    ],
-  },
-  {
-    id: 'node-application',
-    title: '应用强化 · 最小二乘 & 正交投影',
-    type: 'project',
-    status: 'locked',
-    xp: 160,
-    summary: '结合 PDF、PPT、错题本，输出总结',
-  },
-  {
-    id: 'node-mock',
-    title: '仿真冲刺 · Final Mock',
-    type: 'quiz',
-    status: 'locked',
-    xp: 200,
-    summary: '60 分钟限时 · AI 监考 + 自动归档',
-  },
-];
+const cloneTaskNode = (node: TaskNode): TaskNode => ({
+  ...node,
+  children: node.children?.map(cloneTaskNode),
+});
 
-export const createResourceHighlights = (): ResourceHighlight[] => [
-  {
-    id: 'highlight-cards',
-    title: '5 张精华卡片 · 线性无关速查',
-    type: 'card',
-    excerpt: 'AI 自动提炼定义 + 常考变式，已推送到 KB',
-    source: '知识库 · 精华卡片',
-    linkedTaskId: 'node-foundation',
-  },
-  {
-    id: 'highlight-notes',
-    title: '即时笔记 · 拉格朗日乘子突破',
-    type: 'note',
-    excerpt: '已入错题本，AI 标记易错步骤，并提示复习时间',
-    source: '左栏 Lecture slides W5',
-  },
-  {
-    id: 'highlight-quiz',
-    title: '自适应 Quiz · 正交投影',
-    type: 'quiz',
-    excerpt: '完成率 80%，AI 建议 2 天后复刷',
-    source: 'AI 个性化教师',
-  },
-];
+export const createTaskTree = (): TaskNode[] => taskTreeData.map(cloneTaskNode);
+
+export const createResourceHighlights = (): ResourceHighlight[] =>
+  resourceHighlightsData.map((highlight) => ({ ...highlight }));
 
 const createGoal = (): StudyGoal => {
-  const deadline = nextDeadlineIso(18);
+  const deadline = nextDeadlineIso(goalSeed.profile.deadlineDaysFromNow);
+  const profile: GoalProfile = {
+    targetType: goalSeed.profile.targetType,
+    deadline,
+    mastery: goalSeed.profile.mastery,
+    dailyMinutes: goalSeed.profile.dailyMinutes,
+    materials: [...goalSeed.profile.materials],
+    resourcesCaptured: goalSeed.profile.resourcesCaptured,
+  };
+  const progress: GoalProgress = {
+    percent: goalSeed.progress.percent,
+    xp: goalSeed.progress.xp,
+    remainingDays: daysUntil(deadline),
+  };
   return {
-    id: GOAL_ID_LINEAR,
-    name: '微积分期末考试',
-    focus: '线性代数核心 + 冲刺 Mock',
-    status: 'active',
-    profile: {
-      targetType: '期末考试',
-      deadline,
-      mastery: 42,
-      dailyMinutes: 150,
-      materials: ['Lecture slides', 'Past midterms', '拍照错题'],
-      resourcesCaptured: 36,
-    },
-    progress: {
-      percent: 42,
-      xp: 780,
-      remainingDays: daysUntil(deadline),
-    },
+    id: goalSeed.id ?? GOAL_ID_LINEAR,
+    name: goalSeed.name,
+    focus: goalSeed.focus,
+    status: goalSeed.status,
+    profile,
+    progress,
     todayRoute: createStudyRoute(),
     weeklyPlan: createWeeklyPlan(),
     taskTree: createTaskTree(),
     highlights: createResourceHighlights(),
-    connectedKnowledgeVaults: ['kb-current-goal', 'kb-unsorted'],
+    connectedKnowledgeVaults: [...knowledgeSectionsConfig.connectedVaults.activeGoal],
   };
 };
 
@@ -353,139 +323,42 @@ export const createGoalDraft = (): GoalCreationDraft => ({
   dailyMinutes: DEFAULT_DAILY_MINUTES,
 });
 
-export const createKnowledgeSections = (goal: StudyGoal): KnowledgeSection[] => [
-  {
-    id: 'kb-current',
-    title: `当前目标 · ${goal.name}`,
-    description: '所有学习痕迹自动归档，小墨代劳整理',
-    folders: [
-      {
-        id: 'kb-cards',
-        title: '精华卡片',
-        description: 'AI 自动提炼定义、推导、例题',
-        type: 'cards',
-        items: 24,
-        relatedGoalId: goal.id,
-        lastSynced: '今日 08:26',
-      },
-      {
-        id: 'kb-errors',
-        title: '错题本',
-        description: 'Quiz & 作业错题自动回流，含复习提醒',
-        type: 'errors',
-        items: 17,
-        relatedGoalId: goal.id,
-        lastSynced: '昨日 22:41',
-      },
-      {
-        id: 'kb-chat',
-        title: 'AI 对话记录',
-        description: '右栏所有追问按主题归档，可复用',
-        type: 'chat',
-        items: 48,
-        relatedGoalId: goal.id,
-        lastSynced: '今日 07:55',
-      },
-      {
-        id: 'kb-notes',
-        title: '即时笔记',
-        description: '中栏 Markdown 自动沉淀并分类',
-        type: 'notes',
-        items: 32,
-        relatedGoalId: goal.id,
-        lastSynced: '今日 07:52',
-      },
-      {
-        id: 'kb-uploads',
-        title: '上传资料',
-        description: 'PDF / PPT / 拍照笔记自动 OCR + 章节抽取',
-        type: 'uploads',
-        items: 11,
-        relatedGoalId: goal.id,
-        lastSynced: '本周二',
-      },
-    ],
-  },
-  {
-    id: 'kb-independent',
-    title: '独立知识库',
-    description: '无需绑定目标的长期主题',
-    folders: [
-      {
-        id: 'kb-ind-writing',
-        title: '英语写作素材库',
-        description: '独立维护，随时引用到任意目标',
-        type: 'independent',
-        items: 55,
-        lastSynced: '3 天前',
-      },
-      {
-        id: 'kb-ind-ml',
-        title: '机器学习自学笔记',
-        description: '尚未绑定目标，可邀请协作者共写',
-        type: 'independent',
-        items: 12,
-        lastSynced: '上周',
-      },
-    ],
-  },
-  {
-    id: 'kb-community',
-    title: '社区知识库',
-    description: '可分享 / 订阅他人公开知识库',
-    folders: [
-      {
-        id: 'kb-community-linear',
-        title: '线代真题精解合集（社区）',
-        description: '引用后自动关联当前目标',
-        type: 'community',
-        items: 89,
-        lastSynced: '今日 06:15',
-      },
-    ],
-  },
-];
+export const createKnowledgeSections = (goal: StudyGoal): KnowledgeSection[] => {
+  const template = knowledgeSectionsConfig.currentGoalSection;
+  const current: KnowledgeSection = {
+    id: template.id,
+    title: template.titleTemplate.replace('{goalName}', goal.name),
+    description: template.description,
+    folders: template.folders.map((folder) => ({
+      ...folder,
+      relatedGoalId: goal.id,
+    })),
+  };
+  const additional = knowledgeSectionsConfig.additionalSections.map((section) => ({
+    id: section.id,
+    title: section.title,
+    description: section.description,
+    folders: section.folders.map((folder) => ({ ...folder })),
+  }));
+  return [current, ...additional];
+};
 
 const createWorkspaceState = (): WorkspaceState => ({
-  activeAsset: {
-    id: 'asset-pdf-w5',
-    title: 'Lecture Slides · Week 5 正交投影',
-    type: 'pdf',
-    chapter: 'Chapter 5 Projection',
-    progress: 62,
-    metadata: '120 页 · 已高亮 14 处 · 自动章节提取完成',
-  },
-  noteDraft:
-    '## 最小二乘推导\n- 从 Ax=b 开始，构造正规方程 `AᵀAx = Aᵀb`\n- 记得区分“投影点 P”与“坐标 x”\n',
-  syncedNotes: ['正交基构造 3 步模板', 'Quiz 重点错题总结'],
-  lastSyncedAt: '08:12',
-  quizQueue: ['生成 5 题判断题', '拍照错题，自动出解析'],
-  coachFocus: '当前问题集中在「约束条件翻译」与「符号混淆」。',
+  activeAsset: { ...workspaceTemplate.activeAsset },
+  noteDraft: workspaceTemplate.noteDraft,
+  syncedNotes: [...workspaceTemplate.syncedNotes],
+  lastSyncedAt: workspaceTemplate.lastSyncedAt,
+  quizQueue: [...workspaceTemplate.quizQueue],
+  coachFocus: workspaceTemplate.coachFocus,
 });
 
-const createChatHistory = (goalId: string): ChatMessage[] => [
-  {
-    id: 'chat-1',
-    role: 'user',
-    content: '我要在 12 月结束前搞定线性代数，今天重点该学什么？',
+const createChatHistory = (goalId: string): ChatMessage[] =>
+  chatHistorySeeds.map((seed) => ({
+    ...seed,
     relatedGoalId: goalId,
-    timestamp: '07:45',
-  },
-  {
-    id: 'chat-2',
-    role: 'ai',
-    content:
-      '已读取你上传的 Week5 PDF + 错题本。建议路线：1) 先复盘“投影矩阵”错题，2) 打开三栏学习空间执行 20 分钟推导练习，3) 结束后生成 Quiz 并沉入知识库。',
-    relatedGoalId: goalId,
-    timestamp: '07:45',
-  },
-];
+  }));
 
-const createTimeline = (): CalendarEvent[] => [
-  { id: 'cal-1', day: '周三', title: 'AI 诊断 Quiz', time: '19:30', focus: '10 题冲刺 + 自动复盘' },
-  { id: 'cal-2', day: '周五', title: '错题本复刷', time: '20:00', focus: '拍照错题 + RAG 解析' },
-  { id: 'cal-3', day: '周日', title: 'Final Mock', time: '09:00', focus: '60 分钟仿真 + 知识库整理' },
-];
+const createTimeline = (): CalendarEvent[] => timelineData.map((event) => ({ ...event }));
 
 /**
  * Provides the aggregate application state used by the view-model.
@@ -508,3 +381,12 @@ export const createInitialState = (): LearningOsState => {
     timeline: createTimeline(),
   };
 };
+
+
+
+
+
+
+
+
+

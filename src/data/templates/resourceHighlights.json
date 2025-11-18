@@ -1,0 +1,24 @@
+﻿[
+  {
+    "id": "highlight-cards",
+    "title": "5 张精华卡片 · 线性无关速查",
+    "type": "card",
+    "excerpt": "AI 自动提炼定义 + 常考变式，已推送到 KB",
+    "source": "知识库 · 精华卡片",
+    "linkedTaskId": "node-foundation"
+  },
+  {
+    "id": "highlight-notes",
+    "title": "即时笔记 · 拉格朗日乘子突破",
+    "type": "note",
+    "excerpt": "已入错题本，AI 标记易错步骤，并提示复习时间",
+    "source": "左栏 Lecture slides W5"
+  },
+  {
+    "id": "highlight-quiz",
+    "title": "自适应 Quiz · 正交投影",
+    "type": "quiz",
+    "excerpt": "完成度 80%，AI 建议 2 天后复刷",
+    "source": "AI 个性化教师"
+  }
+]

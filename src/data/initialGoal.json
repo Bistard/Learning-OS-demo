@@ -1,0 +1,18 @@
+﻿{
+  "id": "goal-linear",
+  "name": "微积分期末考试",
+  "focus": "线性代数核心 + 冲刺 Mock",
+  "status": "active",
+  "profile": {
+    "targetType": "期末考试",
+    "deadlineDaysFromNow": 18,
+    "mastery": 42,
+    "dailyMinutes": 150,
+    "materials": ["Lecture slides", "Past midterms", "拍照错题"],
+    "resourcesCaptured": 36
+  },
+  "progress": {
+    "percent": 42,
+    "xp": 780
+  }
+}
