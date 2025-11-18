@@ -4,8 +4,8 @@
 
 import {
   GoalCreationDraft,
-  KnowledgeBaseState,
   KnowledgeCategory,
+  KnowledgeBaseState,
   KnowledgeItem,
   LearningOsState,
   Page,
@@ -17,98 +17,43 @@ import {
   createGoalDraft,
   createInitialState,
   NEW_GOAL_CONNECTED_VAULTS,
-  KNOWLEDGE_UNSORTED_CATEGORY_ID,
   createStudyRoute,
   createTaskTree,
   createWeeklyPlan,
   nextDeadlineIso,
 } from '../models/learningOsModel';
+import { KnowledgeManager } from './learningOs/knowledgeManager';
+import { TabController } from './learningOs/tabController';
+import type { AppTab, TabContext, TabOpenOptions } from './learningOs/tabController';
+import type { KnowledgeCategoryDraft, ViewSnapshot } from './learningOs/types';
 
-interface KnowledgeCategoryDraft {
-  title: string;
-  icon: string;
-  color: string;
-}
-
-interface DashboardSummary {
-  totalGoals: number;
-  activeGoals: number;
-  nearestDeadlineLabel: string;
-  knowledgeVaults: number;
-}
-
-/**
- * Additional metadata carried by a tab. It is intentionally loose to allow
- * future view types to enrich their contextual identity (goal, asset, etc.).
- */
-export interface TabContext {
-  goalId?: string;
-  [key: string]: string | undefined;
-}
-
-export interface AppTab {
-  id: string;
-  view: Page;
-  identity: string;
-  title: string;
-  icon?: string;
-  pinned: boolean;
-  closable: boolean;
-  reloadToken: number;
-  context?: TabContext;
-}
-
-interface TabBlueprint {
-  icon: string;
-  pinned?: boolean;
-}
-
-interface TabOpenOptions {
-  identity?: string;
-  title?: string;
-  icon?: string;
-  pinned?: boolean;
-  closable?: boolean;
-  context?: TabContext;
-}
-
-const TAB_ICON_FALLBACK = '📄';
-
-const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
-  goalDashboard: { icon: '📌', pinned: true },
-  goalCreation: { icon: '📝' },
-  goalWorkspace: { icon: '🗂️' },
-  learningWorkspace: { icon: '🧠' },
-  knowledgeBase: { icon: '📚' },
-};
-
-const createTabId = (): string =>
-  `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-
-export interface ViewSnapshot extends LearningOsState {
-  activeGoal: StudyGoal | null;
-  dashboardSummary: DashboardSummary;
-  tabs: AppTab[];
-  activeTabId: string | null;
-}
+export type { AppTab, TabContext } from './learningOs/tabController';
+export type { ViewSnapshot } from './learningOs/types';
 
 export type ViewUpdateListener = (snapshot: ViewSnapshot) => void;
 export type ToastListener = (toast: Toast) => void;
 
 export class LearningOsViewModel {
   private state: LearningOsState = createInitialState();
-  private tabs: AppTab[] = [];
-  private activeTabId: string | null = null;
+  private readonly tabController: TabController;
+  private readonly knowledgeManager: KnowledgeManager;
   private readonly viewListeners = new Set<ViewUpdateListener>();
   private readonly toastListeners = new Set<ToastListener>();
 
   constructor(private readonly nowProvider: () => Date = () => new Date()) {
-    this.bootstrapTabs();
+    this.tabController = new TabController((tab) => this.resolveTabTitle(tab));
+    this.knowledgeManager = new KnowledgeManager({
+      readState: () => this.state,
+      writeState: (partial) => this.updateState(partial),
+      emitToast: (message, tone) => this.emitToast(message, tone),
+      formatTime: () => this.formatTime(),
+    });
+    this.tabController.bootstrap(this.state.page);
   }
 
   public subscribe(listener: ViewUpdateListener): () => void {
     this.viewListeners.add(listener);
-    this.syncTabTitles();
+    this.tabController.syncTabTitles();
     listener(this.buildSnapshot());
     return () => this.viewListeners.delete(listener);
   }
@@ -236,92 +181,37 @@ export class LearningOsViewModel {
   }
 
   public activateTab(tabId: string): void {
-    if (this.activeTabId === tabId) return;
-    const target = this.tabs.find((tab) => tab.id === tabId);
-    if (!target) return;
-    this.activeTabId = target.id;
-    this.assignState({ page: target.view });
+    const page = this.tabController.activate(tabId);
+    if (!page) return;
+    this.assignState({ page });
     this.publish();
   }
 
   public closeTab(tabId: string): void {
-    const targetIndex = this.tabs.findIndex((tab) => tab.id === tabId);
-    if (targetIndex === -1) return;
-    const target = this.tabs[targetIndex];
-    if (!target.closable) return;
-    const remaining = this.tabs.filter((tab) => tab.id !== tabId);
-    if (remaining.length === 0) {
-      const fallback = this.createTab('goalDashboard');
-      this.tabs = [fallback];
-      this.activeTabId = fallback.id;
-      this.assignState({ page: fallback.view });
-      this.publish();
-      return;
-    }
-    this.tabs = remaining;
-    if (this.activeTabId === tabId) {
-      const fallbackIndex = Math.max(0, targetIndex - 1);
-      const nextActive = this.tabs[fallbackIndex] ?? this.tabs[0];
-      this.activeTabId = nextActive.id;
-      this.assignState({ page: nextActive.view });
-      this.publish();
-      return;
-    }
+    const page = this.tabController.close(tabId, 'goalDashboard');
+    if (page === null) return;
+    this.assignState({ page });
     this.publish();
   }
 
   public closeAllTabs(): void {
-    const pinnedTabs = this.tabs.filter((tab) => tab.pinned);
-    if (pinnedTabs.length > 0) {
-      this.tabs = pinnedTabs;
-      this.activeTabId = pinnedTabs[0].id;
-      this.assignState({ page: pinnedTabs[0].view });
-      this.publish();
-      return;
-    }
-    const fallback = this.createTab('goalDashboard');
-    this.tabs = [fallback];
-    this.activeTabId = fallback.id;
-    this.assignState({ page: fallback.view });
+    const page = this.tabController.closeAll('goalDashboard');
+    this.assignState({ page });
     this.publish();
   }
 
   public reloadTab(tabId: string): void {
-    const target = this.tabs.find((tab) => tab.id === tabId);
-    if (!target) return;
-    const updated = { ...target, reloadToken: target.reloadToken + 1 };
-    this.tabs = this.tabs.map((tab) => (tab.id === tabId ? updated : tab));
+    if (!this.tabController.reload(tabId)) return;
     this.publish();
   }
 
   public toggleTabPin(tabId: string, pinned?: boolean): void {
-    const target = this.tabs.find((tab) => tab.id === tabId);
-    if (!target) return;
-    const nextPinned = pinned ?? !target.pinned;
-    if (nextPinned === target.pinned) return;
-    const updated = { ...target, pinned: nextPinned };
-    this.tabs = this.tabs.map((tab) => (tab.id === tabId ? updated : tab));
-    this.enforcePinGrouping();
+    if (!this.tabController.togglePin(tabId, pinned)) return;
     this.publish();
   }
 
   public reorderTabs(order: string[]): void {
-    if (!order.length) return;
-    const ordered: AppTab[] = [];
-    const visited = new Set<string>();
-    order.forEach((id) => {
-      const tab = this.tabs.find((item) => item.id === id);
-      if (tab && !visited.has(id)) {
-        ordered.push(tab);
-        visited.add(id);
-      }
-    });
-    const remainder = this.tabs.filter((tab) => !visited.has(tab.id));
-    const next = [...ordered, ...remainder];
-    const changed = next.some((tab, index) => tab.id !== this.tabs[index]?.id);
-    if (!changed) return;
-    this.tabs = next;
-    this.enforcePinGrouping();
+    if (!this.tabController.reorder(order)) return;
     this.publish();
   }
 
@@ -351,65 +241,21 @@ export class LearningOsViewModel {
       updatedAt: timestamp,
       goalId: this.state.activeGoalId ?? undefined,
     };
-    const knowledgeBase = this.prependKnowledgeItem('kb-notes', noteItem);
+    const knowledgeBase = this.knowledgeManager.prependItem('kb-notes', noteItem);
     this.updateState({ workspace, knowledgeBase });
     this.emitToast('已自动沉入当前知识库并分类～', 'success');
   }
 
   public addKnowledgeCategory(payload: KnowledgeCategoryDraft): void {
-    const title = payload.title.trim();
-    if (!title) {
-      this.emitToast('分类名称不能为空～', 'warning');
-      return;
-    }
-    const icon = payload.icon.trim() || '📁';
-    const color = this.normalizeHexColor(payload.color);
-    const knowledgeBase = this.mutateKnowledgeCategories((categories) => [
-      ...categories,
-      {
-        id: `kb-category-${Date.now()}`,
-        title,
-        icon,
-        color,
-        kind: 'custom',
-        isFixed: false,
-        items: [],
-      },
-    ]);
-    this.updateState({ knowledgeBase });
+    this.knowledgeManager.addCategory(payload);
   }
 
   public renameKnowledgeCategory(categoryId: string, title: string): void {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      this.emitToast('分类名称不能为空～', 'warning');
-      return;
-    }
-    const knowledgeBase = this.mutateKnowledgeCategories((categories) =>
-      categories.map((category) =>
-        category.id === categoryId && !category.isFixed
-          ? { ...category, title: trimmed }
-          : category
-      )
-    );
-    this.updateState({ knowledgeBase });
+    this.knowledgeManager.renameCategory(categoryId, title);
   }
 
   public deleteKnowledgeCategory(categoryId: string): void {
-    const knowledgeBase = this.mutateKnowledgeCategories((categories) => {
-      const target = categories.find((category) => category.id === categoryId);
-      if (!target || target.isFixed) {
-        return categories;
-      }
-      return categories
-        .filter((category) => category.id !== categoryId)
-        .map((category) =>
-          category.id === KNOWLEDGE_UNSORTED_CATEGORY_ID
-            ? { ...category, items: [...target.items, ...category.items] }
-            : category
-        );
-    });
-    this.updateState({ knowledgeBase });
+    this.knowledgeManager.deleteCategory(categoryId);
   }
 
   public reorderKnowledgeCategories(order: string[]): void {
@@ -434,42 +280,11 @@ export class LearningOsViewModel {
   }
 
   public moveKnowledgeItem(itemId: string, targetCategoryId: string, targetIndex = 0): void {
-    const { item } = this.locateKnowledgeItem(itemId);
-    if (!item) return;
-    const normalizedIndex = Number.isInteger(targetIndex) ? Number(targetIndex) : 0;
-    const targetId = this.resolveCategoryId(targetCategoryId);
-    const baseline = this.ensureUnsortedCategory(this.state.knowledgeBase.categories);
-    const withoutItem = baseline.map((category) => ({
-      ...category,
-      items: category.items.filter((candidate) => candidate.id !== itemId),
-    }));
-    const categories = withoutItem.map((category) => {
-      if (category.id !== targetId) {
-        return category;
-      }
-      const items = [...category.items];
-      const safeIndex = Math.max(0, Math.min(normalizedIndex, items.length));
-      items.splice(safeIndex, 0, item);
-      return { ...category, items };
-    });
-    this.updateState({ knowledgeBase: { ...this.state.knowledgeBase, categories } });
+    this.knowledgeManager.moveItem(itemId, targetCategoryId, targetIndex);
   }
 
   public recordKnowledgeUpload(fileName: string): string {
-    const label = fileName.trim() || '未命名文件';
-    const timestamp = this.formatTime();
-    const uploadItem: KnowledgeItem = {
-      id: `kb-upload-${Date.now()}`,
-      summary: label,
-      detail: `${label} 已上传，稍后自动解析`,
-      source: '上传文件',
-      updatedAt: timestamp,
-      goalId: this.state.activeGoalId ?? undefined,
-    };
-    const knowledgeBase = this.prependKnowledgeItem('kb-uploads', uploadItem);
-    this.updateState({ knowledgeBase });
-    this.emitToast('文件已记录到「上传资料」', 'success');
-    return uploadItem.id;
+    return this.knowledgeManager.recordUpload(fileName);
   }
 
   private createGoalFromDraft(draft: GoalCreationDraft): StudyGoal {
@@ -510,73 +325,10 @@ export class LearningOsViewModel {
     };
   }
 
-  private bootstrapTabs(): void {
-    if (this.tabs.length > 0) return;
-    const initialTab = this.createTab(this.state.page);
-    this.tabs = [initialTab];
-    this.activeTabId = initialTab.id;
-  }
-
   private focusOrCreateTab(view: Page, options: TabOpenOptions = {}): void {
-    const identity = options.identity ?? this.buildTabIdentity(view, options.context);
-    const existing = this.tabs.find((tab) => tab.identity === identity);
-    if (existing) {
-      this.activeTabId = existing.id;
-      this.assignState({ page: existing.view });
-      this.publish();
-      return;
-    }
-    const tab = this.createTab(view, { ...options, identity });
-    this.tabs = [...this.tabs, tab];
-    this.enforcePinGrouping();
-    this.activeTabId = tab.id;
-    this.assignState({ page: view });
+    const page = this.tabController.focusOrCreate(view, options);
+    this.assignState({ page });
     this.publish();
-  }
-
-  private createTab(view: Page, options: TabOpenOptions = {}): AppTab {
-    const blueprint = TAB_BLUEPRINTS[view];
-    const identity = options.identity ?? this.buildTabIdentity(view, options.context);
-    return {
-      id: createTabId(),
-      view,
-      identity,
-      title: options.title ?? '',
-      icon: options.icon ?? blueprint?.icon ?? TAB_ICON_FALLBACK,
-      pinned: options.pinned ?? blueprint?.pinned ?? false,
-      closable: options.closable ?? true,
-      reloadToken: 0,
-      context: options.context ? { ...options.context } : undefined,
-    };
-  }
-
-  private buildTabIdentity(view: Page, context?: TabContext): string {
-    if (context?.goalId) {
-      return `${view}:${context.goalId}`;
-    }
-    return view;
-  }
-
-  private enforcePinGrouping(): void {
-    if (this.tabs.length <= 1) return;
-    const pinned = this.tabs.filter((tab) => tab.pinned);
-    const unpinned = this.tabs.filter((tab) => !tab.pinned);
-    this.tabs = [...pinned, ...unpinned];
-  }
-
-  private cloneTabs(): AppTab[] {
-    return this.tabs.map((tab) => ({
-      ...tab,
-      context: tab.context ? { ...tab.context } : undefined,
-    }));
-  }
-
-  private syncTabTitles(): void {
-    this.tabs = this.tabs.map((tab) => {
-      const nextTitle = this.resolveTabTitle(tab);
-      if (nextTitle === tab.title) return tab;
-      return { ...tab, title: nextTitle };
-    });
   }
 
   private resolveTabTitle(tab: AppTab): string {
@@ -624,65 +376,6 @@ export class LearningOsViewModel {
     return [newHighlight, ...existing].slice(0, 6);
   }
 
-  private prependKnowledgeItem(categoryId: string, item: KnowledgeItem): KnowledgeBaseState {
-    const targetId = this.resolveCategoryId(categoryId);
-    return this.mutateKnowledgeCategories((categories) =>
-      categories.map((category) =>
-        category.id === targetId ? { ...category, items: [item, ...category.items] } : category
-      )
-    );
-  }
-
-  private locateKnowledgeItem(
-    itemId: string
-  ): { item: KnowledgeItem | null; categoryId: string | null } {
-    for (const category of this.state.knowledgeBase.categories) {
-      const found = category.items.find((candidate) => candidate.id === itemId);
-      if (found) {
-        return { item: { ...found }, categoryId: category.id };
-      }
-    }
-    return { item: null, categoryId: null };
-  }
-
-  private mutateKnowledgeCategories(
-    mutator: (categories: KnowledgeCategory[]) => KnowledgeCategory[]
-  ): KnowledgeBaseState {
-    const baseline = this.ensureUnsortedCategory(this.state.knowledgeBase.categories);
-    return {
-      ...this.state.knowledgeBase,
-      categories: mutator(baseline),
-    };
-  }
-
-  private ensureUnsortedCategory(categories: KnowledgeCategory[]): KnowledgeCategory[] {
-    if (categories.some((category) => category.id === KNOWLEDGE_UNSORTED_CATEGORY_ID)) {
-      return categories;
-    }
-    const fallback: KnowledgeCategory = {
-      id: KNOWLEDGE_UNSORTED_CATEGORY_ID,
-      title: '未分类',
-      kind: 'uncategorized',
-      isFixed: true,
-      icon: '📥',
-      color: '#94a3b8',
-      items: [],
-    };
-    return [...categories, fallback];
-  }
-
-  private resolveCategoryId(categoryId: string): string {
-    const exists = this.state.knowledgeBase.categories.some(
-      (category) => category.id === categoryId
-    );
-    return exists ? categoryId : KNOWLEDGE_UNSORTED_CATEGORY_ID;
-  }
-
-  private normalizeHexColor(color: string): string {
-    const trimmed = color.trim();
-    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed) ? trimmed : '#94a3b8';
-  }
-
   private mutateActiveGoal(mutator: (goal: StudyGoal) => StudyGoal): void {
     const activeId = this.state.activeGoalId;
     if (!activeId) return;
@@ -705,8 +398,8 @@ export class LearningOsViewModel {
       ...this.state,
       activeGoal,
       dashboardSummary,
-      tabs: this.cloneTabs(),
-      activeTabId: this.activeTabId,
+      tabs: this.tabController.getTabsSnapshot(),
+      activeTabId: this.tabController.getActiveTabId(),
     };
   }
 
@@ -734,7 +427,7 @@ export class LearningOsViewModel {
   }
 
   private publish(): void {
-    this.syncTabTitles();
+    this.tabController.syncTabTitles();
     const snapshot = this.buildSnapshot();
     this.viewListeners.forEach((listener) => listener(snapshot));
   }

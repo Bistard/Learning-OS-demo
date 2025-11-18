@@ -14,17 +14,9 @@ import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
 import { RenderRegions, UiModule } from '../modules/types';
 import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-
-interface NavItem {
-  icon: string;
-  label: string;
-  page: Page;
-}
-
-const SIDE_NAV: NavItem[] = [
-  { icon: '📌', label: '目标', page: 'goalDashboard' },
-  { icon: '📚', label: '知识库', page: 'knowledgeBase' },
-];
+import { buildShellMarkup, SIDE_NAV } from './learningOs/navConfig';
+import { bindNavigation } from './learningOs/navigation';
+import { bindNavResizer } from './learningOs/resizer';
 
 export class LearningOsView {
   private readonly shellElement: HTMLElement;
@@ -81,93 +73,21 @@ export class LearningOsView {
   }
 
   private buildShell(): string {
-    const navMarkup = SIDE_NAV.map(
-      (item) => `
-        <button class="side-link" data-page="${item.page}" type="button">
-          <span class="icon">${item.icon}</span>
-          <span>${item.label}</span>
-        </button>`
-    ).join('');
-    return `
-      <div class="os-shell">
-        <aside class="side-nav">
-          <div class="brand" role="button" tabindex="0" data-nav-home>
-            <span class="logo-dot"></span>
-            <div>
-              <strong>小墨学习 OS</strong>
-              <p class="microcopy">目标驱动 · 知识库沉淀</p>
-            </div>
-          </div>
-          <div class="side-links">
-            ${navMarkup}
-          </div>
-          <div class="side-divider" role="presentation"></div>
-          <div class="side-tabs" data-view="tab-strip" aria-label="工作区标签"></div>
-          <div class="side-meta" data-view="side-meta"></div>
-          <div class="side-resizer" data-resizer aria-hidden="true"></div>
-        </aside>
-        <div class="main-stage">
-          <header class="context-header" data-view="context-head"></header>
-          <main data-view="content"></main>
-        </div>
-      </div>
-      <div class="toast-area" data-view="toast"></div>
-    `;
+    return buildShellMarkup(SIDE_NAV);
   }
 
   private bindNav(shell: HTMLElement): void {
-    const brand = shell.querySelector<HTMLElement>('[data-nav-home]');
-    brand?.addEventListener('click', () => this.viewModel.navigate('goalDashboard'));
-    brand?.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        this.viewModel.navigate('goalDashboard');
-      }
-    });
-    shell.querySelectorAll<HTMLButtonElement>('.side-link').forEach((button) => {
-      const page = button.dataset.page as Page;
+    bindNavigation(shell, this.viewModel, (page, button) => {
       this.navButtons.set(page, button);
-      button.addEventListener('click', () => this.viewModel.navigate(page));
     });
   }
 
   private bindResizer(shell: HTMLElement): void {
-    const resizer = shell.querySelector<HTMLElement>('[data-resizer]');
-    if (!resizer) return;
-    let startX = 0;
-    let startWidth = this.navWidth;
-    let activePointerId: number | null = null;
-    const handlePointerMove = (event: PointerEvent): void => {
-      if (activePointerId === null) return;
-      event.preventDefault();
-      const delta = event.clientX - startX;
-      this.applyNavWidth(startWidth + delta);
-    };
-    const stopResizing = (): void => {
-      if (activePointerId === null) return;
-      if (resizer.hasPointerCapture(activePointerId)) {
-        resizer.releasePointerCapture(activePointerId);
-      }
-      activePointerId = null;
-      document.body.classList.remove('is-resizing-nav');
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-    const handlePointerUp = (event: PointerEvent): void => {
-      if (activePointerId === null || event.pointerId !== activePointerId) return;
-      stopResizing();
-    };
-    resizer.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0) return;
-      event.preventDefault();
-      startX = event.clientX;
-      startWidth = this.navWidth;
-      activePointerId = event.pointerId;
-      resizer.setPointerCapture(activePointerId);
-      document.body.classList.add('is-resizing-nav');
-      window.addEventListener('pointermove', handlePointerMove);
-      window.addEventListener('pointerup', handlePointerUp);
-      window.addEventListener('pointercancel', handlePointerUp);
+    bindNavResizer(shell, {
+      getWidth: () => this.navWidth,
+      applyWidth: (width) => this.applyNavWidth(width),
+      min: this.MIN_NAV_WIDTH,
+      max: this.MAX_NAV_WIDTH,
     });
   }
 
