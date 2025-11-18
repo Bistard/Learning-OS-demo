@@ -329,7 +329,7 @@
   flex-direction: column;
   gap: 12px;
   box-shadow: var(--shadow-md);
-  min-height: 320px;
+  height: 360px;
 }
 
 .kb-category-head {
@@ -406,9 +406,39 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 260px;
+  flex: 1;
   overflow-y: auto;
   padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.kb-items:hover {
+  scrollbar-color: rgba(172, 172, 172, 0.85) transparent;
+}
+
+.kb-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kb-items::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.kb-items::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.kb-items:hover::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), transparent);
+}
+
+.kb-items:hover::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.95), rgba(249, 115, 22, 0.5));
 }
 
 .kb-item {
