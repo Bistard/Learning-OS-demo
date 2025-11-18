@@ -1,4 +1,4 @@
-import { Page } from '../../../models/learningOsModel';
+﻿import { Page } from '../../../models/learningOsModel';
 import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
 import { bindClick } from '../../../utils/dom';
 import { renderMarkdown } from '../../../utils/markdown';
@@ -18,10 +18,6 @@ class LearningWorkspaceViewModel {
   public backToGoalWorkspace(): void {
     this.root.openGoalWorkspace();
   }
-
-  public openKnowledgeBase(): void {
-    this.root.navigate('knowledgeBase');
-  }
 }
 
 class LearningWorkspaceView {
@@ -40,7 +36,7 @@ class LearningWorkspaceView {
     });
     regions.content.innerHTML = `
       <section class="note-reader">
-        <div class="note-reader-head">
+        <article class="note-reader-card">
           <div>
             <p class="eyebrow">笔记阅读器</p>
             <h3>${this.escape(asset.title)}</h3>
@@ -54,18 +50,12 @@ class LearningWorkspaceView {
             <progress value="${asset.progress}" max="100"></progress>
             <span>${asset.progress}% 完成</span>
           </div>
-          <div class="actions">
-            <button class="btn ghost" id="workspace-back">返回任务树</button>
-            <button class="btn primary" id="workspace-open-kb">查看知识库</button>
+          <div class="note-reader-preview">
+            ${preview}
           </div>
-        </div>
-        <article class="note-reader-preview">
-          ${preview}
         </article>
       </section>
     `;
-    bindClick(regions.content, '#workspace-back', () => this.viewModel.backToGoalWorkspace());
-    bindClick(regions.content, '#workspace-open-kb', () => this.viewModel.openKnowledgeBase());
   }
 
   private renderEmpty(): string {
@@ -105,4 +95,3 @@ export class LearningWorkspaceModule implements UiModule {
     this.view.render(state, regions);
   }
 }
-

@@ -422,7 +422,7 @@ body.is-resizing-nav {
   gap: 20px;
 }
 
-.note-reader-head {
+.note-reader-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: #fff;
@@ -451,10 +451,9 @@ body.is-resizing-nav {
 }
 
 .note-reader-preview {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  padding: 24px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
   line-height: 1.7;
   font-size: 15px;
 }
@@ -468,6 +467,22 @@ body.is-resizing-nav {
 .note-reader-preview ul {
   padding-left: 20px;
   margin: 12px 0;
+}
+
+.math-block {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.math-inline {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 4px;
+}
+
+.math-error {
+  color: #dc2626;
+  font-weight: 600;
 }
 
 .reader-preview-empty {

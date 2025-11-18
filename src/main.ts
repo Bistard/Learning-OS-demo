@@ -9,6 +9,7 @@
  */
 
 import './styles.css';
+import 'katex/dist/katex.min.css';
 import { LearningOsViewModel } from './viewModels/learningOsViewModel';
 import { LearningOsView } from './views/learningOsView';
 
@@ -22,4 +23,3 @@ if (document.readyState === 'loading') {
 } else {
   bootstrap();
 }
-
