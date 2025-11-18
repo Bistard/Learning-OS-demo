@@ -192,12 +192,6 @@ export class LearningOsViewModel {
     this.emitToast('已自动沉入当前知识库并分类。', 'success');
   }
 
-  public toggleAutoCapture(enabled: boolean): void {
-    this.updateState({
-      knowledgeBase: { ...this.state.knowledgeBase, autoCaptureEnabled: enabled },
-    });
-  }
-
   public sendChat(message: string): void {
     const trimmed = message.trim();
     if (!trimmed) return;

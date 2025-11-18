@@ -134,7 +134,6 @@ export interface KnowledgeSection {
 
 export interface KnowledgeBaseState {
   sections: KnowledgeSection[];
-  autoCaptureEnabled: boolean;
 }
 
 export interface WorkspaceAsset {
@@ -373,7 +372,6 @@ export const createInitialState = (): LearningOsState => {
     activeGoalId: goal.id,
     creationDraft: createGoalDraft(),
     knowledgeBase: {
-      autoCaptureEnabled: true,
       sections: createKnowledgeSections(goal),
     },
     chatHistory: createChatHistory(goal.id),
