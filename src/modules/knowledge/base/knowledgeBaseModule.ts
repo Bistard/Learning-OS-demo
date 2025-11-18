@@ -66,6 +66,10 @@ class KnowledgeBaseViewModel {
     return this.root.recordKnowledgeUpload(fileName);
   }
 
+  public openNote(noteId: string): void {
+    this.root.openNote(noteId);
+  }
+
   public startRename(categoryId: string): void {
     this.editingCategoryId = categoryId;
   }
@@ -244,14 +248,16 @@ class KnowledgeBaseView {
       return `<p class="kb-empty">暂无内容，新的知识点会自动沉淀。</p>`;
     }
     return category.items
-      .map(
-        (item, index) => `
+      .map((item, index) => {
+        const noteAttr = item.noteId ? ` data-note-id="${item.noteId}"` : '';
+        return `
         <div
           class="kb-item"
           draggable="true"
           data-item-id="${item.id}"
           data-item-index="${index}"
           data-category-item="${category.id}"
+          ${noteAttr}
           title="${escapeHtml(item.detail)}"
           role="button"
           tabindex="0"
@@ -263,7 +269,7 @@ class KnowledgeBaseView {
             </span>
           </div>
         </div>`
-      )
+      })
       .join('');
   }
 
@@ -275,6 +281,7 @@ class KnowledgeBaseView {
     this.bindCategoryDrag();
     this.bindItemDrag();
     this.bindCategoryMenus(state);
+    this.bindNoteShortcuts();
     this.applyHighlights();
   }
 
@@ -442,6 +449,25 @@ class KnowledgeBaseView {
       const category = lookup.get(card.dataset.categoryId ?? '');
       if (!category) return;
       card.addEventListener('contextmenu', (event) => openMenu(category, event));
+    });
+  }
+
+  private bindNoteShortcuts(): void {
+    if (!this.host) return;
+    this.host.querySelectorAll<HTMLElement>('[data-note-id]').forEach((item) => {
+      const noteId = item.dataset.noteId;
+      if (!noteId) return;
+      const open = (): void => this.viewModel.openNote(noteId);
+      item.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        open();
+      });
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          open();
+        }
+      });
     });
   }
 

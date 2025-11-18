@@ -2,7 +2,13 @@
  * Shared type definitions for the Learning OS domain model.
  */
 
-export type Page = 'goalDashboard' | 'goalCreation' | 'goalWorkspace' | 'learningWorkspace' | 'knowledgeBase';
+export type Page =
+  | 'goalDashboard'
+  | 'goalCreation'
+  | 'goalWorkspace'
+  | 'learningWorkspace'
+  | 'knowledgeBase'
+  | 'noteEditor';
 
 export type TaskKind = 'concept' | 'practice' | 'review' | 'quiz' | 'project';
 
@@ -98,6 +104,7 @@ export interface KnowledgeItem {
   updatedAt: string;
   goalId?: string;
   href?: string;
+  noteId?: string;
 }
 
 export interface KnowledgeCategory {
@@ -112,6 +119,23 @@ export interface KnowledgeCategory {
 
 export interface KnowledgeBaseState {
   categories: KnowledgeCategory[];
+}
+
+export interface KnowledgeBaseTemplate {
+  connectedVaults: {
+    activeGoal: string[];
+    newGoal: string[];
+  };
+  categories: KnowledgeCategory[];
+}
+
+export interface KnowledgeNote {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  knowledgeItemId: string;
 }
 
 export interface WorkspaceAsset {
@@ -139,6 +163,7 @@ export interface LearningOsState {
   creationDraft: GoalCreationDraft;
   knowledgeBase: KnowledgeBaseState;
   workspace: WorkspaceState;
+  notes: KnowledgeNote[];
 }
 
 export interface Toast {

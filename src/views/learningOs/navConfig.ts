@@ -31,6 +31,12 @@ export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string
           <div class="side-divider" role="presentation"></div>
           <div class="side-tabs" data-view="tab-strip" aria-label="工作区标签"></div>
           <div class="side-meta" data-view="side-meta"></div>
+          <div class="side-note-cta">
+            <button class="side-note-button" type="button" data-action="create-note">
+              <span class="icon">📝</span>
+              <span>新建笔记</span>
+            </button>
+          </div>
           <div class="side-resizer" data-resizer aria-hidden="true"></div>
         </aside>
         <div class="main-stage">

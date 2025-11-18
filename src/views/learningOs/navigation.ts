@@ -22,4 +22,7 @@ export const bindNavigation = (
     registerNavButton(page, button);
     button.addEventListener('click', () => viewModel.navigate(page));
   });
+
+  const createNoteButton = shell.querySelector<HTMLButtonElement>('[data-action="create-note"]');
+  createNoteButton?.addEventListener('click', () => viewModel.createNote());
 };

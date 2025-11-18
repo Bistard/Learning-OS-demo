@@ -7,6 +7,7 @@ import {
   KnowledgeCategory,
   KnowledgeBaseState,
   KnowledgeItem,
+  KnowledgeNote,
   LearningOsState,
   Page,
   ResourceHighlight,
@@ -21,11 +22,12 @@ import {
   createTaskTree,
   createWeeklyPlan,
   nextDeadlineIso,
+  KNOWLEDGE_NOTES_CATEGORY_ID,
 } from '../models/learningOsModel';
 import { KnowledgeManager } from './learningOs/knowledgeManager';
 import { TabController } from './learningOs/tabController';
 import type { AppTab, TabContext, TabOpenOptions } from './learningOs/tabController';
-import type { KnowledgeCategoryDraft, ViewSnapshot } from './learningOs/types';
+import type { DashboardSummary, KnowledgeCategoryDraft, ViewSnapshot } from './learningOs/types';
 import { isPrimaryNavPage } from '../config/navigation';
 
 export type { AppTab, TabContext } from './learningOs/tabController';
@@ -250,9 +252,56 @@ export class LearningOsViewModel {
       updatedAt: timestamp,
       goalId: this.state.activeGoalId ?? undefined,
     };
-    const knowledgeBase = this.knowledgeManager.prependItem('kb-notes', noteItem);
+    const knowledgeBase = this.knowledgeManager.prependItem(
+      KNOWLEDGE_NOTES_CATEGORY_ID,
+      noteItem
+    );
     this.updateState({ workspace, knowledgeBase });
     this.emitToast('已自动沉入当前知识库并分类～', 'success');
+  }
+
+  public createNote(): void {
+    const timestamp = new Date().toISOString();
+    const note: KnowledgeNote = {
+      id: this.createNoteId(),
+      title: this.generateNoteTitle(),
+      content: '# 新建笔记\n\n在这里使用 **Markdown** 记录灵感、待办和学习要点。',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      knowledgeItemId: `kb-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
+    };
+    const notes = [note, ...this.state.notes];
+    const knowledgeBase = this.syncKnowledgeNoteEntry(note, true);
+    this.updateState({ notes, knowledgeBase });
+    this.openNote(note.id);
+  }
+
+  public openNote(noteId: string): void {
+    const note = this.getNoteById(noteId);
+    if (!note) return;
+    this.focusOrCreateTab('noteEditor', {
+      context: { noteId },
+      title: note.title,
+    });
+  }
+
+  public renameNote(noteId: string, title: string): void {
+    const trimmed = title.trim() || '未命名笔记';
+    this.mutateNote(noteId, (note) => {
+      if (note.title === trimmed) {
+        return null;
+      }
+      return { ...note, title: trimmed, updatedAt: new Date().toISOString() };
+    });
+  }
+
+  public updateNoteContent(noteId: string, content: string): void {
+    this.mutateNote(noteId, (note) => {
+      if (note.content === content) {
+        return null;
+      }
+      return { ...note, content, updatedAt: new Date().toISOString() };
+    });
   }
 
   public addKnowledgeCategory(payload: KnowledgeCategoryDraft): void {
@@ -358,9 +407,97 @@ export class LearningOsViewModel {
       }
       case 'knowledgeBase':
         return activeGoal ? `${activeGoal.name} · 知识库` : '知识库';
+      case 'noteEditor': {
+        const note = this.getNoteById(tab.context?.noteId);
+        return note ? note.title : '笔记';
+      }
       default:
         return '工作区';
     }
+  }
+
+  private mutateNote(
+    noteId: string,
+    mutator: (note: KnowledgeNote) => KnowledgeNote | null
+  ): void {
+    const index = this.state.notes.findIndex((candidate) => candidate.id === noteId);
+    if (index === -1) return;
+    const current = this.state.notes[index];
+    const next = mutator(current);
+    if (!next) return;
+    const notes = this.state.notes.map((note, idx) => (idx === index ? next : note));
+    const knowledgeBase = this.syncKnowledgeNoteEntry(next);
+    this.updateState({ notes, knowledgeBase });
+  }
+
+  private syncKnowledgeNoteEntry(note: KnowledgeNote, insertIfMissing = true): KnowledgeBaseState {
+    const baseline = this.state.knowledgeBase;
+    const categories = this.ensureNotesCategory(baseline.categories);
+    const summary = note.title.trim() || '未命名笔记';
+    const detail = this.buildNoteSnippet(note.content);
+    const updatedAt = this.formatTime();
+    let exists = false;
+    const mapped = categories.map((category) => {
+      if (category.id !== KNOWLEDGE_NOTES_CATEGORY_ID) {
+        return category;
+      }
+      const items = category.items.map((item) => {
+        if (item.id === note.knowledgeItemId) {
+          exists = true;
+          return { ...item, summary, detail, updatedAt, noteId: note.id };
+        }
+        return item;
+      });
+      if (!exists && insertIfMissing) {
+        const newItem: KnowledgeItem = {
+          id: note.knowledgeItemId,
+          summary,
+          detail,
+          source: 'Markdown 笔记',
+          updatedAt,
+          goalId: this.state.activeGoalId ?? undefined,
+          noteId: note.id,
+        };
+        return { ...category, items: [newItem, ...items] };
+      }
+      return { ...category, items };
+    });
+    return { ...baseline, categories: mapped };
+  }
+
+  private ensureNotesCategory(categories: KnowledgeCategory[]): KnowledgeCategory[] {
+    if (categories.some((category) => category.id === KNOWLEDGE_NOTES_CATEGORY_ID)) {
+      return categories;
+    }
+    const fallback: KnowledgeCategory = {
+      id: KNOWLEDGE_NOTES_CATEGORY_ID,
+      title: '笔记',
+      kind: 'notes',
+      isFixed: false,
+      icon: '📝',
+      color: '#34d399',
+      items: [],
+    };
+    return [...categories, fallback];
+  }
+
+  private buildNoteSnippet(content: string): string {
+    const compact = content.replace(/\s+/g, ' ').trim();
+    if (!compact) return '空白笔记';
+    return compact.slice(0, 140);
+  }
+
+  private createNoteId(): string {
+    return `note-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+
+  private generateNoteTitle(): string {
+    return `未命名笔记 ${this.state.notes.length + 1}`;
+  }
+
+  private getNoteById(noteId?: string | null): KnowledgeNote | null {
+    if (!noteId) return null;
+    return this.state.notes.find((note) => note.id === noteId) ?? null;
   }
 
   private getGoalById(goalId?: string | null): StudyGoal | null {

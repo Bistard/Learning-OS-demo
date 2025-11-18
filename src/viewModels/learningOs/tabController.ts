@@ -5,6 +5,7 @@ import { Page } from '../../models/learningOsModel';
 
 export interface TabContext {
   goalId?: string;
+  noteId?: string;
   [key: string]: string | undefined;
 }
 
@@ -42,6 +43,7 @@ const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
   goalWorkspace: { icon: '🗂️' },
   learningWorkspace: { icon: '🧠' },
   knowledgeBase: { icon: '📚' },
+  noteEditor: { icon: '📝' },
 };
 
 const createTabId = (): string =>
@@ -196,6 +198,9 @@ export class TabController {
   private buildTabIdentity(view: Page, context?: TabContext): string {
     if (context?.goalId) {
       return `${view}:${context.goalId}`;
+    }
+    if (context?.noteId) {
+      return `${view}:${context.noteId}`;
     }
     return view;
   }

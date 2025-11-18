@@ -1,0 +1,194 @@
+import { KnowledgeNote, Page } from '../../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
+import { bindClick, bindInput } from '../../../utils/dom';
+import { RenderRegions, UiModule } from '../../types';
+
+interface NoteEditorViewState {
+  note: KnowledgeNote | null;
+  createdLabel: string;
+  updatedLabel: string;
+  wordCount: number;
+}
+
+class NoteEditorViewModel {
+  constructor(private readonly root: LearningOsViewModel) {}
+
+  public buildState(snapshot: ViewSnapshot): NoteEditorViewState {
+    const note = this.resolveActiveNote(snapshot);
+    return {
+      note,
+      createdLabel: note ? this.formatTimestamp(note.createdAt) : '—',
+      updatedLabel: note ? this.formatTimestamp(note.updatedAt) : '—',
+      wordCount: note ? this.countCharacters(note.content) : 0,
+    };
+  }
+
+  public rename(noteId: string, title: string): void {
+    this.root.renameNote(noteId, title);
+  }
+
+  public updateContent(noteId: string, content: string): void {
+    this.root.updateNoteContent(noteId, content);
+  }
+
+  public createNote(): void {
+    this.root.createNote();
+  }
+
+  public openKnowledgeBase(): void {
+    this.root.navigate('knowledgeBase');
+  }
+
+  private resolveActiveNote(snapshot: ViewSnapshot): KnowledgeNote | null {
+    const activeTab = snapshot.tabs.find((tab) => tab.id === snapshot.activeTabId);
+    if (!activeTab || activeTab.view !== 'noteEditor') {
+      return null;
+    }
+    const noteId = activeTab.context?.noteId;
+    if (!noteId) return null;
+    return snapshot.notes.find((note) => note.id === noteId) ?? null;
+  }
+
+  private formatTimestamp(iso: string): string {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleString('zh-CN', { hour12: false });
+  }
+
+  private countCharacters(content: string): number {
+    return content.replace(/\s+/g, '').length;
+  }
+}
+
+class NoteEditorView {
+  constructor(private readonly viewModel: NoteEditorViewModel) {}
+
+  public render(state: NoteEditorViewState, regions: RenderRegions): void {
+    if (!state.note) {
+      regions.content.innerHTML = this.renderEmpty();
+      bindClick(regions.content, '#note-create-empty', () => this.viewModel.createNote());
+      return;
+    }
+    regions.content.innerHTML = this.renderNote(state);
+    const editor = regions.content.querySelector<HTMLTextAreaElement>('#note-body-input');
+    if (editor) {
+      editor.value = state.note.content;
+    }
+    bindInput(regions.content, '#note-title-input', (value) =>
+      this.viewModel.rename(state.note!.id, String(value))
+    );
+    bindInput(regions.content, '#note-body-input', (value) =>
+      this.viewModel.updateContent(state.note!.id, String(value))
+    );
+  }
+
+  private renderEmpty(): string {
+    return `
+      <section class="note-empty">
+        <div class="note-empty-card">
+          <h3>还没有可编辑的笔记</h3>
+          <p>点击下方按钮创建第一篇 Markdown 笔记</p>
+          <button class="btn primary" id="note-create-empty" type="button">新建笔记</button>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderNote(state: NoteEditorViewState): string {
+    const note = state.note!;
+    const preview = this.renderMarkdown(note.content);
+    return `
+      <section class="note-workspace">
+        <div class="note-pane note-pane-editor">
+          <input
+            id="note-title-input"
+            class="note-title-input"
+            type="text"
+            maxlength="80"
+            value="${this.escapeHtml(note.title)}"
+            placeholder="输入标题"
+          />
+          <div class="note-meta-line">
+            <span>创建：${state.createdLabel}</span>
+            <span>更新：${state.updatedLabel}</span>
+            <span>字数：${state.wordCount}</span>
+          </div>
+          <textarea
+            id="note-body-input"
+            class="note-editor-area"
+            placeholder="# 记录灵感..."
+          >${this.escapeHtml(note.content)}</textarea>
+        </div>
+        <div class="note-pane note-pane-preview">
+          <div class="note-preview" data-note-preview>${preview}</div>
+        </div>
+      </section>
+    `;
+  }
+
+  private renderMarkdown(markdown: string): string {
+    const trimmed = markdown.trim();
+    if (!trimmed) {
+      return '<p class="note-preview-empty">暂无内容，开始输入 Markdown 吧～</p>';
+    }
+    const escaped = this.escapeHtml(markdown).replace(/\r\n/g, '\n');
+    const blocks = escaped.split(/\n{2,}/);
+    const html = blocks
+      .map((block) => this.renderBlock(block))
+      .filter((block) => Boolean(block))
+      .join('');
+    return html || '<p class="note-preview-empty">暂无内容，开始输入 Markdown 吧～</p>';
+  }
+
+  private renderBlock(block: string): string {
+    const trimmed = block.trim();
+    if (!trimmed) return '';
+    if (/^#{1,3}\s+/.test(trimmed)) {
+      const level = Math.min(3, trimmed.match(/^#+/)?.[0]?.length ?? 1);
+      const content = trimmed.replace(/^#{1,3}\s+/, '');
+      return `<h${level}>${this.renderInline(content)}</h${level}>`;
+    }
+    const lines = trimmed.split('\n');
+    const isList = lines.every((line) => /^[-*]\s+/.test(line));
+    if (isList) {
+      const items = lines
+        .map((line) => line.replace(/^[-*]\s+/, ''))
+        .map((item) => `<li>${this.renderInline(item)}</li>`)
+        .join('');
+      return `<ul>${items}</ul>`;
+    }
+    return `<p>${this.renderInline(trimmed).replace(/\n/g, '<br />')}</p>`;
+  }
+
+  private renderInline(text: string): string {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+}
+
+export class NoteEditorModule implements UiModule {
+  public readonly page: Page = 'noteEditor';
+  private readonly viewModel: NoteEditorViewModel;
+  private readonly view: NoteEditorView;
+
+  constructor(root: LearningOsViewModel) {
+    this.viewModel = new NoteEditorViewModel(root);
+    this.view = new NoteEditorView(this.viewModel);
+  }
+
+  public render(snapshot: ViewSnapshot, regions: RenderRegions): void {
+    const state = this.viewModel.buildState(snapshot);
+    this.view.render(state, regions);
+  }
+}
