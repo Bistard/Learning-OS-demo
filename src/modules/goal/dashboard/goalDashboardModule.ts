@@ -5,7 +5,6 @@ import { RenderRegions, UiModule } from '../../types';
 
 interface GoalDashboardViewState {
   summary: ViewSnapshot['dashboardSummary'];
-  knowledgeStats: ViewSnapshot['knowledgeStats'];
   goals: StudyGoal[];
 }
 
@@ -15,7 +14,6 @@ class GoalDashboardViewModel {
   public buildState(snapshot: ViewSnapshot): GoalDashboardViewState {
     return {
       summary: snapshot.dashboardSummary,
-      knowledgeStats: snapshot.knowledgeStats,
       goals: snapshot.goals,
     };
   }
@@ -96,22 +94,6 @@ class GoalDashboardView {
                 .join('')
             : '<p class="microcopy">创建目标后，这里会展示任务树与今日路线。</p>'
         }
-      </section>
-
-      <section class="panel knowledge-remind">
-        <div>
-          <p class="eyebrow">目标 ↔ 知识库</p>
-          <h3>目标驱动行为；知识库负责沉淀</h3>
-          <p class="microcopy">
-            目标是有限且可完成的项目；知识库是无限且长期的内容集合。
-            两者通过 AI 自动连接，实现个性化教学与 RAG。
-          </p>
-        </div>
-        <div class="knowledge-stats">
-          <p class="label">自动收录条目</p>
-          <p class="strong">${state.knowledgeStats.totalItems}</p>
-          <p class="microcopy">${state.knowledgeStats.autoCaptureLabel}</p>
-        </div>
       </section>
     `;
 

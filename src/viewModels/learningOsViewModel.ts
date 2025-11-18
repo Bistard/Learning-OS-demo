@@ -31,15 +31,9 @@ interface DashboardSummary {
   knowledgeVaults: number;
 }
 
-interface KnowledgeStats {
-  totalItems: number;
-  autoCaptureLabel: string;
-}
-
 export interface ViewSnapshot extends LearningOsState {
   activeGoal: StudyGoal | null;
   dashboardSummary: DashboardSummary;
-  knowledgeStats: KnowledgeStats;
 }
 
 export type ViewUpdateListener = (snapshot: ViewSnapshot) => void;
@@ -333,12 +327,10 @@ export class LearningOsViewModel {
   private buildSnapshot(): ViewSnapshot {
     const activeGoal = this.getActiveGoal();
     const dashboardSummary = this.computeDashboardSummary();
-    const knowledgeStats = this.computeKnowledgeStats();
     return {
       ...this.state,
       activeGoal,
       dashboardSummary,
-      knowledgeStats,
     };
   }
 
@@ -354,20 +346,6 @@ export class LearningOsViewModel {
       : '暂无截止压力';
     const knowledgeVaults = this.getActiveGoal()?.connectedKnowledgeVaults.length ?? 0;
     return { totalGoals, activeGoals, nearestDeadlineLabel, knowledgeVaults };
-  }
-
-  private computeKnowledgeStats(): KnowledgeStats {
-    const totalItems = this.state.knowledgeBase.sections.reduce(
-      (sum, section) =>
-        sum + section.folders.reduce((folderSum, folder) => folderSum + folder.items, 0),
-      0
-    );
-    return {
-      totalItems,
-      autoCaptureLabel: this.state.knowledgeBase.autoCaptureEnabled
-        ? '自动收录已开启'
-        : '自动收录已暂停',
-    };
   }
 
   private updateState(partial: Partial<LearningOsState>): void {
