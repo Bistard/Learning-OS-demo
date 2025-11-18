@@ -1,0 +1,75 @@
+/**
+ * Utility helpers, micro components, and visibility tweaks.
+ *
+ * Usage:
+ * ```css
+ * @import './utilities.css';
+ * ```
+ */
+
+[hidden] {
+  display: none !important;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.faq ul {
+  list-style: disc;
+  margin-left: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.scheduler {
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  padding: 16px;
+  background: #fff;
+}
+
+.value {
+  font-weight: 600;
+  color: var(--orange);
+  margin-left: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.panel .actions {
+  margin-top: 8px;
+}
+
+.question ol,
+.question ul {
+  margin-top: 8px;
+}
+
+.result ol {
+  margin-top: 4px;
+}
+
+.panel .radar {
+  margin-top: 12px;
+}
+
+.panel .mascot {
+  justify-content: center;
+}
+
