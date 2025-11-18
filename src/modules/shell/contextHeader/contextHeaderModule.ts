@@ -44,10 +44,8 @@ export class ContextHeaderModule {
       </div>
       <div class="context-actions">
         <button class="btn primary" id="header-open-workspace">进入任务树</button>
-        <button class="btn ghost" id="header-open-workspace-3col">三栏学习空间</button>
       </div>
     `;
     bindClick(host, '#header-open-workspace', () => this.viewModel.openGoalWorkspace());
-    bindClick(host, '#header-open-workspace-3col', () => this.viewModel.startLearningWorkspace());
   }
 }
