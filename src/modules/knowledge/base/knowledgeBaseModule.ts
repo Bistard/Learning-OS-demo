@@ -492,7 +492,7 @@ class KnowledgeBaseView {
         label: '删除',
         disabled: category.isFixed,
         danger: true,
-        action: () => this.confirmDelete(category),
+        action: () => this.viewModel.deleteCategory(category.id),
       },
     ];
     this.contextMenu.open(position, items);
@@ -502,14 +502,6 @@ class KnowledgeBaseView {
     this.viewModel.startRename(categoryId);
     this.requestRepaint();
     window.requestAnimationFrame(() => this.focusRenameInput(categoryId));
-  }
-
-  private confirmDelete(category: KnowledgeCategory): void {
-    if (category.isFixed) return;
-    const confirmed = window.confirm('确定删除该分类？内容将移动到「未分类」。');
-    if (confirmed) {
-      this.viewModel.deleteCategory(category.id);
-    }
   }
 }
 
