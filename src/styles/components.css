@@ -130,33 +130,33 @@
 }
 
 .pill {
-  background: #eef2ff;
-  color: #4338ca;
+  background: #f4f4f5;
+  color: var(--text);
 }
 
 .pill.易 {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #e5e5e5;
+  color: var(--text);
 }
 
 .pill.中 {
-  background: #fff7e6;
-  color: #b45309;
+  background: #d4d4d8;
+  color: var(--text);
 }
 
 .pill.难 {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #a1a1aa;
+  color: #ffffff;
 }
 
 .pill.warning {
-  background: #fff7e6;
-  color: var(--warning);
+  background: #ededee;
+  color: var(--text);
 }
 
 .pill.info {
-  background: #e0f2ff;
-  color: var(--info);
+  background: #e4e4e7;
+  color: var(--text);
 }
 
 .pill.ghost {
@@ -165,8 +165,8 @@
 }
 
 .pill.timing {
-  background: #edf2ff;
-  color: #1d4ed8;
+  background: #e0e0e2;
+  color: var(--text);
 }
 
 .pill-btn {
@@ -301,8 +301,8 @@ input[type='range'] {
   display: inline-flex;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #e6f4ed;
-  color: var(--success);
+  background: #e4e4e7;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -311,7 +311,7 @@ input[type='range'] {
   font-weight: 700;
   padding: 10px 16px;
   border-radius: var(--radius-sm);
-  background: #f0f4ff;
+  background: #e6e7e9;
 }
 
 .radar {
@@ -340,11 +340,11 @@ input[type='range'] {
 }
 
 .toast.success {
-  border-color: #d1fae5;
+  border-color: #d4d4d8;
 }
 
 .toast.info {
-  border-color: #dbeafe;
+  border-color: #d4d4d8;
 }
 
 @keyframes bounce {

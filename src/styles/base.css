@@ -8,18 +8,18 @@
  */
 
 :root {
-  --orange: #ff7a00;
-  --orange-soft: #fff1e7;
-  --bg: #f8f8f8;
+  --orange: #0f0f10;
+  --orange-soft: #ededee;
+  --bg: #f5f5f6;
   --surface: #ffffff;
-  --text: #1f2a44;
-  --muted: #5f6b7a;
-  --border: #e6e6e6;
-  --success: #2cb67d;
-  --info: #3b82f6;
-  --warning: #f59e0b;
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.04);
+  --text: #111113;
+  --muted: #6d6d73;
+  --border: #d4d4d8;
+  --success: #16a34a;
+  --info: #0ea5e9;
+  --warning: #f97316;
+  --shadow-lg: 0 18px 50px rgba(4, 5, 6, 0.08);
+  --shadow-md: 0 6px 24px rgba(4, 5, 6, 0.06);
   --radius-lg: 20px;
   --radius-md: 16px;
   --radius-sm: 10px;
@@ -80,4 +80,3 @@ img {
   max-width: 100%;
   height: auto;
 }
-

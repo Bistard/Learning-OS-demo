@@ -62,8 +62,8 @@
 
 .nav-shortcut:hover,
 .nav-shortcut.active {
-  background: var(--orange-soft);
-  color: var(--orange);
+  background: var(--orange);
+  color: var(--surface);
 }
 
 .hero {
@@ -83,11 +83,11 @@
   margin: 20px 0;
 }
 
-.hero-card {
+ .hero-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
-  background: linear-gradient(140deg, #fff9f2, #ffffff);
+  background: linear-gradient(140deg, #f2f2f3, #ffffff);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -361,4 +361,3 @@
     gap: 12px;
   }
 }
-

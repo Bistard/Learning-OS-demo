@@ -198,7 +198,7 @@ export class LearningOsViewModel {
   public completePracticeNode(): void {
     this.markTaskComplete('rank-nullity');
     this.unlockTask('orthogonal');
-    this.emitToast('Nice！进步啦 🍊', 'success');
+    this.emitToast('Nice！进步啦 🖤', 'success');
     this.navigate('tasks');
   }
 

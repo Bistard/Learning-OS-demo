@@ -58,7 +58,7 @@ export class LearningOsView {
         <header class="app-header">
           <div class="logo-area" role="button" tabindex="0">
             <div class="logo-dot"></div>
-            <span>橙知学习 OS</span>
+            <span>小墨学习 OS</span>
           </div>
           <nav>
             <ul>
@@ -144,7 +144,7 @@ export class LearningOsView {
     this.contentHost.innerHTML = `
       <section class="hero">
         <div class="hero-text">
-          <p class="eyebrow">橙知 · 考前 3 天冲刺</p>
+          <p class="eyebrow">小墨 · 考前 3 天冲刺</p>
           <h1>72 小时速成：线性代数冲刺路径</h1>
           <p class="sub">聚焦“最低解题必要知识”，上传资料后 30 秒生成个性化任务树，配套拍照批改与模拟考。</p>
           <div class="cta-group">
@@ -155,8 +155,8 @@ export class LearningOsView {
         </div>
         <div class="hero-card">
           <div class="mascot">
-            <div class="mascot-face">🍊</div>
-            <p>橙子小助理：根据你的资料生成考点树，并在关键节点提醒。</p>
+            <div class="mascot-face">🖤</div>
+            <p>小墨学习助手：根据你的资料生成考点树，并在关键节点提醒。</p>
           </div>
           <div class="progress-mini">
             ${statsHtml}
@@ -380,7 +380,7 @@ export class LearningOsView {
         </div>
         <aside class="chat-panel">
           <div class="msg from-ai">
-            <p class="label">橙子小助手</p>
+            <p class="label">小墨学习助手</p>
             <p>本节得分点：确认重复特征值的几何重数；构造对角化 P 时注意特征向量线性无关性。</p>
           </div>
           <div class="msg from-ai subtle">
@@ -431,7 +431,7 @@ export class LearningOsView {
         </div>
         <aside class="sidebar">
           <h4>小墨批改 · 即时反馈</h4>
-          <p class="hint">做对：短暂激励 “Nice！进步啦 🍊”；做错：引导“别急，我们来拆解错误点 →”。</p>
+          <p class="hint">做对：短暂激励 “Nice！进步啦 🖤”；做错：引导“别急，我们来拆解错误点 →”。</p>
           <div class="faq">
             <p class="label">常见易错</p>
             <ul>
@@ -561,7 +561,7 @@ export class LearningOsView {
           <button class="btn primary" id="review-wrong">复习错题本</button>
           <button class="btn ghost" id="export-cheatsheet">导出考前小抄</button>
         </div>
-        <div class="mascot">橙子小助理：稳住节奏，考前再做一次速记。</div>
+        <div class="mascot">小墨学习助手：稳住节奏，考前再做一次速记。</div>
       </section>
     `;
     this.bindClick('#review-wrong', () => this.viewModel.navigate('review'));
@@ -604,4 +604,3 @@ export class LearningOsView {
     node?.addEventListener('click', handler);
   }
 }
-
