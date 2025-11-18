@@ -1,7 +1,7 @@
-import { Page, StudyGoal, TaskNode } from '../models/learningOsModel';
-import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { bindClick, bindListClick } from '../utils/dom';
-import { RenderRegions, UiModule } from './types';
+import { Page, StudyGoal, TaskNode } from '../../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
+import { bindClick, bindListClick } from '../../../utils/dom';
+import { RenderRegions, UiModule } from '../../types';
 
 interface GoalWorkspaceViewState {
   goal: StudyGoal | null;

@@ -1,4 +1,4 @@
-import { ViewSnapshot } from '../viewModels/learningOsViewModel';
+import { ViewSnapshot } from '../../../viewModels/learningOsViewModel';
 
 export class SidebarMetaModule {
   public render(snapshot: ViewSnapshot, host: HTMLElement): void {

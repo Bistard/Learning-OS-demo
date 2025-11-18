@@ -1,7 +1,7 @@
-import { Page } from '../models/learningOsModel';
-import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { bindClick, bindInput, bindListClick } from '../utils/dom';
-import { RenderRegions, UiModule } from './types';
+import { Page } from '../../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
+import { bindClick, bindInput, bindListClick } from '../../../utils/dom';
+import { RenderRegions, UiModule } from '../../types';
 
 interface GoalCreationViewState {
   draft: ViewSnapshot['creationDraft'];

@@ -1,6 +1,5 @@
-import { ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { LearningOsViewModel } from '../viewModels/learningOsViewModel';
-import { bindClick } from '../utils/dom';
+import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
+import { bindClick } from '../../../utils/dom';
 
 export class ContextHeaderModule {
   constructor(private readonly viewModel: LearningOsViewModel) {}

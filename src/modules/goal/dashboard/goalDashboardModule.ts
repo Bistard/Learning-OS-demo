@@ -1,7 +1,7 @@
-import { Page, StudyGoal } from '../models/learningOsModel';
-import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { bindClick, bindListClick } from '../utils/dom';
-import { RenderRegions, UiModule } from './types';
+import { Page, StudyGoal } from '../../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
+import { bindClick, bindListClick } from '../../../utils/dom';
+import { RenderRegions, UiModule } from '../../types';
 
 interface GoalDashboardViewState {
   summary: ViewSnapshot['dashboardSummary'];

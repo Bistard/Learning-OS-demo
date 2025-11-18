@@ -4,16 +4,16 @@
  */
 
 import { Page } from '../models/learningOsModel';
-import { GoalDashboardModule } from '../modules/goalDashboardModule';
-import { GoalCreationModule } from '../modules/goalCreationModule';
-import { GoalWorkspaceModule } from '../modules/goalWorkspaceModule';
-import { LearningWorkspaceModule } from '../modules/learningWorkspaceModule';
-import { KnowledgeBaseModule } from '../modules/knowledgeBaseModule';
-import { AiChatModule } from '../modules/aiChatModule';
-import { CalendarModule } from '../modules/calendarModule';
-import { SettingsModule } from '../modules/settingsModule';
-import { ContextHeaderModule } from '../modules/contextHeaderModule';
-import { SidebarMetaModule } from '../modules/sidebarMetaModule';
+import { GoalDashboardModule } from '../modules/goal/dashboard/goalDashboardModule';
+import { GoalCreationModule } from '../modules/goal/creation/goalCreationModule';
+import { GoalWorkspaceModule } from '../modules/goal/workspace/goalWorkspaceModule';
+import { LearningWorkspaceModule } from '../modules/learning/workspace/learningWorkspaceModule';
+import { KnowledgeBaseModule } from '../modules/knowledge/base/knowledgeBaseModule';
+import { AiChatModule } from '../modules/ai/chat/aiChatModule';
+import { CalendarModule } from '../modules/calendar/calendarModule';
+import { SettingsModule } from '../modules/settings/settingsModule';
+import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
+import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { RenderRegions, UiModule } from '../modules/types';
 import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
 

@@ -1,7 +1,7 @@
-import { Page } from '../models/learningOsModel';
-import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { bindListClick } from '../utils/dom';
-import { RenderRegions, UiModule } from './types';
+import { Page } from '../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../viewModels/learningOsViewModel';
+import { bindListClick } from '../../utils/dom';
+import { RenderRegions, UiModule } from '../types';
 
 interface CalendarViewState {
   events: ViewSnapshot['timeline'];

@@ -1,7 +1,7 @@
-import { Page } from '../models/learningOsModel';
-import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
-import { bindClick } from '../utils/dom';
-import { RenderRegions, UiModule } from './types';
+import { Page } from '../../models/learningOsModel';
+import { LearningOsViewModel, ViewSnapshot } from '../../viewModels/learningOsViewModel';
+import { bindClick } from '../../utils/dom';
+import { RenderRegions, UiModule } from '../types';
 
 class SettingsViewModel {
   constructor(private readonly root: LearningOsViewModel) {}
