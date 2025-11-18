@@ -38,9 +38,62 @@ interface DashboardSummary {
   knowledgeVaults: number;
 }
 
+/**
+ * Additional metadata carried by a tab. It is intentionally loose to allow
+ * future view types to enrich their contextual identity (goal, asset, etc.).
+ */
+export interface TabContext {
+  goalId?: string;
+  [key: string]: string | undefined;
+}
+
+export interface AppTab {
+  id: string;
+  view: Page;
+  identity: string;
+  title: string;
+  icon?: string;
+  pinned: boolean;
+  closable: boolean;
+  reloadToken: number;
+  context?: TabContext;
+}
+
+interface TabBlueprint {
+  icon: string;
+  pinned?: boolean;
+}
+
+interface TabOpenOptions {
+  identity?: string;
+  title?: string;
+  icon?: string;
+  pinned?: boolean;
+  closable?: boolean;
+  context?: TabContext;
+}
+
+const TAB_ICON_FALLBACK = '📄';
+
+const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
+  goalDashboard: { icon: '📌', pinned: true },
+  goalCreation: { icon: '📝' },
+  goalWorkspace: { icon: '🗂️' },
+  learningWorkspace: { icon: '🧠' },
+  knowledgeBase: { icon: '📚' },
+  aiChat: { icon: '💬' },
+  calendar: { icon: '🧭' },
+  settings: { icon: '⚙️' },
+};
+
+const createTabId = (): string =>
+  `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
 export interface ViewSnapshot extends LearningOsState {
   activeGoal: StudyGoal | null;
   dashboardSummary: DashboardSummary;
+  tabs: AppTab[];
+  activeTabId: string | null;
 }
 
 export type ViewUpdateListener = (snapshot: ViewSnapshot) => void;
@@ -48,13 +101,18 @@ export type ToastListener = (toast: Toast) => void;
 
 export class LearningOsViewModel {
   private state: LearningOsState = createInitialState();
+  private tabs: AppTab[] = [];
+  private activeTabId: string | null = null;
   private readonly viewListeners = new Set<ViewUpdateListener>();
   private readonly toastListeners = new Set<ToastListener>();
 
-  constructor(private readonly nowProvider: () => Date = () => new Date()) {}
+  constructor(private readonly nowProvider: () => Date = () => new Date()) {
+    this.bootstrapTabs();
+  }
 
   public subscribe(listener: ViewUpdateListener): () => void {
     this.viewListeners.add(listener);
+    this.syncTabTitles();
     listener(this.buildSnapshot());
     return () => this.viewListeners.delete(listener);
   }
@@ -64,19 +122,29 @@ export class LearningOsViewModel {
     return () => this.toastListeners.delete(listener);
   }
 
-  public navigate(page: Page): void {
-    if (this.state.page === page) return;
-    this.updateState({ page });
+  public navigate(page: Page, context?: TabContext): void {
+    this.focusOrCreateTab(page, { context });
   }
 
   public selectGoal(goalId: string, targetPage?: Page): void {
     if (this.state.activeGoalId === goalId && !targetPage) return;
     const goalExists = this.state.goals.some((item) => item.id === goalId);
     if (!goalExists) return;
-    this.updateState({
-      activeGoalId: goalId,
-      page: targetPage ?? this.state.page,
-    });
+    const pending: Partial<LearningOsState> = {};
+    if (this.state.activeGoalId !== goalId) {
+      pending.activeGoalId = goalId;
+    }
+    const hasPending = Object.keys(pending).length > 0;
+    if (hasPending) {
+      this.assignState(pending);
+    }
+    if (targetPage) {
+      this.focusOrCreateTab(targetPage, { context: { goalId } });
+      return;
+    }
+    if (hasPending) {
+      this.publish();
+    }
   }
 
   public openGoalWorkspace(goalId?: string): void {
@@ -118,9 +186,8 @@ export class LearningOsViewModel {
       goals: [newGoal, ...this.state.goals],
       activeGoalId: newGoal.id,
       creationDraft: createGoalDraft(),
-      page: 'goalWorkspace',
     };
-    this.publish();
+    this.focusOrCreateTab('goalWorkspace', { context: { goalId: newGoal.id } });
     this.emitToast('目标档案已生成，知识库「未收录」待自动整理。', 'success');
   }
 
@@ -170,6 +237,96 @@ export class LearningOsViewModel {
       });
     }
     this.navigate('learningWorkspace');
+  }
+
+  public activateTab(tabId: string): void {
+    if (this.activeTabId === tabId) return;
+    const target = this.tabs.find((tab) => tab.id === tabId);
+    if (!target) return;
+    this.activeTabId = target.id;
+    this.assignState({ page: target.view });
+    this.publish();
+  }
+
+  public closeTab(tabId: string): void {
+    const targetIndex = this.tabs.findIndex((tab) => tab.id === tabId);
+    if (targetIndex === -1) return;
+    const target = this.tabs[targetIndex];
+    if (!target.closable) return;
+    const remaining = this.tabs.filter((tab) => tab.id !== tabId);
+    if (remaining.length === 0) {
+      const fallback = this.createTab('goalDashboard');
+      this.tabs = [fallback];
+      this.activeTabId = fallback.id;
+      this.assignState({ page: fallback.view });
+      this.publish();
+      return;
+    }
+    this.tabs = remaining;
+    if (this.activeTabId === tabId) {
+      const fallbackIndex = Math.max(0, targetIndex - 1);
+      const nextActive = this.tabs[fallbackIndex] ?? this.tabs[0];
+      this.activeTabId = nextActive.id;
+      this.assignState({ page: nextActive.view });
+      this.publish();
+      return;
+    }
+    this.publish();
+  }
+
+  public closeAllTabs(): void {
+    const pinnedTabs = this.tabs.filter((tab) => tab.pinned);
+    if (pinnedTabs.length > 0) {
+      this.tabs = pinnedTabs;
+      this.activeTabId = pinnedTabs[0].id;
+      this.assignState({ page: pinnedTabs[0].view });
+      this.publish();
+      return;
+    }
+    const fallback = this.createTab('goalDashboard');
+    this.tabs = [fallback];
+    this.activeTabId = fallback.id;
+    this.assignState({ page: fallback.view });
+    this.publish();
+  }
+
+  public reloadTab(tabId: string): void {
+    const target = this.tabs.find((tab) => tab.id === tabId);
+    if (!target) return;
+    const updated = { ...target, reloadToken: target.reloadToken + 1 };
+    this.tabs = this.tabs.map((tab) => (tab.id === tabId ? updated : tab));
+    this.publish();
+  }
+
+  public toggleTabPin(tabId: string, pinned?: boolean): void {
+    const target = this.tabs.find((tab) => tab.id === tabId);
+    if (!target) return;
+    const nextPinned = pinned ?? !target.pinned;
+    if (nextPinned === target.pinned) return;
+    const updated = { ...target, pinned: nextPinned };
+    this.tabs = this.tabs.map((tab) => (tab.id === tabId ? updated : tab));
+    this.enforcePinGrouping();
+    this.publish();
+  }
+
+  public reorderTabs(order: string[]): void {
+    if (!order.length) return;
+    const ordered: AppTab[] = [];
+    const visited = new Set<string>();
+    order.forEach((id) => {
+      const tab = this.tabs.find((item) => item.id === id);
+      if (tab && !visited.has(id)) {
+        ordered.push(tab);
+        visited.add(id);
+      }
+    });
+    const remainder = this.tabs.filter((tab) => !visited.has(tab.id));
+    const next = [...ordered, ...remainder];
+    const changed = next.some((tab, index) => tab.id !== this.tabs[index]?.id);
+    if (!changed) return;
+    this.tabs = next;
+    this.enforcePinGrouping();
+    this.publish();
   }
 
   public updateWorkspaceNote(payload: string): void {
@@ -378,6 +535,109 @@ export class LearningOsViewModel {
     };
   }
 
+  private bootstrapTabs(): void {
+    if (this.tabs.length > 0) return;
+    const initialTab = this.createTab(this.state.page);
+    this.tabs = [initialTab];
+    this.activeTabId = initialTab.id;
+  }
+
+  private focusOrCreateTab(view: Page, options: TabOpenOptions = {}): void {
+    const identity = options.identity ?? this.buildTabIdentity(view, options.context);
+    const existing = this.tabs.find((tab) => tab.identity === identity);
+    if (existing) {
+      this.activeTabId = existing.id;
+      this.assignState({ page: existing.view });
+      this.publish();
+      return;
+    }
+    const tab = this.createTab(view, { ...options, identity });
+    this.tabs = [...this.tabs, tab];
+    this.enforcePinGrouping();
+    this.activeTabId = tab.id;
+    this.assignState({ page: view });
+    this.publish();
+  }
+
+  private createTab(view: Page, options: TabOpenOptions = {}): AppTab {
+    const blueprint = TAB_BLUEPRINTS[view];
+    const identity = options.identity ?? this.buildTabIdentity(view, options.context);
+    return {
+      id: createTabId(),
+      view,
+      identity,
+      title: options.title ?? '',
+      icon: options.icon ?? blueprint?.icon ?? TAB_ICON_FALLBACK,
+      pinned: options.pinned ?? blueprint?.pinned ?? false,
+      closable: options.closable ?? true,
+      reloadToken: 0,
+      context: options.context ? { ...options.context } : undefined,
+    };
+  }
+
+  private buildTabIdentity(view: Page, context?: TabContext): string {
+    if (context?.goalId) {
+      return `${view}:${context.goalId}`;
+    }
+    return view;
+  }
+
+  private enforcePinGrouping(): void {
+    if (this.tabs.length <= 1) return;
+    const pinned = this.tabs.filter((tab) => tab.pinned);
+    const unpinned = this.tabs.filter((tab) => !tab.pinned);
+    this.tabs = [...pinned, ...unpinned];
+  }
+
+  private cloneTabs(): AppTab[] {
+    return this.tabs.map((tab) => ({
+      ...tab,
+      context: tab.context ? { ...tab.context } : undefined,
+    }));
+  }
+
+  private syncTabTitles(): void {
+    this.tabs = this.tabs.map((tab) => {
+      const nextTitle = this.resolveTabTitle(tab);
+      if (nextTitle === tab.title) return tab;
+      return { ...tab, title: nextTitle };
+    });
+  }
+
+  private resolveTabTitle(tab: AppTab): string {
+    const activeGoal = this.getActiveGoal();
+    const contextGoal = this.getGoalById(tab.context?.goalId);
+    switch (tab.view) {
+      case 'goalDashboard':
+        return activeGoal ? `${activeGoal.name} · 驾驶舱` : '目标驾驶舱';
+      case 'goalCreation':
+        return '创建目标';
+      case 'goalWorkspace': {
+        const goal = contextGoal ?? activeGoal;
+        return goal ? `${goal.name} · 工作区` : '目标工作区';
+      }
+      case 'learningWorkspace': {
+        const assetTitle = this.state.workspace.activeAsset?.title;
+        return assetTitle ? `${assetTitle} · 学习台` : '学习工作台';
+      }
+      case 'knowledgeBase':
+        return activeGoal ? `${activeGoal.name} · 知识库` : '知识库';
+      case 'aiChat':
+        return activeGoal ? `${activeGoal.name} · AI 对话` : 'AI 对话';
+      case 'calendar':
+        return '我的计划';
+      case 'settings':
+        return '设置';
+      default:
+        return '工作区';
+    }
+  }
+
+  private getGoalById(goalId?: string | null): StudyGoal | null {
+    if (!goalId) return null;
+    return this.state.goals.find((goal) => goal.id === goalId) ?? null;
+  }
+
   private appendHighlight(existing: ResourceHighlight[], routeId: string): ResourceHighlight[] {
     if (existing.some((highlight) => highlight.linkedTaskId === routeId)) {
       return existing;
@@ -489,6 +749,8 @@ export class LearningOsViewModel {
       ...this.state,
       activeGoal,
       dashboardSummary,
+      tabs: this.cloneTabs(),
+      activeTabId: this.activeTabId,
     };
   }
 
@@ -506,12 +768,17 @@ export class LearningOsViewModel {
     return { totalGoals, activeGoals, nearestDeadlineLabel, knowledgeVaults };
   }
 
-  private updateState(partial: Partial<LearningOsState>): void {
+  private assignState(partial: Partial<LearningOsState>): void {
     this.state = { ...this.state, ...partial };
+  }
+
+  private updateState(partial: Partial<LearningOsState>): void {
+    this.assignState(partial);
     this.publish();
   }
 
   private publish(): void {
+    this.syncTabTitles();
     const snapshot = this.buildSnapshot();
     this.viewListeners.forEach((listener) => listener(snapshot));
   }

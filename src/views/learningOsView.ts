@@ -14,6 +14,7 @@ import { CalendarModule } from '../modules/calendar/calendarModule';
 import { SettingsModule } from '../modules/settings/settingsModule';
 import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
 import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
+import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
 import { RenderRegions, UiModule } from '../modules/types';
 import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
 
@@ -32,24 +33,32 @@ const SIDE_NAV: NavItem[] = [
 ];
 
 export class LearningOsView {
+  private readonly shellElement: HTMLElement;
   private readonly contentHost: HTMLElement;
   private readonly toastHost: HTMLElement;
   private readonly headerHost: HTMLElement;
+  private readonly tabStripHost: HTMLElement;
   private readonly sidebarMeta: HTMLElement;
   private readonly navButtons = new Map<Page, HTMLButtonElement>();
   private readonly modules = new Map<Page, UiModule>();
   private readonly regions: RenderRegions;
   private readonly headerModule: ContextHeaderModule;
   private readonly sidebarModule: SidebarMetaModule;
+  private readonly tabStripModule: TabStripModule;
+  private navWidth = 260;
+  private readonly MIN_NAV_WIDTH = 200;
+  private readonly MAX_NAV_WIDTH = 420;
 
   constructor(rootId: string, private readonly viewModel: LearningOsViewModel) {
     const root = document.getElementById(rootId);
     if (!root) throw new Error(`Root container #${rootId} not found`);
     root.innerHTML = this.buildShell();
+    this.shellElement = root.querySelector<HTMLElement>('.os-shell')!;
     this.contentHost = root.querySelector<HTMLElement>('[data-view="content"]')!;
     this.toastHost = root.querySelector<HTMLElement>('[data-view="toast"]')!;
     this.headerHost = root.querySelector<HTMLElement>('[data-view="context-head"]')!;
     this.sidebarMeta = root.querySelector<HTMLElement>('[data-view="side-meta"]')!;
+    this.tabStripHost = root.querySelector<HTMLElement>('[data-view="tab-strip"]')!;
     this.regions = {
       header: this.headerHost,
       content: this.contentHost,
@@ -57,7 +66,10 @@ export class LearningOsView {
     };
     this.headerModule = new ContextHeaderModule(this.viewModel);
     this.sidebarModule = new SidebarMetaModule();
-    this.bindNav(root);
+    this.tabStripModule = new TabStripModule(this.viewModel);
+    this.applyNavWidth(this.navWidth);
+    this.bindNav(this.shellElement);
+    this.bindResizer(this.shellElement);
     this.registerModules();
     this.viewModel.subscribe((snapshot) => this.render(snapshot));
     this.viewModel.onToast((toast) => this.renderToast(toast.message, toast.tone));
@@ -98,7 +110,10 @@ export class LearningOsView {
           <div class="side-links">
             ${navMarkup}
           </div>
+          <div class="side-divider" role="presentation"></div>
+          <div class="side-tabs" data-view="tab-strip" aria-label="工作区标签"></div>
           <div class="side-meta" data-view="side-meta"></div>
+          <div class="side-resizer" data-resizer aria-hidden="true"></div>
         </aside>
         <div class="main-stage">
           <header class="context-header" data-view="context-head"></header>
@@ -124,7 +139,58 @@ export class LearningOsView {
     });
   }
 
+  private bindResizer(shell: HTMLElement): void {
+    const resizer = shell.querySelector<HTMLElement>('[data-resizer]');
+    if (!resizer) return;
+    let startX = 0;
+    let startWidth = this.navWidth;
+    let activePointerId: number | null = null;
+    const handlePointerMove = (event: PointerEvent): void => {
+      if (activePointerId === null) return;
+      event.preventDefault();
+      const delta = event.clientX - startX;
+      this.applyNavWidth(startWidth + delta);
+    };
+    const stopResizing = (): void => {
+      if (activePointerId === null) return;
+      if (resizer.hasPointerCapture(activePointerId)) {
+        resizer.releasePointerCapture(activePointerId);
+      }
+      activePointerId = null;
+      document.body.classList.remove('is-resizing-nav');
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+    const handlePointerUp = (event: PointerEvent): void => {
+      if (activePointerId === null || event.pointerId !== activePointerId) return;
+      stopResizing();
+    };
+    resizer.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      startX = event.clientX;
+      startWidth = this.navWidth;
+      activePointerId = event.pointerId;
+      resizer.setPointerCapture(activePointerId);
+      document.body.classList.add('is-resizing-nav');
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
+      window.addEventListener('pointercancel', handlePointerUp);
+    });
+  }
+
+  private applyNavWidth(width: number): void {
+    this.navWidth = this.clampNavWidth(width);
+    this.shellElement?.style.setProperty('--nav-width', `${this.navWidth}px`);
+  }
+
+  private clampNavWidth(value: number): number {
+    return Math.min(this.MAX_NAV_WIDTH, Math.max(this.MIN_NAV_WIDTH, value));
+  }
+
   private render(snapshot: ViewSnapshot): void {
+    this.tabStripModule.render(snapshot, this.tabStripHost);
     this.highlightNav(snapshot.page);
     this.headerModule.render(snapshot, this.headerHost);
     this.sidebarModule.render(snapshot, this.sidebarMeta);
