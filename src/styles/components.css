@@ -175,9 +175,23 @@
   cursor: pointer;
 }
 
+.pill-btn.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
 .pill-btn:hover {
   border-color: var(--orange);
   color: var(--orange);
+}
+
+.tag button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  margin-left: 6px;
+  color: inherit;
 }
 
 .ring {
@@ -345,6 +359,68 @@ input[type='range'] {
 
 .toast.info {
   border-color: #d4d4d8;
+}
+
+.cta-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.route-item.locked {
+  opacity: 0.6;
+}
+
+.route-item.complete {
+  border-color: var(--success);
+  background: #f0fdf4;
+}
+
+.tree-node.locked {
+  opacity: 0.6;
+}
+
+.workspace-col.reader progress {
+  width: 100%;
+  height: 8px;
+}
+
+.creation-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.goal-progress progress {
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.goal-progress progress::-webkit-progress-value {
+  background: var(--orange);
+}
+
+.goal-progress progress::-webkit-progress-bar {
+  background: var(--border);
+}
+
+.chat-history::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
 }
 
 @keyframes bounce {

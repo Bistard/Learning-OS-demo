@@ -1,294 +1,371 @@
 /**
- * Learning OS view-model orchestrates domain state mutations + derived data.
- *
- * Usage:
- * ```ts
- * const vm = new LearningOsViewModel();
- * vm.subscribe((snapshot) => console.log(snapshot.page));
- * vm.navigate('tasks');
- * ```
+ * Learning OS view-model aligned with the Goal x Knowledge Base flow.
  */
 
 import {
-  COUNTDOWN_LOOKAHEAD_DAYS,
+  ChatMessage,
+  GoalCreationDraft,
+  KnowledgeFolder,
+  KnowledgeSection,
   LearningOsState,
-  MockExamStatus,
   Page,
-  PLAN_GENERATION_DELAY_MS,
-  QuestionnaireState,
-  TaskKind,
-  TaskNode,
-  TaskStatus,
+  ResourceHighlight,
+  StudyGoal,
   Toast,
   ToastTone,
-  UPLOAD_SIMULATION_INTERVAL_MS,
-  MOCK_EXAM_DURATION_SECONDS,
+  WorkspaceState,
+  createGoalDraft,
   createInitialState,
+  createKnowledgeSections,
+  createStudyRoute,
+  createTaskTree,
+  createWeeklyPlan,
   nextDeadlineIso,
 } from '../models/learningOsModel';
 
+interface DashboardSummary {
+  totalGoals: number;
+  activeGoals: number;
+  nearestDeadlineLabel: string;
+  knowledgeVaults: number;
+}
+
+interface KnowledgeStats {
+  totalItems: number;
+  autoCaptureLabel: string;
+}
+
 export interface ViewSnapshot extends LearningOsState {
-  uploadProgress: number;
-  uploadedCount: number;
-  totalUploads: number;
-  completedTasks: number;
-  totalTasks: number;
-  completionPercent: number;
-  totalXp: number;
-  countdownLabel: string;
-  countdownActive: boolean;
-  mockTimerLabel: string;
+  activeGoal: StudyGoal | null;
+  dashboardSummary: DashboardSummary;
+  knowledgeStats: KnowledgeStats;
 }
 
 export type ViewUpdateListener = (snapshot: ViewSnapshot) => void;
 export type ToastListener = (toast: Toast) => void;
 
-const COUNTDOWN_TICK_INTERVAL = 1000 * 60;
-
 export class LearningOsViewModel {
   private state: LearningOsState = createInitialState();
-  private viewListeners = new Set<ViewUpdateListener>();
-  private toastListeners = new Set<ToastListener>();
-  private uploadTimer: number | null = null;
-  private countdownTimer: number | null = null;
-  private mockTimer: number | null = null;
+  private readonly viewListeners = new Set<ViewUpdateListener>();
+  private readonly toastListeners = new Set<ToastListener>();
 
-  /**
-   * @param nowProvider Allows deterministic testing by injecting a clock.
-   */
   constructor(private readonly nowProvider: () => Date = () => new Date()) {}
 
-  /**
-   * Registers a listener that reacts to view-state changes.
-   *
-   * @param listener Callback receiving the latest snapshot.
-   * @returns Function for disposing the subscription.
-   */
   public subscribe(listener: ViewUpdateListener): () => void {
     this.viewListeners.add(listener);
     listener(this.buildSnapshot());
     return () => this.viewListeners.delete(listener);
   }
 
-  /**
-   * Subscribes to toast notifications triggered by domain events.
-   *
-   * @param listener Toast handler.
-   * @returns Cleanup hook.
-   */
   public onToast(listener: ToastListener): () => void {
     this.toastListeners.add(listener);
     return () => this.toastListeners.delete(listener);
   }
 
-  /**
-   * Imperative navigation triggered by the view.
-   *
-   * @param page Next route id.
-   */
   public navigate(page: Page): void {
     if (this.state.page === page) return;
     this.updateState({ page });
   }
 
-  /**
-   * Simulates uploading the prepared资料, sequentially flipping each item.
-   */
-  public simulateUpload(): void {
-    if (this.state.isUploading) {
-      this.emitToast('正在上传，请稍候', 'info');
+  public selectGoal(goalId: string, targetPage?: Page): void {
+    if (this.state.activeGoalId === goalId && !targetPage) return;
+    const goal = this.state.goals.find((item) => item.id === goalId);
+    if (!goal) return;
+    const sections = this.replaceGoalKnowledgeSection(goal);
+    this.updateState({
+      activeGoalId: goalId,
+      knowledgeBase: { ...this.state.knowledgeBase, sections },
+      page: targetPage ?? this.state.page,
+    });
+  }
+
+  public openGoalWorkspace(goalId?: string): void {
+    if (goalId) {
+      this.selectGoal(goalId, 'goalWorkspace');
+    } else {
+      this.navigate('goalWorkspace');
+    }
+  }
+
+  public updateGoalDraft<K extends keyof GoalCreationDraft>(
+    field: K,
+    value: GoalCreationDraft[K]
+  ): void {
+    this.updateState({ creationDraft: { ...this.state.creationDraft, [field]: value } });
+  }
+
+  public appendMaterial(label: string): void {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const materials = Array.from(new Set([...this.state.creationDraft.materials, trimmed]));
+    this.updateGoalDraft('materials', materials);
+  }
+
+  public removeMaterial(label: string): void {
+    const materials = this.state.creationDraft.materials.filter((item) => item !== label);
+    this.updateGoalDraft('materials', materials);
+  }
+
+  public submitGoalCreation(): void {
+    const draft = this.state.creationDraft;
+    if (!draft.targetType.trim()) {
+      this.emitToast('请先告诉我你要准备什么～', 'warning');
       return;
     }
-    this.updateState({ isUploading: true });
-    this.uploadTimer = window.setInterval(() => {
-      const nextIndex = this.state.uploads.findIndex((item) => item.status === 'pending');
-      if (nextIndex === -1) {
-        this.stopUploadTimer();
-        this.emitToast('资料已上传，正在生成个性化任务树', 'info');
-        this.updateState({ isUploading: false });
-        return;
-      }
-      const uploads = this.state.uploads.map((item, idx) =>
-        idx === nextIndex ? { ...item, status: 'uploaded' } : item
+    const newGoal = this.createGoalFromDraft(draft);
+    const knowledgeSections = this.replaceGoalKnowledgeSection(newGoal);
+    this.state = {
+      ...this.state,
+      goals: [newGoal, ...this.state.goals],
+      activeGoalId: newGoal.id,
+      creationDraft: createGoalDraft(),
+      knowledgeBase: { ...this.state.knowledgeBase, sections: knowledgeSections },
+      page: 'goalWorkspace',
+    };
+    this.publish();
+    this.emitToast('目标档案已生成，知识库「未收录」待自动整理。', 'success');
+  }
+
+  public markRouteItemComplete(routeId: string): void {
+    this.mutateActiveGoal((goal) => {
+      const updatedRoute = goal.todayRoute.map((item) =>
+        item.id === routeId ? { ...item, status: 'complete' as const } : item
       );
-      this.state = { ...this.state, uploads };
-      this.publish();
-    }, UPLOAD_SIMULATION_INTERVAL_MS);
-  }
-
-  /**
-   * Persists questionnaire preferences.
-   *
-   * @param payload Form payload from the view.
-   */
-  public updateQuestionnaire(payload: QuestionnaireState): void {
-    this.updateState({ questionnaire: payload });
-  }
-
-  /**
-   * Generates personalized任务树 after一个小延迟.
-   *
-   * @returns Promise resolved once tasks + countdown are ready.
-   */
-  public async generatePersonalizedPlan(): Promise<void> {
-    await this.delay(PLAN_GENERATION_DELAY_MS);
-    const countdownTarget = this.getEffectiveDeadline();
-    const resetTasks = this.state.tasks.map((task) =>
-      task.id === 'diag' ? { ...task, status: 'available' } : { ...task, status: 'locked' }
-    );
-    this.stopCountdownTicker();
-    this.updateState({
-      tasks: resetTasks,
-      countdownTarget,
-      practiceResultVisible: false,
-      page: 'tasks',
-    });
-    this.startCountdownTicker();
-    this.emitToast('生成完成：个性化任务树已准备好', 'success');
-  }
-
-  /**
-   * Centralizes hero CTA copy explaining流程.
-   */
-  public showFlowGuide(): void {
-    this.emitToast('点击任务节点即可进入学习 / 练习 / 模拟考', 'info');
-  }
-
-  /**
-   * Opens the correct页面 based on点击的任务卡片.
-   *
-   * @param taskId Identifier from the card dataset.
-   */
-  public enterTask(taskId: string | undefined): void {
-    if (!taskId) return;
-    const task = this.state.tasks.find((candidate) => candidate.id === taskId);
-    if (!task || task.status === 'locked') return;
-    const nextPage = this.mapTaskTypeToPage(task.type);
-    this.navigate(nextPage);
-  }
-
-  /**
-   * Marks the learning node完成并解锁下一步.
-   */
-  public completeLearningNode(): void {
-    this.markTaskComplete('diag');
-    this.unlockTask('rank-nullity');
-    this.emitToast('已掌握：特征值与对角化（+30 XP）', 'success');
-    this.navigate('tasks');
-  }
-
-  /**
-   * Triggers模拟拍照上传的提示.
-   */
-  public simulatePhotoUpload(): void {
-    this.emitToast('已模拟上传手写答案，等待批改', 'info');
-  }
-
-  /**
-   * 展示批改结果，供 view 显示静态反馈卡片.
-   */
-  public submitPracticeAnswer(): void {
-    this.updateState({ practiceResultVisible: true });
-    this.emitToast('批改完成，已加入错题本（若错误）', 'info');
-  }
-
-  /**
-   * 完成练习节点并解锁 “正交投影 & 最小二乘”.
-   */
-  public completePracticeNode(): void {
-    this.markTaskComplete('rank-nullity');
-    this.unlockTask('orthogonal');
-    this.emitToast('Nice！进步啦 🖤', 'success');
-    this.navigate('tasks');
-  }
-
-  /**
-   * Schedules 晚间复刷提醒.
-   */
-  public scheduleReviewReminder(): void {
-    this.emitToast('已安排复刷：今晚 20:00', 'success');
-  }
-
-  /**
-   * 完成错题本复盘并解锁模拟考.
-   */
-  public completeReviewNode(): void {
-    this.markTaskComplete('review');
-    this.unlockTask('mock');
-    this.navigate('tasks');
-  }
-
-  /**
-   * 启动 60 分钟模拟考倒计时.
-   */
-  public startMockExam(): void {
-    if (this.state.mockStatus === 'running') return;
-    this.stopMockTimer();
-    this.updateState({ mockStatus: 'running', mockTimerSeconds: MOCK_EXAM_DURATION_SECONDS });
-    this.mockTimer = window.setInterval(() => {
-      if (this.state.mockTimerSeconds <= 0) {
-        this.completeMockExam();
-        return;
+      const completedIndex = goal.todayRoute.findIndex((item) => item.id === routeId);
+      if (completedIndex !== -1 && completedIndex + 1 < updatedRoute.length) {
+        const nextItem = updatedRoute[completedIndex + 1];
+        if (nextItem.status === 'locked') {
+          updatedRoute[completedIndex + 1] = { ...nextItem, status: 'available' as const };
+        }
       }
-      this.state = { ...this.state, mockTimerSeconds: this.state.mockTimerSeconds - 1 };
-      this.publish();
-    }, 1000);
-    this.emitToast('计时已开始，保持节奏', 'info');
+      const progress = Math.min(100, goal.progress.percent + 6);
+      const highlights = this.appendHighlight(goal.highlights, routeId);
+      return {
+        ...goal,
+        todayRoute: updatedRoute,
+        progress: { ...goal.progress, percent: progress },
+        highlights,
+      };
+    });
+    this.emitToast('学习进度已同步到任务树与知识库。', 'success');
   }
 
-  /**
-   * 结束模拟考并展示雷达反馈.
-   */
-  public completeMockExam(): void {
-    this.stopMockTimer();
-    this.markTaskComplete('mock');
-    this.updateState({ mockStatus: 'complete', mockTimerSeconds: 0, mockResultVisible: true });
-    this.emitToast('模拟考完成，已生成弱点雷达图', 'success');
+  public startLearningWorkspace(taskId?: string): void {
+    this.mutateActiveGoal((goal) => {
+      if (!taskId) return goal;
+      const todayRoute = goal.todayRoute.map((item) =>
+        item.id === taskId && item.status !== 'complete'
+          ? { ...item, status: 'in-progress' as const }
+          : item
+      );
+      return { ...goal, todayRoute };
+    });
+    if (taskId) {
+      const routeItem = this.getActiveGoal()?.todayRoute.find((item) => item.id === taskId);
+      this.updateState({
+        workspace: {
+          ...this.state.workspace,
+          coachFocus: routeItem
+            ? `围绕「${routeItem.title}」自动提供例题 / Quiz / 笔记整理`
+            : this.state.workspace.coachFocus,
+        },
+      });
+    }
+    this.navigate('learningWorkspace');
   }
 
-  /**
-   * 导出考前小抄（示意提示）.
-   */
-  public exportCheatsheet(): void {
-    this.emitToast('已准备 PDF 小抄（示意）', 'info');
+  public updateWorkspaceNote(payload: string): void {
+    this.updateState({ workspace: { ...this.state.workspace, noteDraft: payload } });
   }
 
-  /**
-   * 提供 questionnaire 默认截止时间.
-   *
-   * @returns ISO 字符串.
-   */
-  public getEffectiveDeadline(): string {
-    return this.state.questionnaire.deadline || nextDeadlineIso(COUNTDOWN_LOOKAHEAD_DAYS);
+  public syncWorkspaceNote(): void {
+    const content = this.state.workspace.noteDraft.trim();
+    if (!content) {
+      this.emitToast('笔记内容为空，无法收录。', 'warning');
+      return;
+    }
+    const headline = content.split('\n')[0]?.replace(/^#+\s*/, '') || '即时笔记';
+    const timestamp = this.formatTime();
+    const syncedNotes = [headline, ...this.state.workspace.syncedNotes].slice(0, 5);
+    const workspace: WorkspaceState = {
+      ...this.state.workspace,
+      syncedNotes,
+      lastSyncedAt: timestamp,
+    };
+    const knowledgeBase = this.bumpKnowledgeFolder('kb-notes');
+    this.updateState({ workspace, knowledgeBase });
+    this.emitToast('已自动沉入当前知识库并分类。', 'success');
   }
 
-  private publish(): void {
-    const snapshot = this.buildSnapshot();
-    this.viewListeners.forEach((listener) => listener(snapshot));
+  public toggleAutoCapture(enabled: boolean): void {
+    this.updateState({
+      knowledgeBase: { ...this.state.knowledgeBase, autoCaptureEnabled: enabled },
+    });
+  }
+
+  public sendChat(message: string): void {
+    const trimmed = message.trim();
+    if (!trimmed) return;
+    const now = this.formatTime();
+    const userMsg: ChatMessage = {
+      id: `chat-${Date.now()}`,
+      role: 'user',
+      content: trimmed,
+      relatedGoalId: this.state.activeGoalId ?? undefined,
+      timestamp: now,
+    };
+    const aiMsg: ChatMessage = {
+      id: `chat-ai-${Date.now()}`,
+      role: 'ai',
+      content: this.composeAiResponse(trimmed),
+      relatedGoalId: this.state.activeGoalId ?? undefined,
+      timestamp: now,
+    };
+    this.updateState({ chatHistory: [...this.state.chatHistory, userMsg, aiMsg] });
+  }
+
+  private createGoalFromDraft(draft: GoalCreationDraft): StudyGoal {
+    const id = `goal-${Date.now()}`;
+    const deadline = draft.deadline || nextDeadlineIso();
+    const todayRoute = createStudyRoute().map((item, index) =>
+      index < 2 ? { ...item, status: 'available' as const } : { ...item, status: 'locked' as const }
+    );
+    const weeklyPlan = createWeeklyPlan().map((plan, index) =>
+      index === 0
+        ? { ...plan, focus: `${draft.targetType} · ${plan.focus}` }
+        : plan
+    );
+    const taskTree = createTaskTree();
+    return {
+      id,
+      name: draft.targetType || '自定义学习目标',
+      focus: 'AI 根据资料持续生成任务树',
+      status: 'active',
+      profile: {
+        targetType: draft.targetType || '自定义',
+        deadline,
+        mastery: draft.mastery,
+        dailyMinutes: draft.dailyMinutes,
+        materials: draft.materials,
+        resourcesCaptured: 0,
+      },
+      progress: {
+        percent: 0,
+        xp: 0,
+        remainingDays: this.computeRemainingDays(deadline),
+      },
+      todayRoute,
+      weeklyPlan,
+      taskTree,
+      highlights: [],
+      connectedKnowledgeVaults: ['kb-unsorted'],
+    };
+  }
+
+  private appendHighlight(existing: ResourceHighlight[], routeId: string): ResourceHighlight[] {
+    if (existing.some((highlight) => highlight.linkedTaskId === routeId)) {
+      return existing;
+    }
+    const route = this.getActiveGoal()?.todayRoute.find((item) => item.id === routeId);
+    if (!route) return existing;
+    const newHighlight: ResourceHighlight = {
+      id: `highlight-${routeId}`,
+      title: `${route.title} · 自动整理完成`,
+      type: 'insight',
+      excerpt: '学习痕迹已同步，「知识库」将继续补全关联内容。',
+      source: '未收录知识库',
+      linkedTaskId: routeId,
+    };
+    return [newHighlight, ...existing].slice(0, 6);
+  }
+
+  private bumpKnowledgeFolder(folderId: string) {
+    const sections = this.state.knowledgeBase.sections.map((section) => ({
+      ...section,
+      folders: section.folders.map((folder) =>
+        folder.id === folderId ? this.incrementFolder(folder) : folder
+      ),
+    }));
+    return { ...this.state.knowledgeBase, sections };
+  }
+
+  private incrementFolder(folder: KnowledgeFolder): KnowledgeFolder {
+    return { ...folder, items: folder.items + 1, lastSynced: this.formatTime() };
+  }
+
+  private replaceGoalKnowledgeSection(goal: StudyGoal): KnowledgeSection[] {
+    const [goalSection] = createKnowledgeSections(goal);
+    const otherSections = this.state.knowledgeBase.sections.filter(
+      (section) => section.id !== 'kb-current'
+    );
+    return [goalSection, ...otherSections];
+  }
+
+  private composeAiResponse(message: string): string {
+    const goal = this.getActiveGoal();
+    if (!goal) {
+      return '先创建一个目标吧，AI 才能结合知识库给出路径。';
+    }
+    const nextRoute = goal.todayRoute.find((item) => item.status === 'available');
+    const base = `已读取目标「${goal.name}」与关联知识库。`;
+    if (!nextRoute) {
+      return `${base} 目前所有路线均完成，可打开任务树安排下一阶段或创建新的目标。`;
+    }
+    return `${base} 建议现在执行「${nextRoute.title}」（约 ${nextRoute.etaMinutes} 分钟）。左栏阅读资料、中栏记笔记，右栏我会基于你上传的 ${goal.profile.materials[0] ?? '资料'} 继续生成 Quiz。`;
+  }
+
+  private mutateActiveGoal(mutator: (goal: StudyGoal) => StudyGoal): void {
+    const activeId = this.state.activeGoalId;
+    if (!activeId) return;
+    const goals = this.state.goals.map((goal) =>
+      goal.id === activeId ? mutator(goal) : goal
+    );
+    this.state = { ...this.state, goals };
+    this.publish();
+  }
+
+  private getActiveGoal(): StudyGoal | null {
+    if (!this.state.activeGoalId) return null;
+    return this.state.goals.find((goal) => goal.id === this.state.activeGoalId) ?? null;
   }
 
   private buildSnapshot(): ViewSnapshot {
-    const uploadedCount = this.state.uploads.filter((item) => item.status === 'uploaded').length;
-    const totalUploads = this.state.uploads.length;
-    const uploadProgress = totalUploads === 0 ? 0 : Math.round((uploadedCount / totalUploads) * 100);
-    const completedTasks = this.state.tasks.filter((task) => task.status === 'complete').length;
-    const totalTasks = this.state.tasks.length;
-    const completionPercent = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-    const totalXp = this.state.tasks
-      .filter((task) => task.status === 'complete')
-      .reduce((acc, task) => acc + task.xp, 0);
+    const activeGoal = this.getActiveGoal();
+    const dashboardSummary = this.computeDashboardSummary();
+    const knowledgeStats = this.computeKnowledgeStats();
     return {
       ...this.state,
-      uploadProgress,
-      uploadedCount,
-      totalUploads,
-      completedTasks,
-      totalTasks,
-      completionPercent,
-      totalXp,
-      countdownLabel: this.computeCountdownLabel(),
-      countdownActive: Boolean(this.state.countdownTarget),
-      mockTimerLabel: this.formatMockTimer(this.state.mockTimerSeconds),
+      activeGoal,
+      dashboardSummary,
+      knowledgeStats,
+    };
+  }
+
+  private computeDashboardSummary(): DashboardSummary {
+    const totalGoals = this.state.goals.length;
+    const activeGoals = this.state.goals.filter((goal) => goal.status === 'active').length;
+    const nearestDeadline = this.state.goals
+      .map((goal) => goal.progress.remainingDays)
+      .filter((days) => days > 0)
+      .sort((a, b) => a - b)[0];
+    const nearestDeadlineLabel = nearestDeadline
+      ? `距最近截止 ${nearestDeadline} 天`
+      : '暂无截止压力';
+    const knowledgeVaults = this.getActiveGoal()?.connectedKnowledgeVaults.length ?? 0;
+    return { totalGoals, activeGoals, nearestDeadlineLabel, knowledgeVaults };
+  }
+
+  private computeKnowledgeStats(): KnowledgeStats {
+    const totalItems = this.state.knowledgeBase.sections.reduce(
+      (sum, section) =>
+        sum + section.folders.reduce((folderSum, folder) => folderSum + folder.items, 0),
+      0
+    );
+    return {
+      totalItems,
+      autoCaptureLabel: this.state.knowledgeBase.autoCaptureEnabled
+        ? '自动收录已开启'
+        : '自动收录已暂停',
     };
   }
 
@@ -297,94 +374,23 @@ export class LearningOsViewModel {
     this.publish();
   }
 
+  private publish(): void {
+    const snapshot = this.buildSnapshot();
+    this.viewListeners.forEach((listener) => listener(snapshot));
+  }
+
   private emitToast(message: string, tone: ToastTone): void {
     const toast: Toast = { message, tone };
     this.toastListeners.forEach((listener) => listener(toast));
   }
 
-  private mapTaskTypeToPage(kind: TaskKind): Page {
-    switch (kind) {
-      case 'learn':
-        return 'learning';
-      case 'practice':
-        return 'practice';
-      case 'review':
-        return 'review';
-      case 'mock':
-        return 'mock';
-      default:
-        return 'tasks';
-    }
+  private formatTime(): string {
+    return this.nowProvider().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
   }
 
-  private markTaskComplete(taskId: string): void {
-    this.state = {
-      ...this.state,
-      tasks: this.state.tasks.map((task) =>
-        task.id === taskId ? { ...task, status: 'complete' } : task
-      ),
-    };
-    this.publish();
-  }
-
-  private unlockTask(taskId: string): void {
-    this.state = {
-      ...this.state,
-      tasks: this.state.tasks.map((task) =>
-        task.id === taskId && task.status === 'locked' ? { ...task, status: 'available' } : task
-      ),
-    };
-    this.publish();
-  }
-
-  private computeCountdownLabel(): string {
-    if (!this.state.countdownTarget) {
-      return '距考试 -- 天 -- 小时';
-    }
-    const target = new Date(this.state.countdownTarget);
+  private computeRemainingDays(deadline: string): number {
+    const target = new Date(deadline);
     const diff = target.getTime() - this.nowProvider().getTime();
-    if (diff <= 0) return '距考试 0 天 0 小时';
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    return `距考试 ${days} 天 ${hours} 小时`;
-  }
-
-  private formatMockTimer(seconds: number): string {
-    const min = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, '0');
-    const sec = (seconds % 60).toString().padStart(2, '0');
-    return `${min}:${sec}`;
-  }
-
-  private stopUploadTimer(): void {
-    if (this.uploadTimer) {
-      window.clearInterval(this.uploadTimer);
-      this.uploadTimer = null;
-    }
-  }
-
-  private startCountdownTicker(): void {
-    this.countdownTimer = window.setInterval(() => this.publish(), COUNTDOWN_TICK_INTERVAL);
-  }
-
-  private stopCountdownTicker(): void {
-    if (this.countdownTimer) {
-      window.clearInterval(this.countdownTimer);
-      this.countdownTimer = null;
-    }
-  }
-
-  private stopMockTimer(): void {
-    if (this.mockTimer) {
-      window.clearInterval(this.mockTimer);
-      this.mockTimer = null;
-    }
-  }
-
-  private delay(duration: number): Promise<void> {
-    return new Promise((resolve) => {
-      window.setTimeout(resolve, duration);
-    });
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 }
