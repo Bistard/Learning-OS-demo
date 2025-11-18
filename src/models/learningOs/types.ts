@@ -150,15 +150,12 @@ export interface WorkspaceAsset {
   chapter: string;
   progress: number;
   metadata: string;
+  content: string;
+  lastUpdated: string;
 }
 
 export interface WorkspaceState {
   activeAsset: WorkspaceAsset;
-  noteDraft: string;
-  syncedNotes: string[];
-  lastSyncedAt: string;
-  quizQueue: string[];
-  coachFocus: string;
 }
 
 export interface LearningOsState {

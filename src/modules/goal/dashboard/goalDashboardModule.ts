@@ -30,9 +30,6 @@ class GoalDashboardViewModel {
     this.root.openGoalWorkspace(goalId);
   }
 
-  public startLearningWorkspace(goalId: string): void {
-    this.root.startLearningWorkspace(goalId);
-  }
 }
 
 class GoalDashboardView {
@@ -87,7 +84,6 @@ class GoalDashboardView {
                 </div>
                 <div class="goal-actions">
                   <button class="btn primary" data-goal-open="${goal.id}">进入任务树</button>
-                  <button class="btn ghost" data-goal-workspace="${goal.id}">三栏学习空间</button>
                 </div>
               </article>`
                 )
@@ -102,10 +98,6 @@ class GoalDashboardView {
     bindListClick(regions.content, '[data-goal-open]', (element) => {
       const id = element.getAttribute('data-goal-open');
       if (id) this.viewModel.openGoal(id);
-    });
-    bindListClick(regions.content, '[data-goal-workspace]', (element) => {
-      const id = element.getAttribute('data-goal-workspace');
-      if (id) this.viewModel.startLearningWorkspace(id);
     });
   }
 }

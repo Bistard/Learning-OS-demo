@@ -13,9 +13,10 @@ import {
   Page,
   ResourceHighlight,
   StudyGoal,
+  StudyRouteItem,
   Toast,
   ToastTone,
-  WorkspaceState,
+  WorkspaceAsset,
   createGoalDraft,
   createInitialState,
   NEW_GOAL_CONNECTED_VAULTS,
@@ -191,14 +192,10 @@ export class LearningOsViewModel {
     });
     if (taskId) {
       const routeItem = this.getActiveGoal()?.todayRoute.find((item) => item.id === taskId);
-      this.updateState({
-        workspace: {
-          ...this.state.workspace,
-          coachFocus: routeItem
-            ? `围绕「${routeItem.title}」自动提供例题 / Quiz / 笔记整理`
-            : this.state.workspace.coachFocus,
-        },
-      });
+      if (routeItem) {
+        const activeAsset = this.buildWorkspaceAsset(routeItem);
+        this.updateState({ workspace: { activeAsset } });
+      }
     }
     this.navigate('learningWorkspace');
   }
@@ -236,40 +233,6 @@ export class LearningOsViewModel {
   public reorderTabs(order: string[]): void {
     if (!this.tabController.reorder(order)) return;
     this.publish();
-  }
-
-  public updateWorkspaceNote(payload: string): void {
-    this.updateState({ workspace: { ...this.state.workspace, noteDraft: payload } });
-  }
-
-  public syncWorkspaceNote(): void {
-    const content = this.state.workspace.noteDraft.trim();
-    if (!content) {
-      this.emitToast('笔记内容为空，无法收录～', 'warning');
-      return;
-    }
-    const headline = content.split('\n')[0]?.replace(/^#+\s*/, '') || '即时笔记';
-    const timestamp = this.formatTime();
-    const syncedNotes = [headline, ...this.state.workspace.syncedNotes].slice(0, 5);
-    const workspace: WorkspaceState = {
-      ...this.state.workspace,
-      syncedNotes,
-      lastSyncedAt: timestamp,
-    };
-    const noteItem: KnowledgeItem = {
-      id: `kb-note-${Date.now()}`,
-      summary: headline,
-      detail: content,
-      source: '即时笔记',
-      updatedAt: timestamp,
-      goalId: this.state.activeGoalId ?? undefined,
-    };
-    const knowledgeBase = this.knowledgeManager.prependItem(
-      KNOWLEDGE_NOTES_CATEGORY_ID,
-      noteItem
-    );
-    this.updateState({ workspace, knowledgeBase });
-    this.emitToast('已自动沉入当前知识库并分类～', 'success');
   }
 
   public createNote(): void {
@@ -605,5 +568,58 @@ export class LearningOsViewModel {
     const target = new Date(deadline);
     const diff = target.getTime() - this.nowProvider().getTime();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  private buildWorkspaceAsset(routeItem: StudyRouteItem): WorkspaceAsset {
+    const base = this.state.workspace.activeAsset;
+    const metadata = `${this.describeRouteKind(routeItem.kind)} · 预计 ${routeItem.etaMinutes} 分钟`;
+    const progress =
+      routeItem.status === 'complete'
+        ? 100
+        : Math.max(Math.min(base.progress + 5, 95), base.progress || 20);
+    return {
+      ...base,
+      id: `route-${routeItem.id}`,
+      title: routeItem.title,
+      chapter: routeItem.detail || base.chapter,
+      metadata,
+      progress,
+      content: this.composeWorkspaceMarkdown(routeItem),
+      lastUpdated: this.formatTime(),
+    };
+  }
+
+  private composeWorkspaceMarkdown(routeItem: StudyRouteItem): string {
+    const detail = routeItem.detail ? `> ${routeItem.detail}` : '';
+    return [
+      `# ${routeItem.title}`,
+      detail,
+      '## 学习计划',
+      `- 类型：${this.describeRouteKind(routeItem.kind)}`,
+      `- 预计耗时：${routeItem.etaMinutes} 分钟`,
+      '',
+      '## 笔记区',
+      '- 写下推导、例题、思考',
+      '- 记录下一步行动',
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+  }
+
+  private describeRouteKind(kind: StudyRouteItem['kind']): string {
+    switch (kind) {
+      case 'concept':
+        return '概念理解';
+      case 'practice':
+        return '练习巩固';
+      case 'review':
+        return '复盘总结';
+      case 'quiz':
+        return '测验';
+      case 'project':
+        return '项目实践';
+      default:
+        return '学习任务';
+    }
   }
 }

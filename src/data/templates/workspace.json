@@ -1,15 +1,12 @@
-﻿{
+{
   "activeAsset": {
-    "id": "asset-pdf-w5",
-    "title": "Lecture Slides · Week 5 正交投影",
-    "type": "pdf",
-    "chapter": "Chapter 5 Projection",
+    "id": "asset-markdown-reader",
+    "title": "线性代数 · 投影矩阵",
+    "type": "note",
+    "chapter": "第 5 讲 · 投影与最小二乘",
     "progress": 62,
-    "metadata": "120 页 · 已高亮 14 处 · 自动章节提取完成"
-  },
-  "noteDraft": "## 最小二乘推导\n- 从 Ax=b 开始，构造正规方程 `AᵀAx = Aᵀb`\n- 记得区分“投影点 P”与“坐标 x”\n",
-  "syncedNotes": ["正交基构建 3 步模型", "Quiz 重点错题总结"],
-  "lastSyncedAt": "08:12",
-  "quizQueue": ["生成 5 题判断题", "拍照错题，自动出解析"],
-  "coachFocus": "当前问题集中在「约束条件翻译」与「符号混淆」"
+    "metadata": "AI 整理 · 预计 25 分钟",
+    "content": "# 投影矩阵\n\n## 学习目标\n- 理解投影矩阵的几何含义\n- 掌握 AᵀAx = Aᵀb 的推导\n\n## 例题\n- 给出一个投影示例，推导其矩阵形式。\n- 总结最小二乘误差的来源。\n\n## 笔记\n在此区域输入关键推导和反思。",
+    "lastUpdated": "08:12"
+  }
 }

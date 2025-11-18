@@ -140,11 +140,6 @@ export const createGoalDraft = (): GoalCreationDraft => ({
 
 const createWorkspaceState = (): WorkspaceState => ({
   activeAsset: { ...workspaceTemplate.activeAsset },
-  noteDraft: workspaceTemplate.noteDraft,
-  syncedNotes: [...workspaceTemplate.syncedNotes],
-  lastSyncedAt: workspaceTemplate.lastSyncedAt,
-  quizQueue: [...workspaceTemplate.quizQueue],
-  coachFocus: workspaceTemplate.coachFocus,
 });
 
 /**

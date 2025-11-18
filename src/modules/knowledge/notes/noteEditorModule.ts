@@ -1,6 +1,7 @@
 import { KnowledgeNote, Page } from '../../../models/learningOsModel';
 import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
 import { bindClick } from '../../../utils/dom';
+import { renderMarkdown } from '../../../utils/markdown';
 import { RenderRegions, UiModule } from '../../types';
 
 interface NoteEditorViewState {
@@ -103,7 +104,7 @@ class NoteEditorView {
 
   private renderNote(state: NoteEditorViewState): string {
     const note = state.note!;
-    const preview = state.showPreview ? this.renderMarkdown(note.content) : '';
+    const preview = state.showPreview ? renderMarkdown(note.content) : '';
     const workspaceClass = state.showPreview ? 'note-workspace' : 'note-workspace single';
     return `
       <section class="${workspaceClass}">
@@ -223,47 +224,6 @@ class NoteEditorView {
       return true;
     }
     return false;
-  }
-
-  private renderMarkdown(markdown: string): string {
-    const trimmed = markdown.trim();
-    if (!trimmed) {
-      return '<p class="note-preview-empty">暂无内容，开始输入 Markdown 吧～</p>';
-    }
-    const escaped = this.escapeHtml(markdown).replace(/\r\n/g, '\n');
-    const blocks = escaped.split(/\n{2,}/);
-    const html = blocks
-      .map((block) => this.renderBlock(block))
-      .filter((block) => Boolean(block))
-      .join('');
-    return html || '<p class="note-preview-empty">暂无内容，开始输入 Markdown 吧～</p>';
-  }
-
-  private renderBlock(block: string): string {
-    const trimmed = block.trim();
-    if (!trimmed) return '';
-    if (/^#{1,3}\s+/.test(trimmed)) {
-      const level = Math.min(3, trimmed.match(/^#+/)?.[0]?.length ?? 1);
-      const content = trimmed.replace(/^#{1,3}\s+/, '');
-      return `<h${level}>${this.renderInline(content)}</h${level}>`;
-    }
-    const lines = trimmed.split('\n');
-    const isList = lines.every((line) => /^[-*]\s+/.test(line));
-    if (isList) {
-      const items = lines
-        .map((line) => line.replace(/^[-*]\s+/, ''))
-        .map((item) => `<li>${this.renderInline(item)}</li>`)
-        .join('');
-      return `<ul>${items}</ul>`;
-    }
-    return `<p>${this.renderInline(trimmed).replace(/\n/g, '<br />')}</p>`;
-  }
-
-  private renderInline(text: string): string {
-    return text
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>');
   }
 
   private escapeHtml(value: string): string {

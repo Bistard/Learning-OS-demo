@@ -49,7 +49,7 @@ class GoalWorkspaceView {
             <span class="pill">${item.etaMinutes} min</span>
             <button class="btn ghost" data-route-learn="${item.id}" ${
               item.status === 'locked' ? 'disabled' : ''
-            }>进入三栏</button>
+            }>开始学习</button>
             <button class="btn primary" data-route-complete="${item.id}" ${
               item.status === 'available' || item.status === 'in-progress' ? '' : 'disabled'
             }>标记完成</button>
@@ -149,7 +149,7 @@ class GoalWorkspaceView {
           <span>${node.xp} XP</span>
           <button class="btn ghost" data-node-workspace="${node.id}" ${
             node.status === 'locked' ? 'disabled' : ''
-          }>开启三栏</button>
+          }>开始学习</button>
         </div>
         ${
           node.children ? `<div class="tree-children">${node.children.map(renderNode).join('')}</div>` : ''
