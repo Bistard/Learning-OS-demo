@@ -3,7 +3,6 @@
  */
 
 import {
-  ChatMessage,
   GoalCreationDraft,
   KnowledgeBaseState,
   KnowledgeCategory,
@@ -81,9 +80,6 @@ const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
   goalWorkspace: { icon: '🗂️' },
   learningWorkspace: { icon: '🧠' },
   knowledgeBase: { icon: '📚' },
-  aiChat: { icon: '💬' },
-  calendar: { icon: '🧭' },
-  settings: { icon: '⚙️' },
 };
 
 const createTabId = (): string =>
@@ -476,27 +472,6 @@ export class LearningOsViewModel {
     return uploadItem.id;
   }
 
-  public sendChat(message: string): void {
-    const trimmed = message.trim();
-    if (!trimmed) return;
-    const now = this.formatTime();
-    const userMsg: ChatMessage = {
-      id: `chat-${Date.now()}`,
-      role: 'user',
-      content: trimmed,
-      relatedGoalId: this.state.activeGoalId ?? undefined,
-      timestamp: now,
-    };
-    const aiMsg: ChatMessage = {
-      id: `chat-ai-${Date.now()}`,
-      role: 'ai',
-      content: this.composeAiResponse(trimmed),
-      relatedGoalId: this.state.activeGoalId ?? undefined,
-      timestamp: now,
-    };
-    this.updateState({ chatHistory: [...this.state.chatHistory, userMsg, aiMsg] });
-  }
-
   private createGoalFromDraft(draft: GoalCreationDraft): StudyGoal {
     const id = `goal-${Date.now()}`;
     const deadline = draft.deadline || nextDeadlineIso();
@@ -622,12 +597,6 @@ export class LearningOsViewModel {
       }
       case 'knowledgeBase':
         return activeGoal ? `${activeGoal.name} · 知识库` : '知识库';
-      case 'aiChat':
-        return activeGoal ? `${activeGoal.name} · AI 对话` : 'AI 对话';
-      case 'calendar':
-        return '我的计划';
-      case 'settings':
-        return '设置';
       default:
         return '工作区';
     }
@@ -712,19 +681,6 @@ export class LearningOsViewModel {
   private normalizeHexColor(color: string): string {
     const trimmed = color.trim();
     return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed) ? trimmed : '#94a3b8';
-  }
-
-  private composeAiResponse(message: string): string {
-    const goal = this.getActiveGoal();
-    if (!goal) {
-      return '先创建一个目标吧，AI 才能结合知识库给出路径。';
-    }
-    const nextRoute = goal.todayRoute.find((item) => item.status === 'available');
-    const base = `已读取目标「${goal.name}」与关联知识库。`;
-    if (!nextRoute) {
-      return `${base} 目前所有路线均完成，可打开任务树安排下一阶段或创建新的目标。`;
-    }
-    return `${base} 建议现在执行「${nextRoute.title}」（约 ${nextRoute.etaMinutes} 分钟）。左栏阅读资料、中栏记笔记，右栏我会基于你上传的 ${goal.profile.materials[0] ?? '资料'} 继续生成 Quiz。`;
   }
 
   private mutateActiveGoal(mutator: (goal: StudyGoal) => StudyGoal): void {

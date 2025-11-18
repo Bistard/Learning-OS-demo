@@ -1,7 +1,14 @@
 ﻿{
   "connectedVaults": {
-    "activeGoal": ["kb-flashcards", "kb-mistakes", "kb-notes"],
-    "newGoal": ["kb-uncategorized", "kb-notes"]
+    "activeGoal": [
+      "kb-flashcards",
+      "kb-mistakes",
+      "kb-notes"
+    ],
+    "newGoal": [
+      "kb-uncategorized",
+      "kb-notes"
+    ]
   },
   "categories": [
     {
@@ -12,14 +19,70 @@
       "icon": "🃏",
       "color": "#f97316",
       "items": [
-        {"id": "kb-item-flash-1", "summary": "极限七条黄金法则", "detail": "当 ε > 0, 存在 δ > 0 使 |f(x) - L| < ε, |x - a| < δ。", "source": "AI 精炼", "updatedAt": "今日 08:26", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-2", "summary": "链式求导示例 f(g(x))", "detail": "d/dx f(g(x)) = f'(g(x)) · g'(x)，使用前记得判定可导区间。", "source": "AI 精炼", "updatedAt": "今日 08:32", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-3", "summary": "洛必达使用边界", "detail": "仅在 0/0 或 ∞/∞ 型时可用，且需连续可导。", "source": "AI 精炼", "updatedAt": "今日 08:41", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-4", "summary": "泰勒展开速记", "detail": "e^x = 1 + x + x^2/2! + …，sin/cos 记住奇偶配对。", "source": "AI 精炼", "updatedAt": "今日 08:45", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-5", "summary": "常见积分替换", "detail": "遇到 √(a^2 - x^2) 优先设 x = a sin θ，带入易化。", "source": "AI 精炼", "updatedAt": "今日 08:55", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-6", "summary": "三角恒等速查", "detail": "1 + tan^2 x = sec^2 x；1 + cot^2 x = csc^2 x。", "source": "AI 精炼", "updatedAt": "今日 09:02", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-7", "summary": "误差阶定义", "detail": "O(h) 表示误差与步长同阶，适用于数值计算提醒。", "source": "AI 精炼", "updatedAt": "今日 09:05", "goalId": "goal-linear"},
-        {"id": "kb-item-flash-8", "summary": "常用极限模板", "detail": "sin x / x → 1、(1 + 1/n)^n → e，考试常见。", "source": "AI 精炼", "updatedAt": "今日 09:07", "goalId": "goal-linear"}
+        {
+          "id": "kb-item-flash-1",
+          "summary": "极限七条黄金法则",
+          "detail": "当 ε > 0, 存在 δ > 0 使 |f(x) - L| < ε, |x - a| < δ。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:26",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-2",
+          "summary": "链式求导示例 f(g(x))",
+          "detail": "d/dx f(g(x)) = f'(g(x)) · g'(x)，使用前记得判定可导区间。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:32",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-3",
+          "summary": "洛必达使用边界",
+          "detail": "仅在 0/0 或 ∞/∞ 型时可用，且需连续可导。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:41",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-4",
+          "summary": "泰勒展开速记",
+          "detail": "e^x = 1 + x + x^2/2! + …，sin/cos 记住奇偶配对。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:45",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-5",
+          "summary": "常见积分替换",
+          "detail": "遇到 √(a^2 - x^2) 优先设 x = a sin θ，带入易化。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 08:55",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-6",
+          "summary": "三角恒等速查",
+          "detail": "1 + tan^2 x = sec^2 x；1 + cot^2 x = csc^2 x。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 09:02",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-7",
+          "summary": "误差阶定义",
+          "detail": "O(h) 表示误差与步长同阶，适用于数值计算提醒。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 09:05",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-flash-8",
+          "summary": "常用极限模板",
+          "detail": "sin x / x → 1、(1 + 1/n)^n → e，考试常见。",
+          "source": "AI 精炼",
+          "updatedAt": "今日 09:07",
+          "goalId": "goal-linear"
+        }
       ]
     },
     {
@@ -30,29 +93,62 @@
       "icon": "⚠️",
       "color": "#facc15",
       "items": [
-        {"id": "kb-item-mistake-1", "summary": "定积分换元忘记限", "detail": "换元后上下限需同步替换，否则区间仍是原变量。", "source": "错题回流", "updatedAt": "昨日 22:41", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-2", "summary": "麦克劳林展开抄错符号", "detail": "记住 (-1)^n 保持在导数前，展开到 n=3 即可。", "source": "错题回流", "updatedAt": "昨日 21:18", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-3", "summary": "牛顿法初值选错", "detail": "远离根时会震荡，需结合图像再迭代。", "source": "错题回流", "updatedAt": "昨日 21:05", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-4", "summary": "极坐标面积公式漏 1/2", "detail": "S = 1/2 ∫ r^2 dθ，写题前抄公式避免漏系数。", "source": "错题回流", "updatedAt": "昨日 20:51", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-5", "summary": "拉格朗日乘子代入错误", "detail": "约束 g(x,y)=0 需与 λ 同时求导再解线性方程组。", "source": "错题回流", "updatedAt": "昨日 20:40", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-6", "summary": "数列极限拆分错误", "detail": "a_n + b_n 极限存在需分别求，不能随意拆。", "source": "错题回流", "updatedAt": "昨日 20:15", "goalId": "goal-linear"},
-        {"id": "kb-item-mistake-7", "summary": "微分方程常数丢失", "detail": "积分后别忘回代初始条件确定常数。", "source": "错题回流", "updatedAt": "昨日 19:58", "goalId": "goal-linear"}
-      ]
-    },
-    {
-      "id": "kb-ai-chat",
-      "title": "AI 对话记录",
-      "kind": "aiChats",
-      "isFixed": false,
-      "icon": "🤖",
-      "color": "#38bdf8",
-      "items": [
-        {"id": "kb-item-chat-1", "summary": "AI：如何把握证明题节奏？", "detail": "答：先列已知与待证，再按“构造-变形-结论”三段展开。", "source": "AI 对话", "updatedAt": "今日 07:55", "goalId": "goal-linear"},
-        {"id": "kb-item-chat-2", "summary": "AI：有无三分钟复习方案？", "detail": "刷 2 道链式求导 + 1 道极限夹逼 + 复盘错题 1 条。", "source": "AI 对话", "updatedAt": "今日 07:58", "goalId": "goal-linear"},
-        {"id": "kb-item-chat-3", "summary": "AI：如何拆分复习周计划？", "detail": "按章节聚合，周中刷题，周末整理错题。", "source": "AI 对话", "updatedAt": "今日 09:20", "goalId": "goal-linear"},
-        {"id": "kb-item-chat-4", "summary": "AI：积分题做不完怎么办？", "detail": "先判别类型再作图，优先写思路。", "source": "AI 对话", "updatedAt": "今日 09:24", "goalId": "goal-linear"},
-        {"id": "kb-item-chat-5", "summary": "AI：如何串讲马尔可夫不等式？", "detail": "给出定义、场景，再补一道例题。", "source": "AI 对话", "updatedAt": "今日 09:30", "goalId": "goal-linear"},
-        {"id": "kb-item-chat-6", "summary": "AI：复数题看不懂", "detail": "建议先转极坐标，牢记“模乘角加”。", "source": "AI 对话", "updatedAt": "今日 09:41", "goalId": "goal-linear"}
+        {
+          "id": "kb-item-mistake-1",
+          "summary": "定积分换元忘记限",
+          "detail": "换元后上下限需同步替换，否则区间仍是原变量。",
+          "source": "错题回流",
+          "updatedAt": "昨日 22:41",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-2",
+          "summary": "麦克劳林展开抄错符号",
+          "detail": "记住 (-1)^n 保持在导数前，展开到 n=3 即可。",
+          "source": "错题回流",
+          "updatedAt": "昨日 21:18",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-3",
+          "summary": "牛顿法初值选错",
+          "detail": "远离根时会震荡，需结合图像再迭代。",
+          "source": "错题回流",
+          "updatedAt": "昨日 21:05",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-4",
+          "summary": "极坐标面积公式漏 1/2",
+          "detail": "S = 1/2 ∫ r^2 dθ，写题前抄公式避免漏系数。",
+          "source": "错题回流",
+          "updatedAt": "昨日 20:51",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-5",
+          "summary": "拉格朗日乘子代入错误",
+          "detail": "约束 g(x,y)=0 需与 λ 同时求导再解线性方程组。",
+          "source": "错题回流",
+          "updatedAt": "昨日 20:40",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-6",
+          "summary": "数列极限拆分错误",
+          "detail": "a_n + b_n 极限存在需分别求，不能随意拆。",
+          "source": "错题回流",
+          "updatedAt": "昨日 20:15",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-mistake-7",
+          "summary": "微分方程常数丢失",
+          "detail": "积分后别忘回代初始条件确定常数。",
+          "source": "错题回流",
+          "updatedAt": "昨日 19:58",
+          "goalId": "goal-linear"
+        }
       ]
     },
     {
@@ -63,11 +159,51 @@
       "icon": "🔗",
       "color": "#a855f7",
       "items": [
-        {"id": "kb-item-link-1", "summary": "哈佛微积分公开课 · 章节 05", "detail": "对比导数与极限的直观关系，适合快速回顾。", "source": "Website", "updatedAt": "本周 04:13", "goalId": "goal-linear", "href": "https://example.com/calculus"},
-        {"id": "kb-item-link-2", "summary": "Brilliant - 练习集 12", "detail": "精选 10 道链式求导题，逐步提示。", "source": "Website", "updatedAt": "本周 02:40", "goalId": "goal-linear", "href": "https://example.com/brilliant"},
-        {"id": "kb-item-link-3", "summary": "Paul's Notes · Series Review", "detail": "幂级数常见问法，附练习答案。", "source": "Website", "updatedAt": "本周 01:18", "goalId": "goal-linear", "href": "https://example.com/series"},
-        {"id": "kb-item-link-4", "summary": "3Blue1Brown - Fourier", "detail": "可视化傅里叶级数，快速建立直觉。", "source": "Website", "updatedAt": "本周 01:03", "goalId": "goal-linear", "href": "https://example.com/fourier"},
-        {"id": "kb-item-link-5", "summary": "MIT OCW 18.03 DE", "detail": "微分方程讲义 PDF + 题解。", "source": "Website", "updatedAt": "本周 00:40", "goalId": "goal-linear", "href": "https://example.com/de"}
+        {
+          "id": "kb-item-link-1",
+          "summary": "哈佛微积分公开课 · 章节 05",
+          "detail": "对比导数与极限的直观关系，适合快速回顾。",
+          "source": "Website",
+          "updatedAt": "本周 04:13",
+          "goalId": "goal-linear",
+          "href": "https://example.com/calculus"
+        },
+        {
+          "id": "kb-item-link-2",
+          "summary": "Brilliant - 练习集 12",
+          "detail": "精选 10 道链式求导题，逐步提示。",
+          "source": "Website",
+          "updatedAt": "本周 02:40",
+          "goalId": "goal-linear",
+          "href": "https://example.com/brilliant"
+        },
+        {
+          "id": "kb-item-link-3",
+          "summary": "Paul's Notes · Series Review",
+          "detail": "幂级数常见问法，附练习答案。",
+          "source": "Website",
+          "updatedAt": "本周 01:18",
+          "goalId": "goal-linear",
+          "href": "https://example.com/series"
+        },
+        {
+          "id": "kb-item-link-4",
+          "summary": "3Blue1Brown - Fourier",
+          "detail": "可视化傅里叶级数，快速建立直觉。",
+          "source": "Website",
+          "updatedAt": "本周 01:03",
+          "goalId": "goal-linear",
+          "href": "https://example.com/fourier"
+        },
+        {
+          "id": "kb-item-link-5",
+          "summary": "MIT OCW 18.03 DE",
+          "detail": "微分方程讲义 PDF + 题解。",
+          "source": "Website",
+          "updatedAt": "本周 00:40",
+          "goalId": "goal-linear",
+          "href": "https://example.com/de"
+        }
       ]
     },
     {
@@ -78,12 +214,54 @@
       "icon": "📤",
       "color": "#f472b6",
       "items": [
-        {"id": "kb-item-upload-1", "summary": "Lecture-05.pdf", "detail": "PPT OCR 完成，抽取 18 段摘要。", "source": "上传", "updatedAt": "本周 02:08", "goalId": "goal-linear"},
-        {"id": "kb-item-upload-2", "summary": "Mock-2023-A.jpg", "detail": "拍照笔记 6 张，已转文字并打标签。", "source": "上传", "updatedAt": "本周 01:51", "goalId": "goal-linear"},
-        {"id": "kb-item-upload-3", "summary": "错题本-导数.xlsx", "detail": "表格内 25 道题已解析，准备同步错题本。", "source": "上传", "updatedAt": "本周 01:20", "goalId": "goal-linear"},
-        {"id": "kb-item-upload-4", "summary": "Quiz-week7.pdf", "detail": "AI 已提取单选题，准备关联任务树。", "source": "上传", "updatedAt": "本周 00:55", "goalId": "goal-linear"},
-        {"id": "kb-item-upload-5", "summary": "手写推导-积分.mp4", "detail": "自动转写完成，可生成精华摘要。", "source": "上传", "updatedAt": "本周 00:42", "goalId": "goal-linear"},
-        {"id": "kb-item-upload-6", "summary": "课堂讨论录音.m4a", "detail": "语音转写 12 分钟，待整理关键词。", "source": "上传", "updatedAt": "昨日 23:58", "goalId": "goal-linear"}
+        {
+          "id": "kb-item-upload-1",
+          "summary": "Lecture-05.pdf",
+          "detail": "PPT OCR 完成，抽取 18 段摘要。",
+          "source": "上传",
+          "updatedAt": "本周 02:08",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-2",
+          "summary": "Mock-2023-A.jpg",
+          "detail": "拍照笔记 6 张，已转文字并打标签。",
+          "source": "上传",
+          "updatedAt": "本周 01:51",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-3",
+          "summary": "错题本-导数.xlsx",
+          "detail": "表格内 25 道题已解析，准备同步错题本。",
+          "source": "上传",
+          "updatedAt": "本周 01:20",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-4",
+          "summary": "Quiz-week7.pdf",
+          "detail": "AI 已提取单选题，准备关联任务树。",
+          "source": "上传",
+          "updatedAt": "本周 00:55",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-5",
+          "summary": "手写推导-积分.mp4",
+          "detail": "自动转写完成，可生成精华摘要。",
+          "source": "上传",
+          "updatedAt": "本周 00:42",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-upload-6",
+          "summary": "课堂讨论录音.m4a",
+          "detail": "语音转写 12 分钟，待整理关键词。",
+          "source": "上传",
+          "updatedAt": "昨日 23:58",
+          "goalId": "goal-linear"
+        }
       ]
     },
     {
@@ -94,13 +272,62 @@
       "icon": "📝",
       "color": "#34d399",
       "items": [
-        {"id": "kb-item-note-1", "summary": "三步判断函数凹凸", "detail": "1) 求一阶导; 2) 看二阶导符号; 3) 结合区间。", "source": "即时笔记", "updatedAt": "今日 07:52", "goalId": "goal-linear"},
-        {"id": "kb-item-note-2", "summary": "考试 20 天复盘 checklist", "detail": "每日 Quiz 2 套, 周末整理错题再入 AI", "source": "即时笔记", "updatedAt": "今日 07:58", "goalId": "goal-linear"},
-        {"id": "kb-item-note-3", "summary": "五分钟速记 - 级数判断", "detail": "先写比较对象，再写敛散理由。", "source": "即时笔记", "updatedAt": "今日 08:10", "goalId": "goal-linear"},
-        {"id": "kb-item-note-4", "summary": "本周易错合集", "detail": "导数题注意单位，积分题注意区间。", "source": "即时笔记", "updatedAt": "今日 08:18", "goalId": "goal-linear"},
-        {"id": "kb-item-note-5", "summary": "AI 建议待验证", "detail": "完成链式求导后回看 ChatGPT 提示。", "source": "即时笔记", "updatedAt": "今日 08:28", "goalId": "goal-linear"},
-        {"id": "kb-item-note-6", "summary": "第二轮复习策略", "detail": "公式 > 例题 > 错题，确保每天 30 分钟总结。", "source": "即时笔记", "updatedAt": "今日 08:45", "goalId": "goal-linear"},
-        {"id": "kb-item-note-7", "summary": "模考反馈", "detail": "复杂度题耗时，先写分析后算。", "source": "即时笔记", "updatedAt": "今日 09:01", "goalId": "goal-linear"}
+        {
+          "id": "kb-item-note-1",
+          "summary": "三步判断函数凹凸",
+          "detail": "1) 求一阶导; 2) 看二阶导符号; 3) 结合区间。",
+          "source": "即时笔记",
+          "updatedAt": "今日 07:52",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-2",
+          "summary": "考试 20 天复盘 checklist",
+          "detail": "每日 Quiz 2 套, 周末整理错题再入 AI",
+          "source": "即时笔记",
+          "updatedAt": "今日 07:58",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-3",
+          "summary": "五分钟速记 - 级数判断",
+          "detail": "先写比较对象，再写敛散理由。",
+          "source": "即时笔记",
+          "updatedAt": "今日 08:10",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-4",
+          "summary": "本周易错合集",
+          "detail": "导数题注意单位，积分题注意区间。",
+          "source": "即时笔记",
+          "updatedAt": "今日 08:18",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-5",
+          "summary": "AI 建议待验证",
+          "detail": "完成链式求导后回看 ChatGPT 提示。",
+          "source": "即时笔记",
+          "updatedAt": "今日 08:28",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-6",
+          "summary": "第二轮复习策略",
+          "detail": "公式 > 例题 > 错题，确保每天 30 分钟总结。",
+          "source": "即时笔记",
+          "updatedAt": "今日 08:45",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-note-7",
+          "summary": "模考反馈",
+          "detail": "复杂度题耗时，先写分析后算。",
+          "source": "即时笔记",
+          "updatedAt": "今日 09:01",
+          "goalId": "goal-linear"
+        }
       ]
     },
     {
@@ -111,9 +338,30 @@
       "icon": "📥",
       "color": "#94a3b8",
       "items": [
-        {"id": "kb-item-unsorted-1", "summary": "待整理：把线性代数笔记搬过来", "detail": "需要判断与本目标是否相关，暂缓分配。", "source": "临时记录", "updatedAt": "今日 06:40", "goalId": "goal-linear"},
-        {"id": "kb-item-unsorted-2", "summary": "想问 AI：向量场题型", "detail": "还没确定所属分类，先放这里。", "source": "临时记录", "updatedAt": "今日 07:05", "goalId": "goal-linear"},
-        {"id": "kb-item-unsorted-3", "summary": "老师额外发的讲义", "detail": "暂未完成 OCR，待分类。", "source": "临时记录", "updatedAt": "今日 07:12", "goalId": "goal-linear"}
+        {
+          "id": "kb-item-unsorted-1",
+          "summary": "待整理：把线性代数笔记搬过来",
+          "detail": "需要判断与本目标是否相关，暂缓分配。",
+          "source": "临时记录",
+          "updatedAt": "今日 06:40",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-unsorted-2",
+          "summary": "想问 AI：向量场题型",
+          "detail": "还没确定所属分类，先放这里。",
+          "source": "临时记录",
+          "updatedAt": "今日 07:05",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-item-unsorted-3",
+          "summary": "老师额外发的讲义",
+          "detail": "暂未完成 OCR，待分类。",
+          "source": "临时记录",
+          "updatedAt": "今日 07:12",
+          "goalId": "goal-linear"
+        }
       ]
     }
   ]

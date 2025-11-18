@@ -16,18 +16,13 @@ import taskTreeTemplate from '../data/templates/taskTree.json';
 import resourceHighlightsTemplate from '../data/templates/resourceHighlights.json';
 import knowledgeBaseTemplateData from '../data/templates/knowledgeBase.json';
 import workspaceTemplateData from '../data/templates/workspace.json';
-import chatHistoryTemplate from '../data/templates/chatHistory.json';
-import timelineTemplate from '../data/templates/timeline.json';
 
 export type Page =
   | 'goalDashboard'
   | 'goalCreation'
   | 'goalWorkspace'
   | 'learningWorkspace'
-  | 'knowledgeBase'
-  | 'aiChat'
-  | 'calendar'
-  | 'settings';
+  | 'knowledgeBase';
 
 export type TaskKind = 'concept' | 'practice' | 'review' | 'quiz' | 'project';
 
@@ -109,7 +104,6 @@ export interface GoalCreationDraft {
 export type KnowledgeCategoryKind =
   | 'flashcards'
   | 'mistakes'
-  | 'aiChats'
   | 'links'
   | 'uploads'
   | 'notes'
@@ -160,31 +154,13 @@ export interface WorkspaceState {
   coachFocus: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'ai';
-  content: string;
-  relatedGoalId?: string;
-  timestamp: string;
-}
-
-export interface CalendarEvent {
-  id: string;
-  day: string;
-  title: string;
-  time: string;
-  focus: string;
-}
-
 export interface LearningOsState {
   page: Page;
   goals: StudyGoal[];
   activeGoalId: string | null;
   creationDraft: GoalCreationDraft;
   knowledgeBase: KnowledgeBaseState;
-  chatHistory: ChatMessage[];
   workspace: WorkspaceState;
-  timeline: CalendarEvent[];
 }
 
 export interface Toast {
@@ -222,8 +198,6 @@ interface KnowledgeBaseTemplate {
   };
 }
 
-type ChatMessageSeed = Omit<ChatMessage, 'relatedGoalId'>;
-
 const goalSeed = initialGoalData as GoalSeed;
 const studyRouteData = studyRouteTemplate as StudyRouteItem[];
 const weeklyPlanData = weeklyPlanTemplate as WeeklyPlanItem[];
@@ -231,8 +205,6 @@ const taskTreeData = taskTreeTemplate as TaskNode[];
 const resourceHighlightsData = resourceHighlightsTemplate as ResourceHighlight[];
 const knowledgeBaseTemplate = knowledgeBaseTemplateData as KnowledgeBaseTemplate;
 const workspaceTemplate = workspaceTemplateData as WorkspaceState;
-const chatHistorySeeds = chatHistoryTemplate as ChatMessageSeed[];
-const timelineData = timelineTemplate as CalendarEvent[];
 
 export const NEW_GOAL_CONNECTED_VAULTS = Object.freeze([
   ...knowledgeBaseTemplate.connectedVaults.newGoal,
@@ -334,14 +306,6 @@ const createWorkspaceState = (): WorkspaceState => ({
   coachFocus: workspaceTemplate.coachFocus,
 });
 
-const createChatHistory = (goalId: string): ChatMessage[] =>
-  chatHistorySeeds.map((seed) => ({
-    ...seed,
-    relatedGoalId: goalId,
-  }));
-
-const createTimeline = (): CalendarEvent[] => timelineData.map((event) => ({ ...event }));
-
 /**
  * Provides the aggregate application state used by the view-model.
  *
@@ -355,9 +319,7 @@ export const createInitialState = (): LearningOsState => {
     activeGoalId: goal.id,
     creationDraft: createGoalDraft(),
     knowledgeBase: createKnowledgeBase(),
-    chatHistory: createChatHistory(goal.id),
     workspace: createWorkspaceState(),
-    timeline: createTimeline(),
   };
 };
 

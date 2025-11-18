@@ -707,64 +707,6 @@ body.is-resizing-nav {
   }
 }
 
-.chat-history {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.chat-msg {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-}
-
-.chat-msg.ai {
-  background: var(--bg);
-}
-
-.chat-input {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.chat-input textarea {
-  flex: 1;
-  min-height: 100px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  font-family: inherit;
-}
-
-.calendar-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.calendar-item {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.settings .setting-row {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 @media (max-width: 1200px) {
   .os-shell {
     grid-template-columns: 220px 1fr;

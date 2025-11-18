@@ -26,10 +26,6 @@ class LearningWorkspaceViewModel {
     this.root.syncWorkspaceNote();
   }
 
-  public openChat(): void {
-    this.root.navigate('aiChat');
-  }
-
   public updateNote(value: string): void {
     this.root.updateWorkspaceNote(value);
   }
@@ -71,7 +67,6 @@ class LearningWorkspaceView {
               ${state.workspace.quizQueue.map((item) => `<li>${item}</li>`).join('')}
             </ul>
             <div class="actions">
-              <button class="btn ghost" id="workspace-go-chat">打开 AI 对话</button>
               <button class="btn primary" id="workspace-sync">同步到知识库</button>
             </div>
           </div>
@@ -83,7 +78,6 @@ class LearningWorkspaceView {
     bindClick(regions.content, '#workspace-open-kb', () => this.viewModel.openKnowledgeBase());
     bindClick(regions.content, '#sync-note', () => this.viewModel.syncNote());
     bindClick(regions.content, '#workspace-sync', () => this.viewModel.syncNote());
-    bindClick(regions.content, '#workspace-go-chat', () => this.viewModel.openChat());
     bindInput(regions.content, '#note-editor', (value) =>
       this.viewModel.updateNote(String(value))
     );

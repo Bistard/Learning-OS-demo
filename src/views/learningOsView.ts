@@ -9,9 +9,6 @@ import { GoalCreationModule } from '../modules/goal/creation/goalCreationModule'
 import { GoalWorkspaceModule } from '../modules/goal/workspace/goalWorkspaceModule';
 import { LearningWorkspaceModule } from '../modules/learning/workspace/learningWorkspaceModule';
 import { KnowledgeBaseModule } from '../modules/knowledge/base/knowledgeBaseModule';
-import { AiChatModule } from '../modules/ai/chat/aiChatModule';
-import { CalendarModule } from '../modules/calendar/calendarModule';
-import { SettingsModule } from '../modules/settings/settingsModule';
 import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
 import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
@@ -27,9 +24,6 @@ interface NavItem {
 const SIDE_NAV: NavItem[] = [
   { icon: '📌', label: '目标', page: 'goalDashboard' },
   { icon: '📚', label: '知识库', page: 'knowledgeBase' },
-  { icon: '💬', label: 'AI 对话', page: 'aiChat' },
-  { icon: '🧭', label: '我的计划', page: 'calendar' },
-  { icon: '⚙️', label: '设置', page: 'settings' },
 ];
 
 export class LearningOsView {
@@ -82,9 +76,6 @@ export class LearningOsView {
       new GoalWorkspaceModule(this.viewModel),
       new LearningWorkspaceModule(this.viewModel),
       new KnowledgeBaseModule(this.viewModel),
-      new AiChatModule(this.viewModel),
-      new CalendarModule(this.viewModel),
-      new SettingsModule(this.viewModel),
     ];
     moduleInstances.forEach((module) => this.modules.set(module.page, module));
   }
