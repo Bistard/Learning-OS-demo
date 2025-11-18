@@ -1,4 +1,4 @@
-﻿{
+{
   "currentGoalSection": {
     "id": "kb-current",
     "titleTemplate": "当前目标 · {goalName}",
@@ -46,48 +46,14 @@
       }
     ]
   },
-  "additionalSections": [
-    {
-      "id": "kb-independent",
-      "title": "独立知识库",
-      "description": "无需绑定目标的长期主题",
-      "folders": [
-        {
-          "id": "kb-ind-writing",
-          "title": "英语写作素材库",
-          "description": "独立维护，随时引用到任意目标",
-          "type": "independent",
-          "items": 55,
-          "lastSynced": "3 天前"
-        },
-        {
-          "id": "kb-ind-ml",
-          "title": "机器学习自学笔记",
-          "description": "尚未绑定目标，可邀请协作者共建",
-          "type": "independent",
-          "items": 12,
-          "lastSynced": "上周"
-        }
-      ]
-    },
-    {
-      "id": "kb-community",
-      "title": "社区知识库",
-      "description": "可分享 / 订阅他人公开知识库",
-      "folders": [
-        {
-          "id": "kb-community-linear",
-          "title": "线代真题精解合集（社区）",
-          "description": "引用后自动关联当前目标",
-          "type": "community",
-          "items": 89,
-          "lastSynced": "今日 06:15"
-        }
-      ]
-    }
-  ],
+  "additionalSections": [],
   "connectedVaults": {
-    "activeGoal": ["kb-current-goal", "kb-unsorted"],
-    "newGoal": ["kb-unsorted"]
+    "activeGoal": [
+      "kb-current-goal",
+      "kb-unsorted"
+    ],
+    "newGoal": [
+      "kb-unsorted"
+    ]
   }
 }

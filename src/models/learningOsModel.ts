@@ -111,9 +111,7 @@ export type KnowledgeFolderType =
   | 'errors'
   | 'chat'
   | 'notes'
-  | 'uploads'
-  | 'independent'
-  | 'community';
+  | 'uploads';
 
 export interface KnowledgeFolder {
   id: string;
