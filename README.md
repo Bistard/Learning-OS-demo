@@ -57,8 +57,3 @@
 - 所有案例与模板数据统一存放在 `src/data/` 文件夹，以 JSON 形式集中管理。
 - `src/models/learningOsModel.ts` 仅负责读取这些数据并构建状态，不再硬编码任务树或知识库结构。
 - 当需要替换演示文案时，直接编辑对应 JSON（如 `initialGoal.json`、`templates/*.json`）即可被全局复用。
-
-## ϵͳ����
-- ��������������á���ť�������±�ǩҳ�������á�
-- Ŀǰ�ṩ������ Markdown Ԥ�������أ�Ĭ���� `src/config/config.json` ����һ�¡�
-- �رպ󣬱ʼǱ༭��ֻչʾ Markdown Դ�ı���������Ⱦ�Ҳ�Ԥ����
