@@ -270,7 +270,7 @@ class GoalCreationView {
           <option value="${subject.id}" ${subject.status !== 'available' ? 'disabled' : ''} ${
           state.draft.subjectId === subject.id ? 'selected' : ''
         }>
-            ${subject.label}${subject.status !== 'available' ? ' ? ????' : ''}
+            ${subject.label}${subject.status !== 'available' ? ' · 即将上线' : ''}
           </option>
         `
       )
@@ -288,7 +288,7 @@ class GoalCreationView {
     const countdownActive = state.draft.timeMode === 'countdown';
     const countdownButtons = COUNTDOWN_PRESETS.map((hours) => {
       const active = countdownActive && state.draft.countdownHours === hours;
-      return `<button class="chip ${active ? 'active' : ''}" data-countdown="${hours}">${hours} ??</button>`;
+      return `<button class="chip ${active ? 'active' : ''}" data-countdown="${hours}">${hours} 小时</button>`;
     }).join('');
     const continueDisabled =
       !state.draft.targetType.trim() ||
@@ -300,33 +300,33 @@ class GoalCreationView {
     const timeControl = deadlineActive
       ? `<input type="datetime-local" id="goal-deadline" value="${state.draft.deadline}" />`
       : `<div class="chip-group" id="countdown-group">${countdownButtons}</div>`;
-    const timeDescription = deadlineActive ? '?????? / ?????' : '3 / 5 / 12 ????';
+    const timeDescription = deadlineActive ? '适合长期目标 / 考研等场景' : '3 / 5 / 12 小时冲刺';
     return `
       <div class="stage-base">
         <section class="card stack-card">
           <div class="field">
-            <label>????</label>
+            <label>考试科目</label>
             <select id="goal-subject">${subjectOptions}</select>
-            <p class="microcopy">Demo ???????????????????</p>
+            <p class="microcopy">Demo 当前锁定「微积分」，其余科目即将开放。</p>
           </div>
           <div class="field">
-            <label>????? <span id="goal-mastery-value">${state.draft.mastery}%</span></label>
+            <label>期望掌握度 <span id="goal-mastery-value">${state.draft.mastery}%</span></label>
             <input type="range" id="goal-mastery" min="0" max="100" value="${state.draft.mastery}" />
           </div>
           <div class="field">
-            <label>????????</label>
+            <label>每日投入（分钟）</label>
             <input type="number" id="goal-daily-minutes" min="30" step="10" value="${state.draft.dailyMinutes}" />
           </div>
         </section>
         <section class="card stack-card time-card" data-mode="${state.draft.timeMode}">
           <div class="time-mode-toggle">
             <button class="time-mode-option ${deadlineActive ? 'active' : ''}" data-time-mode="deadline">
-              <span>????</span>
-              <small>??</small>
+              <span>截止日期</span>
+              <small>长期</small>
             </button>
             <button class="time-mode-option ${countdownActive ? 'active' : ''}" data-time-mode="countdown">
-              <span>?????</span>
-              <small>??</small>
+              <span>倒计时模式</span>
+              <small>短期</small>
             </button>
           </div>
           <div class="time-body">
@@ -335,27 +335,27 @@ class GoalCreationView {
           </div>
         </section>
         <section class="card stack-card preset-card">
-          <label>???? ? ????</label>
+          <label>目标类型 · 预设模板</label>
           <select id="goal-preset">${presetOptions}</select>
           <div class="preset-summary">
             <div>
-              <p class="microcopy">????</p>
+              <p class="microcopy">系统路径</p>
               <p class="preset-copy">${state.activePreset.systemFocus}</p>
             </div>
             <div>
-              <p class="microcopy">?????</p>
+              <p class="microcopy">个性化老师</p>
               <p class="preset-copy">${state.activePreset.ragFocus}</p>
             </div>
           </div>
           <button class="btn ghost" id="toggle-advanced">${
-            state.flow.advancedOpen ? '??????' : '????'
+            state.flow.advancedOpen ? '收起高级设置' : '高级设置'
           }</button>
         </section>
       </div>
       ${advancedPanel}
       <div class="stage-actions">
-        <button class="btn ghost" disabled>??</button>
-        <button class="btn primary" id="to-materials" ${continueDisabled ? 'disabled' : ''}>??</button>
+        <button class="btn ghost" disabled>返回</button>
+        <button class="btn primary" id="to-materials" ${continueDisabled ? 'disabled' : ''}>继续</button>
       </div>
     `;
   }
@@ -392,24 +392,24 @@ class GoalCreationView {
             (material) => `
               <span class="tag">
                 ${material}
-                <button type="button" data-remove-material="${material}" aria-label="?? ${material}">?</button>
+                <button type="button" data-remove-material="${material}" aria-label="移除 ${material}">×</button>
               </span>
             `
           )
           .join('')
-      : '<p class="microcopy">?????????????????AI ?????????</p>';
+      : '<p class="microcopy">上传课件、错题本或直接导入知识库，AI 会自动解析与关联。</p>';
     return `
       <div class="stage-materials">
         <div class="upload-shell">
           <div class="upload-dropzone" id="goal-material-dropzone">
             <div>
-              <p class="label">??????</p>
-              <p class="microcopy">???? / ???? / ???? PDF???????</p>
+              <p class="label">上传相关资料</p>
+              <p class="microcopy">支持拖拽 / 粘贴链接 / 直接上传 PDF、图片等文件。</p>
             </div>
-            <button class="btn secondary" id="goal-upload-trigger">??????</button>
+            <button class="btn secondary" id="goal-upload-trigger">上传相关资料</button>
             <div class="upload-menu" id="goal-upload-menu">
-              <button data-upload-option="custom">?????...</button>
-              <button data-upload-option="knowledge">??????...</button>
+              <button data-upload-option="custom">自定义上传...</button>
+              <button data-upload-option="knowledge">从知识库导入...</button>
             </div>
             <input type="file" id="goal-file-input" multiple hidden />
           </div>
@@ -417,8 +417,8 @@ class GoalCreationView {
         </div>
       </div>
       <div class="stage-actions">
-        <button class="btn ghost" id="back-to-base">??</button>
-        <button class="btn primary" id="to-generation">??</button>
+        <button class="btn ghost" id="back-to-base">返回</button>
+        <button class="btn primary" id="to-generation">继续</button>
       </div>
     `;
   }

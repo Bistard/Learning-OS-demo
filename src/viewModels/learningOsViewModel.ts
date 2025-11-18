@@ -5,6 +5,8 @@
 import {
   AppConfiguration,
   GoalCreationDraft,
+  GoalCreationFlowState,
+  GoalProfile,
   KnowledgeCategory,
   KnowledgeBaseState,
   KnowledgeItem,
@@ -17,6 +19,7 @@ import {
   Toast,
   ToastTone,
   WorkspaceAsset,
+  createGoalCreationFlowState,
   createGoalDraft,
   createInitialState,
   NEW_GOAL_CONNECTED_VAULTS,
@@ -26,6 +29,11 @@ import {
   nextDeadlineIso,
   KNOWLEDGE_NOTES_CATEGORY_ID,
 } from '../models/learningOsModel';
+import {
+  ensureAdvancedSettings,
+  getGoalCreationPreset,
+  getGoalCreationSubject,
+} from '../models/learningOs/goalCreationConfig';
 import { KnowledgeManager } from './learningOs/knowledgeManager';
 import { TabController } from './learningOs/tabController';
 import type { AppTab, TabContext, TabOpenOptions } from './learningOs/tabController';
@@ -127,6 +135,10 @@ export class LearningOsViewModel {
     this.updateState({ creationDraft: { ...this.state.creationDraft, [field]: value } });
   }
 
+  public updateGoalCreationFlow(partial: Partial<GoalCreationFlowState>): void {
+    this.updateState({ creationFlow: { ...this.state.creationFlow, ...partial } });
+  }
+
   public appendMaterial(label: string): void {
     const trimmed = label.trim();
     if (!trimmed) return;
@@ -145,12 +157,17 @@ export class LearningOsViewModel {
       this.emitToast('请先告诉我你要准备什么～', 'warning');
       return;
     }
+    if (this.state.creationFlow.generationPhase === 'running') {
+      this.emitToast('AI 正在生成方案，请稍候再提交～', 'info');
+      return;
+    }
     const newGoal = this.createGoalFromDraft(draft);
     this.state = {
       ...this.state,
       goals: [newGoal, ...this.state.goals],
       activeGoalId: newGoal.id,
       creationDraft: createGoalDraft(),
+      creationFlow: createGoalCreationFlowState(),
     };
     this.focusOrCreateTab('goalWorkspace', { context: { goalId: newGoal.id } });
     this.emitToast('目标档案已生成，知识库「未收录」待自动整理。', 'success');
@@ -322,29 +339,32 @@ export class LearningOsViewModel {
 
   private createGoalFromDraft(draft: GoalCreationDraft): StudyGoal {
     const id = `goal-${Date.now()}`;
-    const deadline = draft.deadline || nextDeadlineIso();
+    const preset = getGoalCreationPreset(draft.presetId);
+    const subject = getGoalCreationSubject(draft.subjectId);
+    const subjectLabel = draft.subjectLabel?.trim() || subject.label;
+    const subjectId = draft.subjectId || subject.id;
+    const targetType = draft.targetType.trim() || preset.label;
+    const deadline = this.resolveGoalDeadline(draft);
     const todayRoute = createStudyRoute().map((item, index) =>
       index < 2 ? { ...item, status: 'available' as const } : { ...item, status: 'locked' as const }
     );
     const weeklyPlan = createWeeklyPlan().map((plan, index) =>
-      index === 0
-        ? { ...plan, focus: `${draft.targetType} · ${plan.focus}` }
-        : plan
+      index === 0 ? { ...plan, focus: `${targetType} · ${plan.focus}` } : plan
     );
-    const taskTree = createTaskTree();
+    const profile = this.buildGoalProfile({
+      draft,
+      deadline,
+      presetId: preset.id,
+      subjectId,
+      subjectLabel,
+      targetType,
+    });
     return {
       id,
-      name: draft.targetType || '自定义学习目标',
-      focus: 'AI 根据资料持续生成任务树',
+      name: this.buildGoalName(subjectLabel, targetType),
+      focus: this.buildGoalFocus(preset),
       status: 'active',
-      profile: {
-        targetType: draft.targetType || '自定义',
-        deadline,
-        mastery: draft.mastery,
-        dailyMinutes: draft.dailyMinutes,
-        materials: draft.materials,
-        resourcesCaptured: 0,
-      },
+      profile,
       progress: {
         percent: 0,
         xp: 0,
@@ -352,10 +372,75 @@ export class LearningOsViewModel {
       },
       todayRoute,
       weeklyPlan,
-      taskTree,
+      taskTree: createTaskTree(),
       highlights: [],
       connectedKnowledgeVaults: [...NEW_GOAL_CONNECTED_VAULTS],
     };
+  }
+
+  private buildGoalName(subjectLabel: string, targetType: string): string {
+    const normalizedSubject = subjectLabel.trim();
+    const normalizedTarget = targetType.trim();
+    if (normalizedSubject && normalizedTarget) {
+      return `${normalizedSubject} · ${normalizedTarget}`;
+    }
+    if (normalizedTarget) {
+      return normalizedTarget;
+    }
+    if (normalizedSubject) {
+      return `${normalizedSubject} · 学习目标`;
+    }
+    return '自定义学习目标';
+  }
+
+  private buildGoalFocus(preset: ReturnType<typeof getGoalCreationPreset>): string {
+    const systemFocus = preset.systemFocus?.trim();
+    const ragFocus = preset.ragFocus?.trim();
+    if (systemFocus && ragFocus) {
+      return `${systemFocus} · ${ragFocus}`;
+    }
+    return systemFocus || ragFocus || 'AI 根据资料持续生成任务树';
+  }
+
+  private buildGoalProfile({
+    draft,
+    deadline,
+    presetId,
+    subjectId,
+    subjectLabel,
+    targetType,
+  }: {
+    draft: GoalCreationDraft;
+    deadline: string;
+    presetId: string;
+    subjectId: string;
+    subjectLabel: string;
+    targetType: string;
+  }): GoalProfile {
+    const advancedSettings = ensureAdvancedSettings(draft.advancedSettings, presetId);
+    return {
+      targetType,
+      deadline,
+      mastery: draft.mastery,
+      dailyMinutes: draft.dailyMinutes,
+      materials: draft.materials,
+      resourcesCaptured: 0,
+      subjectId,
+      subjectLabel,
+      presetId,
+      advancedSettings,
+      timeMode: draft.timeMode,
+      countdownHours: draft.timeMode === 'countdown' ? draft.countdownHours : null,
+    };
+  }
+
+  private resolveGoalDeadline(draft: GoalCreationDraft): string {
+    if (draft.timeMode === 'countdown' && draft.countdownHours) {
+      const now = this.nowProvider();
+      const target = new Date(now.getTime() + draft.countdownHours * 60 * 60 * 1000);
+      return target.toISOString().slice(0, 16);
+    }
+    return draft.deadline || nextDeadlineIso();
   }
 
   private focusOrCreateTab(view: Page, options: TabOpenOptions = {}): void {

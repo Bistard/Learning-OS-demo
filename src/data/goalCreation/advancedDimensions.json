@@ -1,0 +1,171 @@
+[
+  {
+    "id": "baseline",
+    "label": "基础水平",
+    "description": "掌握度 / 自评 / 准备程度 / 先修情况",
+    "options": [
+      {
+        "id": "reset-core",
+        "label": "重建基础",
+        "summary": "掌握度 <40%，需要补齐核心概念与先修知识"
+      },
+      {
+        "id": "patching",
+        "label": "查漏补缺",
+        "summary": "掌握度 40%-70%，概念基本清晰，需要高频练习"
+      },
+      {
+        "id": "extension",
+        "label": "拔高突破",
+        "summary": "掌握度 >70%，目标为进阶区分度与综合题"
+      }
+    ]
+  },
+  {
+    "id": "contentStructure",
+    "label": "内容结构",
+    "description": "章节覆盖 / 考点类型 / 题型结构 / 资料集合",
+    "options": [
+      {
+        "id": "core-chapters",
+        "label": "核心章节优先",
+        "summary": "聚焦压轴章节 + 高频大题 + 典型题型"
+      },
+      {
+        "id": "layered-mix",
+        "label": "真题混编",
+        "summary": "核心知识 + 变式题 + 错题集联动演练"
+      },
+      {
+        "id": "full-coverage",
+        "label": "全量覆盖",
+        "summary": "逐章扫清知识点，构建资料 + 题型矩阵"
+      }
+    ]
+  },
+  {
+    "id": "scoreTarget",
+    "label": "期望成绩",
+    "description": "过线 / 稳过 / 提分 / 冲刺 / 精通",
+    "options": [
+      {
+        "id": "pass-line",
+        "label": "过线",
+        "summary": "重点保底 60 分"
+      },
+      {
+        "id": "steady-pass",
+        "label": "稳过",
+        "summary": "目标 70-75 分，保持安全区"
+      },
+      {
+        "id": "boost",
+        "label": "提分",
+        "summary": "冲击 80+，强化薄弱模块"
+      },
+      {
+        "id": "sprint",
+        "label": "冲刺",
+        "summary": "冲击 85-90，构建系统级最短路径"
+      },
+      {
+        "id": "mastery",
+        "label": "精通",
+        "summary": "追求 95+，全量掌控题型"
+      }
+    ]
+  },
+  {
+    "id": "studyApproach",
+    "label": "学习方式",
+    "description": "看总结 / 刷题 / 听解释 / 深度理解",
+    "options": [
+      {
+        "id": "summary-led",
+        "label": "先总后练",
+        "summary": "AI 先给总结，再安排巩固练习"
+      },
+      {
+        "id": "practice-led",
+        "label": "题目驱动",
+        "summary": "直接刷题 + 题型拆解 + 反馈闭环"
+      },
+      {
+        "id": "audio-explain",
+        "label": "解释驱动",
+        "summary": "老师口吻逐题讲解 + 语音/可视化提示"
+      },
+      {
+        "id": "deep-dive",
+        "label": "深度理解",
+        "summary": "推导 + 证明 + 知识地图式学习"
+      }
+    ]
+  },
+  {
+    "id": "pacePreference",
+    "label": "节奏偏好",
+    "description": "快 / 稳 / 深度",
+    "options": [
+      {
+        "id": "fast-lane",
+        "label": "快",
+        "summary": "压缩路径，聚焦关键产出"
+      },
+      {
+        "id": "balanced",
+        "label": "稳",
+        "summary": "均衡输出，确保每天可完成"
+      },
+      {
+        "id": "immersive",
+        "label": "深度",
+        "summary": "讲解 + 练习 + 复盘三段式沉浸"
+      }
+    ]
+  },
+  {
+    "id": "mindset",
+    "label": "学习心理",
+    "description": "害怕点 / 焦虑程度 / 信心",
+    "options": [
+      {
+        "id": "high-anxiety",
+        "label": "容易焦虑",
+        "summary": "高压情境，需要拆解恐惧点 + 正向反馈"
+      },
+      {
+        "id": "steady",
+        "label": "轻压平衡",
+        "summary": "轻焦虑，需提醒节奏 + 及时肯定"
+      },
+      {
+        "id": "confident",
+        "label": "自信探索",
+        "summary": "高自信，偏好挑战与开放式追问"
+      }
+    ]
+  },
+  {
+    "id": "learningWindow",
+    "label": "学习窗口",
+    "description": "每天可投入时段",
+    "options": [
+      {
+        "id": "fragments",
+        "label": "碎片时间",
+        "summary": "3-4 段 20min，便携内容 + 微任务"
+      },
+      {
+        "id": "evening-block",
+        "label": "晚间黄金档",
+        "summary": "19:00-22:00，适合长线复盘"
+      },
+      {
+        "id": "dual-block",
+        "label": "早晚双时段",
+        "summary": "晨间概念 + 晚间刷题"
+      }
+    ]
+  }
+]

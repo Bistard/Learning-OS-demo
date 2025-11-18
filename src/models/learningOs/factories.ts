@@ -10,6 +10,7 @@ import {
 } from './constants';
 import {
   GoalCreationDraft,
+  GoalCreationFlowState,
   GoalProfile,
   GoalProgress,
   AppConfiguration,
@@ -35,6 +36,11 @@ import {
   workspaceTemplate,
 } from './templates';
 import { defaultConfiguration } from '../../config/configuration';
+import {
+  ensureAdvancedSettings,
+  getDefaultPreset,
+  getDefaultSubject,
+} from './goalCreationConfig';
 
 export const NEW_GOAL_CONNECTED_VAULTS = Object.freeze([...knowledgeBaseTemplate.connectedVaults.newGoal]);
 
@@ -130,12 +136,29 @@ const createGoal = (): StudyGoal => {
   };
 };
 
-export const createGoalDraft = (): GoalCreationDraft => ({
-  targetType: '',
-  deadline: nextDeadlineIso(),
-  mastery: 0,
-  materials: [],
-  dailyMinutes: DEFAULT_DAILY_MINUTES,
+export const createGoalDraft = (): GoalCreationDraft => {
+  const preset = getDefaultPreset();
+  const subject = getDefaultSubject();
+  return {
+    subjectId: subject.id,
+    subjectLabel: subject.label,
+    presetId: preset.id,
+    targetType: preset.label,
+    deadline: nextDeadlineIso(),
+    timeMode: 'deadline',
+    countdownHours: null,
+    mastery: preset.defaultMastery ?? 0,
+    materials: [],
+    dailyMinutes: preset.defaultDailyMinutes ?? DEFAULT_DAILY_MINUTES,
+    advancedSettings: ensureAdvancedSettings(preset.advancedDefaults, preset.id),
+  };
+};
+
+export const createGoalCreationFlowState = (): GoalCreationFlowState => ({
+  step: 'base',
+  advancedOpen: false,
+  generationPhase: 'idle',
+  generationMessageIndex: 0,
 });
 
 const createWorkspaceState = (): WorkspaceState => ({
@@ -154,6 +177,7 @@ export const createInitialState = (): LearningOsState => {
     goals: [goal],
     activeGoalId: goal.id,
     creationDraft: createGoalDraft(),
+    creationFlow: createGoalCreationFlowState(),
     knowledgeBase,
     workspace: createWorkspaceState(),
     notes,

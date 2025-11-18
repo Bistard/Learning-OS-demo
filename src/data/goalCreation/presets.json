@@ -1,0 +1,110 @@
+[
+  {
+    "id": "exam-sprint",
+    "label": "备考冲刺",
+    "description": "系统级最短路径，压缩 48 小时冲刺阶段",
+    "systemFocus": "自动生成压缩化任务树 + 必考路线",
+    "ragFocus": "老师高压陪跑 + 及时纠偏",
+    "defaultMastery": 58,
+    "defaultDailyMinutes": 180,
+    "advancedDefaults": {
+      "baseline": "reset-core",
+      "contentStructure": "layered-mix",
+      "scoreTarget": "sprint",
+      "studyApproach": "practice-led",
+      "pacePreference": "fast-lane",
+      "mindset": "high-anxiety",
+      "learningWindow": "dual-block"
+    }
+  },
+  {
+    "id": "assignment-focus",
+    "label": "作业模式",
+    "description": "对齐课堂进度，生成作业优先事项",
+    "systemFocus": "拆解课堂章节 + 作业题型提醒",
+    "ragFocus": "老师逐题批改 + 辅助理解",
+    "defaultMastery": 42,
+    "defaultDailyMinutes": 90,
+    "advancedDefaults": {
+      "baseline": "patching",
+      "contentStructure": "core-chapters",
+      "scoreTarget": "steady-pass",
+      "studyApproach": "summary-led",
+      "pacePreference": "balanced",
+      "mindset": "steady",
+      "learningWindow": "fragments"
+    }
+  },
+  {
+    "id": "review-mode",
+    "label": "复习模式",
+    "description": "期中/期末前复盘 + 查漏补缺",
+    "systemFocus": "章节雷达 + 易错题重新组合",
+    "ragFocus": "老师用错题驱动再讲解",
+    "defaultMastery": 68,
+    "defaultDailyMinutes": 120,
+    "advancedDefaults": {
+      "baseline": "patching",
+      "contentStructure": "layered-mix",
+      "scoreTarget": "boost",
+      "studyApproach": "deep-dive",
+      "pacePreference": "balanced",
+      "mindset": "steady",
+      "learningWindow": "evening-block"
+    }
+  },
+  {
+    "id": "longterm-learning",
+    "label": "长期学习",
+    "description": "兼顾长期积累与阶段性评估",
+    "systemFocus": "阶段性目标 + 任务树可拓展",
+    "ragFocus": "老师提供个性化习题集与复盘",
+    "defaultMastery": 75,
+    "defaultDailyMinutes": 150,
+    "advancedDefaults": {
+      "baseline": "extension",
+      "contentStructure": "full-coverage",
+      "scoreTarget": "mastery",
+      "studyApproach": "deep-dive",
+      "pacePreference": "immersive",
+      "mindset": "confident",
+      "learningWindow": "dual-block"
+    }
+  },
+  {
+    "id": "postgrad-exam",
+    "label": "考研模式",
+    "description": "全链路覆盖 + 高频真题联动",
+    "systemFocus": "多轮任务树 + 高频知识图谱",
+    "ragFocus": "老师阶段性面批 + 计划纠偏",
+    "defaultMastery": 62,
+    "defaultDailyMinutes": 210,
+    "advancedDefaults": {
+      "baseline": "reset-core",
+      "contentStructure": "full-coverage",
+      "scoreTarget": "mastery",
+      "studyApproach": "practice-led",
+      "pacePreference": "fast-lane",
+      "mindset": "high-anxiety",
+      "learningWindow": "dual-block"
+    }
+  },
+  {
+    "id": "self-learning",
+    "label": "自学模式",
+    "description": "开放式探索 + RAG 老师陪练",
+    "systemFocus": "围绕兴趣点动态生成学习路径",
+    "ragFocus": "老师以解释/可视化提示为主",
+    "defaultMastery": 45,
+    "defaultDailyMinutes": 80,
+    "advancedDefaults": {
+      "baseline": "patching",
+      "contentStructure": "layered-mix",
+      "scoreTarget": "boost",
+      "studyApproach": "audio-explain",
+      "pacePreference": "balanced",
+      "mindset": "confident",
+      "learningWindow": "fragments"
+    }
+  }
+]

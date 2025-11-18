@@ -23,6 +23,11 @@
   color: #fff;
 }
 
+.btn.secondary {
+  background: var(--text);
+  color: #fff;
+}
+
 .btn.ghost {
   background: transparent;
   border: 1px solid var(--border);
@@ -186,6 +191,43 @@
   color: var(--orange);
 }
 
+.chip {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 6px 12px;
+  font-weight: 600;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.chip span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.chip.active {
+  border-color: var(--orange);
+  background: var(--orange-soft);
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .tag button {
   border: none;
   background: transparent;
@@ -290,6 +332,24 @@ input[type='range'] {
   gap: 12px;
 }
 
+.status-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.status-indicator.loading {
+  border-color: var(--border);
+  border-top-color: var(--orange);
+  animation: spin 1s linear infinite;
+}
+
+.status-indicator.success {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
 .dots {
   display: inline-flex;
   gap: 8px;
@@ -311,6 +371,15 @@ input[type='range'] {
   animation-delay: 0.3s;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .badge {
   display: inline-flex;
   padding: 6px 12px;
@@ -318,6 +387,11 @@ input[type='range'] {
   background: #e4e4e7;
   color: var(--text);
   font-weight: 600;
+}
+
+.badge.accent {
+  background: var(--orange-soft);
+  color: var(--orange);
 }
 
 .timer {

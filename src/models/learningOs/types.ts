@@ -15,6 +15,14 @@ export type TaskKind = 'concept' | 'practice' | 'review' | 'quiz' | 'project';
 
 export type TaskStatus = 'locked' | 'available' | 'in-progress' | 'complete';
 
+export type GoalCreationStep = 'base' | 'materials' | 'generation';
+
+export type GoalCreationTimeMode = 'deadline' | 'countdown';
+
+export type GoalGenerationPhase = 'idle' | 'running' | 'ready';
+
+export type GoalAdvancedSettings = Record<string, string>;
+
 export interface StudyRouteItem {
   id: string;
   title: string;
@@ -58,6 +66,12 @@ export interface GoalProfile {
   dailyMinutes: number;
   materials: string[];
   resourcesCaptured: number;
+  subjectId?: string;
+  subjectLabel?: string;
+  presetId?: string;
+  advancedSettings?: GoalAdvancedSettings;
+  timeMode?: GoalCreationTimeMode;
+  countdownHours?: number | null;
 }
 
 export interface GoalProgress {
@@ -81,11 +95,24 @@ export interface StudyGoal {
 }
 
 export interface GoalCreationDraft {
+  subjectId: string;
+  subjectLabel: string;
+  presetId: string;
   targetType: string;
   deadline: string;
+  timeMode: GoalCreationTimeMode;
+  countdownHours: number | null;
   mastery: number;
   materials: string[];
   dailyMinutes: number;
+  advancedSettings: GoalAdvancedSettings;
+}
+
+export interface GoalCreationFlowState {
+  step: GoalCreationStep;
+  advancedOpen: boolean;
+  generationPhase: GoalGenerationPhase;
+  generationMessageIndex: number;
 }
 
 export type KnowledgeCategoryKind =
@@ -163,6 +190,7 @@ export interface LearningOsState {
   goals: StudyGoal[];
   activeGoalId: string | null;
   creationDraft: GoalCreationDraft;
+  creationFlow: GoalCreationFlowState;
   knowledgeBase: KnowledgeBaseState;
   workspace: WorkspaceState;
   notes: KnowledgeNote[];
