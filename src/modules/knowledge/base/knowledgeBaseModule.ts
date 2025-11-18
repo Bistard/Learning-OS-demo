@@ -15,12 +15,23 @@ import { RenderRegions, UiModule } from '../../types';
 import { ContextMenu, ContextMenuItem } from '../../../utils/contextMenu';
 
 const CATEGORY_TAIL_DROP_ID = '__category-tail__';
+const DEFAULT_CATEGORY_COLOR = '#d4d4d8';
+const HEX_COLOR = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 interface KnowledgeBaseViewState {
   categories: KnowledgeCategory[];
   activeGoalName: string;
   editingCategoryId: string | null;
 }
+
+interface KnowledgeCategoryDraft {
+  title: string;
+  icon: string;
+  color: string;
+}
+
+const sanitizeHexColor = (value: string): string =>
+  HEX_COLOR.test(value) ? value : DEFAULT_CATEGORY_COLOR;
 
 const escapeHtml = (value: string): string =>
   value
@@ -47,8 +58,12 @@ class KnowledgeBaseViewModel {
     };
   }
 
-  public addCategory(label: string): void {
-    this.root.addKnowledgeCategory(label);
+  public addCategory(payload: KnowledgeCategoryDraft): void {
+    this.root.addKnowledgeCategory(payload);
+  }
+
+  public recordUpload(fileName: string): string {
+    return this.root.recordKnowledgeUpload(fileName);
   }
 
   public startRename(categoryId: string): void {
@@ -133,8 +148,12 @@ class KnowledgeBaseView {
   private host: HTMLElement | null = null;
   private readonly contextMenu = ContextMenu.shared();
   private categoryInputPopover: HTMLDivElement | null = null;
+  private categoryInputForm: HTMLFormElement | null = null;
   private categoryInputField: HTMLInputElement | null = null;
+  private categoryIconInput: HTMLInputElement | null = null;
+  private categoryColorInput: HTMLInputElement | null = null;
   private teardownCategoryInput: (() => void) | null = null;
+  private readonly pendingHighlightIds = new Set<string>();
 
   constructor(
     private readonly viewModel: KnowledgeBaseViewModel,
@@ -152,12 +171,11 @@ class KnowledgeBaseView {
     return `
       <section class="knowledge-base">
         <header class="kb-toolbar">
-          <div>
-            <p class="eyebrow">绑定目标</p>
-            <h3>${escapeHtml(state.activeGoalName)} · 自动沉淀分类</h3>
-            <p class="microcopy">拖拽左侧把手即可排序，未分类用于临时内容。</p>
+          <input type="file" id="kb-upload-input" hidden multiple />
+          <div class="kb-toolbar-actions">
+            <button class="btn ghost" id="kb-upload-btn" type="button">上传文件</button>
+            <button class="btn primary" id="kb-add-category-btn" type="button">新建分类</button>
           </div>
-          <button class="btn primary" id="kb-add-category-btn" type="button">新建分类</button>
         </header>
         <div class="kb-category-board">
           ${categories.join('')}
@@ -188,11 +206,16 @@ class KnowledgeBaseView {
           </div>
         </form>`
       : `<h4>${escapeHtml(category.title)}</h4>`;
+    const accent = sanitizeHexColor(category.color);
+    const icon = category.icon?.trim() || '📁';
     return `
-      <article class="kb-category" data-category-id="${category.id}">
+      <article class="kb-category" data-category-id="${category.id}" style="--kb-accent:${accent}">
         <header class="kb-category-head">
-          <div>
-            ${titleMarkup}
+          <div class="kb-category-info">
+            <div class="kb-category-title">
+              <span class="kb-category-icon" aria-hidden="true">${escapeHtml(icon)}</span>
+              ${titleMarkup}
+            </div>
             <p class="microcopy">${category.items.length} 条内容</p>
           </div>
           <div class="kb-category-actions">
@@ -233,10 +256,12 @@ class KnowledgeBaseView {
           role="button"
           tabindex="0"
         >
-          <p class="kb-item-title">${escapeHtml(item.summary)}</p>
-          <span class="kb-item-meta">
-            ${escapeHtml(item.source)} · ${escapeHtml(item.updatedAt)}
-          </span>
+          <div class="kb-item-row">
+            <p class="kb-item-title">${escapeHtml(item.summary)}</p>
+            <span class="kb-item-meta">
+              ${escapeHtml(item.updatedAt)}
+            </span>
+          </div>
         </div>`
       )
       .join('');
@@ -245,10 +270,12 @@ class KnowledgeBaseView {
   private bindInteractions(state: KnowledgeBaseViewState): void {
     if (!this.host) return;
     this.bindAddCategory();
+    this.bindUploadAction();
     this.bindRenameForms();
     this.bindCategoryDrag();
     this.bindItemDrag();
     this.bindCategoryMenus(state);
+    this.applyHighlights();
   }
 
   private bindAddCategory(): void {
@@ -258,6 +285,23 @@ class KnowledgeBaseView {
       if (button) {
         this.openCategoryInput(button);
       }
+    });
+  }
+
+  private bindUploadAction(): void {
+    if (!this.host) return;
+    const uploadButton = this.host.querySelector<HTMLButtonElement>('#kb-upload-btn');
+    const uploadInput = this.host.querySelector<HTMLInputElement>('#kb-upload-input');
+    if (!uploadButton || !uploadInput) return;
+    uploadButton.addEventListener('click', () => uploadInput.click());
+    uploadInput.addEventListener('change', () => {
+      if (!uploadInput.files || uploadInput.files.length === 0) return;
+      Array.from(uploadInput.files).forEach((file) => {
+        const itemId = this.viewModel.recordUpload(file.name);
+        this.pendingHighlightIds.add(itemId);
+      });
+      uploadInput.value = '';
+      this.applyHighlights();
     });
   }
 
@@ -414,24 +458,58 @@ class KnowledgeBaseView {
     container.className = 'kb-category-input';
     container.hidden = true;
     container.innerHTML = `
-      <input
-        type="text"
-        maxlength="24"
-        placeholder="输入分类名称后按 Enter"
-        aria-label="输入分类名称"
-      />
+      <form class="kb-category-form">
+        <div class="kb-category-input-row">
+          <input
+            type="text"
+            name="icon"
+            maxlength="2"
+            value="✨"
+            placeholder="Emoji"
+            aria-label="分类图标"
+          />
+          <input
+            type="color"
+            name="color"
+            value="#6366f1"
+            aria-label="分类颜色"
+          />
+        </div>
+        <input
+          type="text"
+          name="title"
+          maxlength="24"
+          placeholder="输入分类名称后按 Enter"
+          aria-label="输入分类名称"
+          required
+        />
+      </form>
     `;
     document.body.appendChild(container);
     this.categoryInputPopover = container;
-    this.categoryInputField = container.querySelector('input');
+    this.categoryInputForm = container.querySelector('form');
+    this.categoryIconInput = container.querySelector('input[name="icon"]');
+    this.categoryColorInput = container.querySelector('input[name="color"]');
+    this.categoryInputField = container.querySelector('input[name="title"]');
+    this.categoryInputForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      this.submitCategoryInput();
+    });
   }
 
   private openCategoryInput(anchor: HTMLElement): void {
     this.ensureCategoryInput();
-    if (!this.categoryInputPopover || !this.categoryInputField) return;
-    const container = this.categoryInputPopover;
-    const input = this.categoryInputField;
+    if (
+      !this.categoryInputPopover ||
+      !this.categoryInputField ||
+      !this.categoryInputForm ||
+      !this.categoryIconInput ||
+      !this.categoryColorInput
+    ) {
+      return;
+    }
     this.closeCategoryInput();
+    const container = this.categoryInputPopover;
     container.hidden = false;
     container.style.visibility = 'hidden';
     const rect = anchor.getBoundingClientRect();
@@ -440,44 +518,61 @@ class KnowledgeBaseView {
       Math.min(rect.left, window.innerWidth - container.offsetWidth - 12)
     );
     container.style.left = `${maxLeft}px`;
-    container.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 60)}px`;
+    container.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 80)}px`;
     container.style.visibility = 'visible';
-    input.value = '';
-    input.focus();
+    this.categoryInputForm.reset();
+    this.categoryIconInput.value = this.categoryIconInput.value || '✨';
+    this.categoryColorInput.value = this.categoryColorInput.value || '#6366f1';
+    this.categoryInputField.value = '';
+    this.categoryInputField.focus();
     const handleKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const value = input.value;
-        this.viewModel.addCategory(value);
-        if (value.trim()) {
-          this.closeCategoryInput();
-        } else {
-          input.focus();
-        }
-      } else if (event.key === 'Escape') {
+      if (event.key === 'Escape') {
         event.preventDefault();
         this.closeCategoryInput();
       }
     };
-    const handleBlur = (): void => {
-      window.setTimeout(() => this.closeCategoryInput(), 80);
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (!this.categoryInputPopover?.contains(event.target as Node)) {
+        this.closeCategoryInput();
+      }
     };
-    input.addEventListener('keydown', handleKey);
-    input.addEventListener('blur', handleBlur);
+    this.categoryInputForm.addEventListener('keydown', handleKey);
+    document.addEventListener('mousedown', handleClickOutside);
     this.teardownCategoryInput = () => {
-      input.removeEventListener('keydown', handleKey);
-      input.removeEventListener('blur', handleBlur);
+      this.categoryInputForm?.removeEventListener('keydown', handleKey);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }
 
   private closeCategoryInput(): void {
-    if (!this.categoryInputPopover || !this.categoryInputField) return;
+    if (!this.categoryInputPopover) return;
     if (this.teardownCategoryInput) {
       this.teardownCategoryInput();
       this.teardownCategoryInput = null;
     }
-    this.categoryInputField.value = '';
+    this.categoryInputForm?.reset();
     this.categoryInputPopover.hidden = true;
+  }
+
+  private submitCategoryInput(): void {
+    if (
+      !this.categoryInputField ||
+      !this.categoryIconInput ||
+      !this.categoryColorInput
+    ) {
+      return;
+    }
+    const payload: KnowledgeCategoryDraft = {
+      title: this.categoryInputField.value,
+      icon: this.categoryIconInput.value,
+      color: this.categoryColorInput.value,
+    };
+    this.viewModel.addCategory(payload);
+    if (payload.title.trim()) {
+      this.closeCategoryInput();
+    } else {
+      this.categoryInputField.focus();
+    }
   }
 
   private openCategoryMenu(category: KnowledgeCategory, position: { x: number; y: number }): void {
@@ -492,7 +587,7 @@ class KnowledgeBaseView {
         label: '删除',
         disabled: category.isFixed,
         danger: true,
-        action: () => this.viewModel.deleteCategory(category.id),
+        action: () => this.confirmDelete(category),
       },
     ];
     this.contextMenu.open(position, items);
@@ -502,6 +597,27 @@ class KnowledgeBaseView {
     this.viewModel.startRename(categoryId);
     this.requestRepaint();
     window.requestAnimationFrame(() => this.focusRenameInput(categoryId));
+  }
+
+  private confirmDelete(category: KnowledgeCategory): void {
+    if (category.isFixed) return;
+    const confirmed = window.confirm('确定删除该分类？内容将移动到「未分类」。');
+    if (confirmed) {
+      this.viewModel.deleteCategory(category.id);
+    }
+  }
+
+  private applyHighlights(): void {
+    if (!this.host || this.pendingHighlightIds.size === 0) return;
+    const ids = Array.from(this.pendingHighlightIds);
+    ids.forEach((id) => {
+      const element = this.host?.querySelector<HTMLElement>(`[data-item-id="${id}"]`);
+      if (element) {
+        element.classList.add('highlight');
+        window.setTimeout(() => element.classList.remove('highlight'), 1600);
+        this.pendingHighlightIds.delete(id);
+      }
+    });
   }
 }
 

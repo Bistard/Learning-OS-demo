@@ -25,6 +25,12 @@ import {
   nextDeadlineIso,
 } from '../models/learningOsModel';
 
+interface KnowledgeCategoryDraft {
+  title: string;
+  icon: string;
+  color: string;
+}
+
 interface DashboardSummary {
   totalGoals: number;
   activeGoals: number;
@@ -197,17 +203,21 @@ export class LearningOsViewModel {
     this.emitToast('已自动沉入当前知识库并分类～', 'success');
   }
 
-  public addKnowledgeCategory(title: string): void {
-    const trimmed = title.trim();
-    if (!trimmed) {
+  public addKnowledgeCategory(payload: KnowledgeCategoryDraft): void {
+    const title = payload.title.trim();
+    if (!title) {
       this.emitToast('分类名称不能为空～', 'warning');
       return;
     }
+    const icon = payload.icon.trim() || '📁';
+    const color = this.normalizeHexColor(payload.color);
     const knowledgeBase = this.mutateKnowledgeCategories((categories) => [
       ...categories,
       {
         id: `kb-category-${Date.now()}`,
-        title: trimmed,
+        title,
+        icon,
+        color,
         kind: 'custom',
         isFixed: false,
         items: [],
@@ -290,6 +300,23 @@ export class LearningOsViewModel {
       return { ...category, items };
     });
     this.updateState({ knowledgeBase: { ...this.state.knowledgeBase, categories } });
+  }
+
+  public recordKnowledgeUpload(fileName: string): string {
+    const label = fileName.trim() || '未命名文件';
+    const timestamp = this.formatTime();
+    const uploadItem: KnowledgeItem = {
+      id: `kb-upload-${Date.now()}`,
+      summary: label,
+      detail: `${label} 已上传，稍后自动解析`,
+      source: '上传文件',
+      updatedAt: timestamp,
+      goalId: this.state.activeGoalId ?? undefined,
+    };
+    const knowledgeBase = this.prependKnowledgeItem('kb-uploads', uploadItem);
+    this.updateState({ knowledgeBase });
+    this.emitToast('文件已记录到「上传资料」', 'success');
+    return uploadItem.id;
   }
 
   public sendChat(message: string): void {
@@ -408,6 +435,8 @@ export class LearningOsViewModel {
       title: '未分类',
       kind: 'uncategorized',
       isFixed: true,
+      icon: '📥',
+      color: '#94a3b8',
       items: [],
     };
     return [...categories, fallback];
@@ -418,6 +447,11 @@ export class LearningOsViewModel {
       (category) => category.id === categoryId
     );
     return exists ? categoryId : KNOWLEDGE_UNSORTED_CATEGORY_ID;
+  }
+
+  private normalizeHexColor(color: string): string {
+    const trimmed = color.trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed) ? trimmed : '#94a3b8';
   }
 
   private composeAiResponse(message: string): string {

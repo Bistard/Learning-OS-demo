@@ -131,6 +131,8 @@ export interface KnowledgeCategory {
   title: string;
   kind: KnowledgeCategoryKind;
   isFixed: boolean;
+  icon: string;
+  color: string;
   items: KnowledgeItem[];
 }
 
@@ -210,9 +212,7 @@ interface GoalSeed {
   progress: Omit<GoalProgress, 'remainingDays'>;
 }
 
-interface KnowledgeCategoryTemplate extends KnowledgeCategory {
-  items: KnowledgeItem[];
-}
+type KnowledgeCategoryTemplate = KnowledgeCategory;
 
 interface KnowledgeBaseTemplate {
   categories: KnowledgeCategoryTemplate[];
