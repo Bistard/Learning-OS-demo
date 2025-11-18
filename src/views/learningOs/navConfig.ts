@@ -1,20 +1,11 @@
 /**
  * Navigation configuration and shell template helpers for the Learning OS view.
  */
-import { Page } from '../../models/learningOsModel';
+import { PRIMARY_NAV, NavDefinition } from '../../config/navigation';
 
-export interface NavItem {
-  icon: string;
-  label: string;
-  page: Page;
-}
+export const SIDE_NAV: ReadonlyArray<NavDefinition> = PRIMARY_NAV;
 
-export const SIDE_NAV: NavItem[] = [
-  { icon: '📌', label: '目标', page: 'goalDashboard' },
-  { icon: '📚', label: '知识库', page: 'knowledgeBase' },
-];
-
-export const buildShellMarkup = (navItems: NavItem[]): string => {
+export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string => {
   const navMarkup = navItems
     .map(
       (item) => `

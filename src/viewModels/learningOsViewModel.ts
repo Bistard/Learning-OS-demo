@@ -26,6 +26,7 @@ import { KnowledgeManager } from './learningOs/knowledgeManager';
 import { TabController } from './learningOs/tabController';
 import type { AppTab, TabContext, TabOpenOptions } from './learningOs/tabController';
 import type { KnowledgeCategoryDraft, ViewSnapshot } from './learningOs/types';
+import { isPrimaryNavPage } from '../config/navigation';
 
 export type { AppTab, TabContext } from './learningOs/tabController';
 export type { ViewSnapshot } from './learningOs/types';
@@ -48,7 +49,9 @@ export class LearningOsViewModel {
       emitToast: (message, tone) => this.emitToast(message, tone),
       formatTime: () => this.formatTime(),
     });
-    this.tabController.bootstrap(this.state.page);
+    if (!isPrimaryNavPage(this.state.page)) {
+      this.tabController.bootstrap(this.state.page);
+    }
   }
 
   public subscribe(listener: ViewUpdateListener): () => void {
@@ -64,6 +67,12 @@ export class LearningOsViewModel {
   }
 
   public navigate(page: Page, context?: TabContext): void {
+    if (isPrimaryNavPage(page)) {
+      this.tabController.clearActiveTab();
+      this.assignState({ page });
+      this.publish();
+      return;
+    }
     this.focusOrCreateTab(page, { context });
   }
 

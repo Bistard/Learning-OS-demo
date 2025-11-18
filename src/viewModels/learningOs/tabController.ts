@@ -89,17 +89,16 @@ export class TabController {
     if (!target.closable) return null;
     const remaining = this.tabs.filter((tab) => tab.id !== tabId);
     if (remaining.length === 0) {
-      const fallback = this.createTab(fallbackView);
-      this.tabs = [fallback];
-      this.activeTabId = fallback.id;
-      return fallback.view;
+      this.tabs = [];
+      this.activeTabId = null;
+      return fallbackView;
     }
     this.tabs = remaining;
     if (this.activeTabId === tabId) {
       const fallbackIndex = Math.max(0, targetIndex - 1);
       const nextActive = this.tabs[fallbackIndex] ?? this.tabs[0];
-      this.activeTabId = nextActive.id;
-      return nextActive.view;
+      this.activeTabId = nextActive?.id ?? null;
+      return nextActive?.view ?? fallbackView;
     }
     return null;
   }
@@ -111,10 +110,9 @@ export class TabController {
       this.activeTabId = pinnedTabs[0].id;
       return pinnedTabs[0].view;
     }
-    const fallback = this.createTab(fallbackView);
-    this.tabs = [fallback];
-    this.activeTabId = fallback.id;
-    return fallback.view;
+    this.tabs = [];
+    this.activeTabId = null;
+    return fallbackView;
   }
 
   public reload(tabId: string): boolean {
@@ -173,6 +171,10 @@ export class TabController {
 
   public getActiveTabId(): string | null {
     return this.activeTabId;
+  }
+
+  public clearActiveTab(): void {
+    this.activeTabId = null;
   }
 
   private createTab(view: Page, options: TabOpenOptions = {}): AppTab {
