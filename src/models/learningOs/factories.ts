@@ -12,6 +12,7 @@ import {
   GoalCreationDraft,
   GoalProfile,
   GoalProgress,
+  AppConfiguration,
   KnowledgeBaseState,
   KnowledgeCategory,
   KnowledgeItem,
@@ -33,6 +34,7 @@ import {
   weeklyPlanData,
   workspaceTemplate,
 } from './templates';
+import { defaultConfiguration } from '../../config/configuration';
 
 export const NEW_GOAL_CONNECTED_VAULTS = Object.freeze([...knowledgeBaseTemplate.connectedVaults.newGoal]);
 
@@ -160,6 +162,7 @@ export const createInitialState = (): LearningOsState => {
     knowledgeBase,
     workspace: createWorkspaceState(),
     notes,
+    configuration: createConfiguration(),
   };
 };
 
@@ -194,3 +197,6 @@ export const prependKnowledgeItem = (
     ),
   };
 };
+const createConfiguration = (): AppConfiguration => ({
+  ...defaultConfiguration,
+});

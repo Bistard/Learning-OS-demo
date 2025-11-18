@@ -8,6 +8,7 @@ interface NoteEditorViewState {
   createdLabel: string;
   updatedLabel: string;
   wordCount: number;
+  showPreview: boolean;
 }
 
 class NoteEditorViewModel {
@@ -20,6 +21,7 @@ class NoteEditorViewModel {
       createdLabel: note ? this.formatTimestamp(note.createdAt) : '—',
       updatedLabel: note ? this.formatTimestamp(note.updatedAt) : '—',
       wordCount: note ? this.countCharacters(note.content) : 0,
+      showPreview: snapshot.configuration.notePreviewEnabled,
     };
   }
 
@@ -101,9 +103,10 @@ class NoteEditorView {
 
   private renderNote(state: NoteEditorViewState): string {
     const note = state.note!;
-    const preview = this.renderMarkdown(note.content);
+    const preview = state.showPreview ? this.renderMarkdown(note.content) : '';
+    const workspaceClass = state.showPreview ? 'note-workspace' : 'note-workspace single';
     return `
-      <section class="note-workspace">
+      <section class="${workspaceClass}">
         <div class="note-pane note-pane-editor">
           <input
             id="note-title-input"
@@ -124,10 +127,16 @@ class NoteEditorView {
             placeholder="# 记录灵感..."
           >${this.escapeHtml(note.content)}</textarea>
         </div>
-        <div class="note-pane note-pane-preview">
-          <div class="note-preview" data-note-preview>${preview}</div>
-        </div>
+        ${state.showPreview ? this.renderPreviewPane(preview) : ''}
       </section>
+    `;
+  }
+
+  private renderPreviewPane(preview: string): string {
+    return `
+      <div class="note-pane note-pane-preview">
+        <div class="note-preview" data-note-preview>${preview}</div>
+      </div>
     `;
   }
 

@@ -14,6 +14,6 @@ export const PRIMARY_NAV: ReadonlyArray<NavDefinition> = [
   { icon: '📚', label: '知识库', page: 'knowledgeBase' },
 ];
 
-const NAV_PAGE_SET = new Set(PRIMARY_NAV.map((item) => item.page));
+const NAV_PAGE_SET = new Set<Page>([...PRIMARY_NAV.map((item) => item.page), 'settings']);
 
 export const isPrimaryNavPage = (page: Page): boolean => NAV_PAGE_SET.has(page);

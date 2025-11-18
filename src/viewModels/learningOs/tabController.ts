@@ -44,6 +44,7 @@ const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
   learningWorkspace: { icon: '🧠' },
   knowledgeBase: { icon: '📚' },
   noteEditor: { icon: '📝' },
+  settings: { icon: '⚙️' },
 };
 
 const createTabId = (): string =>

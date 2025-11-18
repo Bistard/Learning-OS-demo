@@ -8,7 +8,8 @@ export type Page =
   | 'goalWorkspace'
   | 'learningWorkspace'
   | 'knowledgeBase'
-  | 'noteEditor';
+  | 'noteEditor'
+  | 'settings';
 
 export type TaskKind = 'concept' | 'practice' | 'review' | 'quiz' | 'project';
 
@@ -129,6 +130,10 @@ export interface KnowledgeBaseTemplate {
   categories: KnowledgeCategory[];
 }
 
+export interface AppConfiguration {
+  notePreviewEnabled: boolean;
+}
+
 export interface KnowledgeNote {
   id: string;
   title: string;
@@ -164,6 +169,7 @@ export interface LearningOsState {
   knowledgeBase: KnowledgeBaseState;
   workspace: WorkspaceState;
   notes: KnowledgeNote[];
+  configuration: AppConfiguration;
 }
 
 export interface Toast {

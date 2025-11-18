@@ -10,6 +10,7 @@ import { GoalWorkspaceModule } from '../modules/goal/workspace/goalWorkspaceModu
 import { LearningWorkspaceModule } from '../modules/learning/workspace/learningWorkspaceModule';
 import { KnowledgeBaseModule } from '../modules/knowledge/base/knowledgeBaseModule';
 import { NoteEditorModule } from '../modules/knowledge/notes/noteEditorModule';
+import { SettingsModule } from '../modules/settings/settingsModule';
 import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
 import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
@@ -70,6 +71,7 @@ export class LearningOsView {
       new LearningWorkspaceModule(this.viewModel),
       new KnowledgeBaseModule(this.viewModel),
       new NoteEditorModule(this.viewModel),
+      new SettingsModule(this.viewModel),
     ];
     moduleInstances.forEach((module) => this.modules.set(module.page, module));
   }

@@ -28,6 +28,10 @@ export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string
           <div class="side-links">
             ${navMarkup}
           </div>
+          <button class="side-link" data-page="settings" type="button">
+            <span class="icon">⚙️</span>
+            <span>设置</span>
+          </button>
           <div class="side-divider" role="presentation"></div>
           <div class="side-tabs" data-view="tab-strip" aria-label="工作区标签"></div>
           <div class="side-meta" data-view="side-meta"></div>

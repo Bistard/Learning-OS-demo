@@ -3,6 +3,7 @@
  */
 
 import {
+  AppConfiguration,
   GoalCreationDraft,
   KnowledgeCategory,
   KnowledgeBaseState,
@@ -76,6 +77,17 @@ export class LearningOsViewModel {
       return;
     }
     this.focusOrCreateTab(page, { context });
+  }
+
+  public setNotePreviewEnabled(enabled: boolean): void {
+    if (this.state.configuration.notePreviewEnabled === enabled) {
+      return;
+    }
+    const configuration: AppConfiguration = {
+      ...this.state.configuration,
+      notePreviewEnabled: enabled,
+    };
+    this.updateState({ configuration });
   }
 
   public selectGoal(goalId: string, targetPage?: Page): void {
@@ -411,6 +423,8 @@ export class LearningOsViewModel {
         const note = this.getNoteById(tab.context?.noteId);
         return note ? note.title : '笔记';
       }
+      case 'settings':
+        return '系统设置';
       default:
         return '工作区';
     }
