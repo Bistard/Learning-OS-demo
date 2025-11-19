@@ -4,7 +4,7 @@
     "title": "基础刷新 · 行列式 / 向量空间",
     "type": "concept",
     "status": "available",
-    "xp": 120,
+    "etaMinutes": 90,
     "summary": "补齐概念盲区，生成精华卡片",
     "children": [
       {
@@ -12,7 +12,7 @@
         "title": "特征值、特征向量",
         "type": "concept",
         "status": "available",
-        "xp": 40,
+        "etaMinutes": 35,
         "summary": "AI 推导 + 可视化理解"
       },
       {
@@ -20,7 +20,7 @@
         "title": "Rank-Nullity 应用",
         "type": "practice",
         "status": "locked",
-        "xp": 30,
+        "etaMinutes": 45,
         "summary": "自动抽题 + 逐题批改"
       }
     ]
@@ -30,7 +30,7 @@
     "title": "应用强化 · 最小二乘 & 正交投影",
     "type": "project",
     "status": "locked",
-    "xp": 160,
+    "etaMinutes": 120,
     "summary": "结合 PDF、PPT、错题本，输出总结"
   },
   {
@@ -38,7 +38,7 @@
     "title": "仿真冲刺 · Final Mock",
     "type": "quiz",
     "status": "locked",
-    "xp": 200,
+    "etaMinutes": 80,
     "summary": "60 分钟限时 · AI 监考 + 自动归档"
   }
 ]

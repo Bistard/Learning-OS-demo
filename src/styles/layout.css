@@ -736,24 +736,73 @@ body.is-resizing-nav {
 .task-tree .tree-node {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+}
+
+.task-tree .tree-node + .tree-node {
+  margin-top: 10px;
+}
+
+.task-tree .tree-node.complete {
+  border-color: var(--success);
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.task-tree .node-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-tree .node-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-tree .node-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.task-tree .node-eta {
+  background: rgba(17, 17, 19, 0.05);
+  color: var(--text);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.task-tree .tree-node.complete .node-eta {
+  background: rgba(22, 163, 74, 0.18);
+  color: var(--success);
+}
+
+.task-tree .node-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .tree-children {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   border-left: 2px dashed var(--border);
-  padding-left: 16px;
+  padding-left: 12px;
+  margin-left: 6px;
 }
 
-.node-meta {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+.task-tree .tree-node.complete > .tree-children {
+  border-left-color: rgba(22, 163, 74, 0.6);
 }
 
 .note-reader {

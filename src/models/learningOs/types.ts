@@ -45,7 +45,7 @@ export interface TaskNode {
   title: string;
   type: TaskKind;
   status: TaskStatus;
-  xp: number;
+  etaMinutes: number;
   summary: string;
   children?: TaskNode[];
 }

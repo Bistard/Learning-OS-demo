@@ -16,6 +16,7 @@ import {
   ResourceHighlight,
   StudyGoal,
   StudyRouteItem,
+  TaskNode,
   Toast,
   ToastTone,
   WorkspaceAsset,
@@ -198,6 +199,14 @@ export class LearningOsViewModel {
       };
     });
     this.emitToast('学习进度已同步到任务树与知识库。', 'success');
+  }
+
+  public markTaskNodeComplete(nodeId: string): void {
+    if (!nodeId) return;
+    this.mutateActiveGoal((goal) => {
+      const [taskTree, updated] = this.applyTaskNodeCompletion(goal.taskTree, nodeId);
+      return updated ? { ...goal, taskTree } : goal;
+    });
   }
 
   public startLearningWorkspace(taskId?: string): void {
@@ -587,6 +596,29 @@ export class LearningOsViewModel {
   private getGoalById(goalId?: string | null): StudyGoal | null {
     if (!goalId) return null;
     return this.state.goals.find((goal) => goal.id === goalId) ?? null;
+  }
+
+  private applyTaskNodeCompletion(nodes: TaskNode[], targetId: string): [TaskNode[], boolean] {
+    let changed = false;
+    const nextNodes = nodes.map((node) => {
+      let children = node.children;
+      let childChanged = false;
+      if (node.children && node.children.length > 0) {
+        const [updatedChildren, subtreeChanged] = this.applyTaskNodeCompletion(node.children, targetId);
+        children = updatedChildren;
+        childChanged = subtreeChanged;
+      }
+      if (node.id === targetId) {
+        changed = true;
+        return { ...node, status: 'complete', children };
+      }
+      if (childChanged) {
+        changed = true;
+        return { ...node, children };
+      }
+      return node;
+    });
+    return [changed ? nextNodes : nodes, changed];
   }
 
   private appendHighlight(existing: ResourceHighlight[], routeId: string): ResourceHighlight[] {
