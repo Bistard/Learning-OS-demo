@@ -457,10 +457,6 @@ input[type='range'] {
   background: #f0fdf4;
 }
 
-.tree-node.locked {
-  opacity: 0.6;
-}
-
 .creation-summary {
   display: flex;
   justify-content: space-between;

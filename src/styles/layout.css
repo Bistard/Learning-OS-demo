@@ -754,22 +754,25 @@ body.is-resizing-nav {
 
 .task-tree .node-content {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .task-tree .node-copy {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1 1 280px;
 }
 
 .task-tree .node-meta {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 200px;
 }
 
 .task-tree .node-eta {
@@ -790,6 +793,7 @@ body.is-resizing-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  justify-content: flex-end;
 }
 
 .tree-children {

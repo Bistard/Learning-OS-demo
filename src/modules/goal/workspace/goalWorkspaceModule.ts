@@ -7,6 +7,14 @@ interface GoalWorkspaceViewState {
   goal: StudyGoal | null;
 }
 
+const TASK_KIND_LABEL: Record<TaskNode['type'], string> = {
+  concept: '概念',
+  practice: '练习',
+  review: '复盘',
+  quiz: '测验',
+  project: '项目',
+};
+
 class GoalWorkspaceViewModel {
   constructor(private readonly root: LearningOsViewModel) {}
 
@@ -60,18 +68,19 @@ class GoalWorkspaceView {
     }
 
     const renderNode = (node: TaskNode): string => {
-      const startDisabled = node.status === 'locked' || node.status === 'complete';
+      const startDisabled = node.status === 'complete';
       const completeDisabled = node.status === 'complete';
+      const statusClass = node.status === 'complete' ? 'complete' : '';
       return `
-        <div class="tree-node ${node.status}">
+        <div class="tree-node ${statusClass}">
           <div class="node-content">
             <div class="node-copy">
-              <p class="label">${node.type}</p>
+              <p class="label">${TASK_KIND_LABEL[node.type] ?? '任务'}</p>
               <strong>${node.title}</strong>
               <p class="microcopy">${node.summary}</p>
             </div>
             <div class="node-meta">
-              <span class="pill node-eta">${node.etaMinutes} min</span>
+              <span class="pill node-eta">${node.etaMinutes} 分钟</span>
               <div class="node-actions">
                 <button class="btn ghost" data-node-workspace="${node.id}" ${
                   startDisabled ? 'disabled' : ''
