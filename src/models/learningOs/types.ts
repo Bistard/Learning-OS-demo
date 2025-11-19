@@ -15,6 +15,63 @@ export type TaskKind = 'concept' | 'practice' | 'review' | 'quiz' | 'project';
 
 export type TaskStatus = 'locked' | 'available' | 'in-progress' | 'complete';
 
+export type TaskBenefitLevel = 'high' | 'medium' | 'low';
+
+export type TaskOrigin = 'aiGenerated' | 'curated';
+
+export type LearningStrategyId =
+  | 'priorityLearning'
+  | 'chunking'
+  | 'feynman'
+  | 'predictionBased'
+  | 'aiQuizLoop'
+  | 'paceAdjust'
+  | 'activeRecall';
+
+export type PersonaSignalKey =
+  | 'weakFoundation'
+  | 'likesPractice'
+  | 'prefersAiMentor'
+  | 'fearDifficulty'
+  | 'targetScore90'
+  | 'targetScore60'
+  | 'remaining12h'
+  | 'remaining3h';
+
+export interface TaskPersonaBinding {
+  signal: PersonaSignalKey;
+  label: string;
+  action: string;
+}
+
+export interface TaskNodeTag {
+  id: string;
+  label: string;
+  description: string;
+  type: 'persona' | 'strategy' | 'origin' | 'benefit';
+  order: number;
+}
+
+export interface TaskWhyBlock {
+  statement: string;
+  evidence: string[];
+}
+
+export interface PersonaSignal {
+  id: PersonaSignalKey;
+  label: string;
+  description: string;
+}
+
+export interface LearningPersona {
+  remainingHours: number;
+  targetScore: number;
+  preferences: PersonaSignal[];
+  weaknesses: PersonaSignal[];
+  constraints: PersonaSignal[];
+  strategyLine: string;
+}
+
 export type GoalCreationStep = 'base' | 'materials' | 'generation';
 
 export type GoalCreationTimeMode = 'deadline' | 'countdown';
@@ -47,6 +104,13 @@ export interface TaskNode {
   status: TaskStatus;
   etaMinutes: number;
   summary: string;
+  benefitLevel: TaskBenefitLevel;
+  origin: TaskOrigin;
+  personaBindings: TaskPersonaBinding[];
+  tagSequence: TaskNodeTag[];
+  chunkSteps: string[];
+  strategies: LearningStrategyId[];
+  why: TaskWhyBlock;
   children?: TaskNode[];
 }
 
@@ -72,6 +136,7 @@ export interface GoalProfile {
   advancedSettings?: GoalAdvancedSettings;
   timeMode?: GoalCreationTimeMode;
   countdownHours?: number | null;
+  persona?: LearningPersona;
 }
 
 export interface GoalProgress {

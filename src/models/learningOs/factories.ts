@@ -118,6 +118,7 @@ const createGoal = (): StudyGoal => {
     dailyMinutes: goalSeed.profile.dailyMinutes,
     materials: [...goalSeed.profile.materials],
     resourcesCaptured: goalSeed.profile.resourcesCaptured,
+    persona: goalSeed.profile.persona,
   };
   const progress: GoalProgress = {
     percent: goalSeed.progress.percent,

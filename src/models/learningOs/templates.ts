@@ -11,11 +11,12 @@ import weeklyPlanTemplate from '../../data/templates/weeklyPlan.json';
 import workspaceTemplateData from '../../data/templates/workspace.json';
 import {
   KnowledgeLibraryTemplate,
+  LearningPersona,
+  ResourceHighlight,
   StudyRouteItem,
   TaskNode,
   WeeklyPlanItem,
   WorkspaceState,
-  ResourceHighlight,
 } from './types';
 
 export interface GoalSeed {
@@ -30,6 +31,7 @@ export interface GoalSeed {
     dailyMinutes: number;
     materials: string[];
     resourcesCaptured: number;
+    persona?: LearningPersona;
   };
   progress: {
     percent: number;

@@ -1,15 +1,56 @@
-﻿{
+{
   "id": "goal-linear",
-  "name": "微积分期末考试",
-  "focus": "线性代数核心 + 冲刺 Mock",
+  "name": "线性代数期末冲刺",
+  "focus": "概念复盘 + 压轴 Mock",
   "status": "active",
   "profile": {
-    "targetType": "期末考试",
+    "targetType": "期末考",
     "deadlineDaysFromNow": 18,
     "mastery": 42,
     "dailyMinutes": 150,
-    "materials": ["Lecture slides", "Past midterms", "拍照错题"],
-    "resourcesCaptured": 36
+    "materials": ["Lecture slides", "Past midterms", "助教答疑"],
+    "resourcesCaptured": 36,
+    "persona": {
+      "remainingHours": 12,
+      "targetScore": 90,
+      "preferences": [
+        {
+          "id": "likesPractice",
+          "label": "喜欢刷题",
+          "description": "题海手感好于纯听课。"
+        },
+        {
+          "id": "prefersAiMentor",
+          "label": "先听 AI",
+          "description": "希望 AI 先讲逻辑再实操。"
+        }
+      ],
+      "weaknesses": [
+        {
+          "id": "weakFoundation",
+          "label": "基础薄弱",
+          "description": "矩阵、行列式反复卡壳。"
+        },
+        {
+          "id": "fearDifficulty",
+          "label": "怕难",
+          "description": "需要由易到难的梯度。"
+        }
+      ],
+      "constraints": [
+        {
+          "id": "remaining12h",
+          "label": "剩余 12 小时",
+          "description": "冲刺期自动扩展高收益模块。"
+        },
+        {
+          "id": "targetScore90",
+          "label": "冲刺 90+",
+          "description": "自动添加压轴难题。"
+        }
+      ],
+      "strategyLine": "12 小时冲刺：AI 讲重点 → Chunking 拆题 → Feynman 复述校验。"
+    }
   },
   "progress": {
     "percent": 42,

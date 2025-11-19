@@ -17,6 +17,7 @@ import {
   StudyGoal,
   StudyRouteItem,
   TaskNode,
+  TaskStatus,
   Toast,
   ToastTone,
   WorkspaceAsset,
@@ -610,7 +611,7 @@ export class LearningOsViewModel {
       }
       if (node.id === targetId) {
         changed = true;
-        return { ...node, status: 'complete', children };
+        return { ...node, status: 'complete' as TaskStatus, children };
       }
       if (childChanged) {
         changed = true;
