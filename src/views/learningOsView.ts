@@ -34,7 +34,7 @@ export class LearningOsView {
   private readonly headerModule: ContextHeaderModule;
   private readonly sidebarModule: SidebarMetaModule;
   private readonly tabStripModule: TabStripModule;
-  private navWidth = 260;
+  private navWidth = 248;
   private readonly MIN_NAV_WIDTH = 200;
   private readonly MAX_NAV_WIDTH = 420;
 

@@ -1,9 +1,18 @@
 /**
  * Navigation configuration and shell template helpers for the Learning OS view.
  */
-import { PRIMARY_NAV, NavDefinition } from '../../config/navigation';
+import { ICON_SETTINGS, PRIMARY_NAV, NavDefinition } from '../../config/navigation';
 
 export const SIDE_NAV: ReadonlyArray<NavDefinition> = PRIMARY_NAV;
+
+const NOTE_ICON = `
+  <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true" focusable="false"
+    stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 4h9a3 3 0 0 1 3 3v13l-4-3-4 3V7a3 3 0 0 0-3-3z" />
+    <path d="M9 11h6" />
+    <path d="M9 15h4" />
+  </svg>
+`;
 
 export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string => {
   const navMarkup = navItems
@@ -29,7 +38,7 @@ export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string
             ${navMarkup}
           </div>
           <button class="side-link" data-page="settings" type="button">
-            <span class="icon">⚙️</span>
+            <span class="icon">${ICON_SETTINGS}</span>
             <span>设置</span>
           </button>
           <div class="side-divider" role="presentation"></div>
@@ -37,7 +46,7 @@ export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string
           <div class="side-meta" data-view="side-meta"></div>
           <div class="side-note-cta">
             <button class="side-note-button" type="button" data-action="create-note">
-              <span class="icon">📝</span>
+              <span class="icon">${NOTE_ICON}</span>
               <span>新建笔记</span>
             </button>
           </div>

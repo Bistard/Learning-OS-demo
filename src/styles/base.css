@@ -1,29 +1,69 @@
 /**
- * Base styles: tokens, resets, and typography scaffold.
- *
- * Usage:
- * ```css
- * @import './base.css';
- * ```
+ * Base styles: shared design tokens + typography aligned to the 小墨 UI style guide.
  */
 
 :root {
-  --orange: #0f0f10;
-  --orange-soft: #ededee;
-  --bg: #f5f5f6;
+  /* Brand + accent palette */
+  --brand-primary: #2a4cff;
+  --brand-primary-strong: #1d38d8;
+  --brand-secondary: #6e6bef;
+  --brand-soft: #e6e9ff;
+  --accent-success: #2fb67d;
+  --accent-info: #4a7df0;
+  --accent-warning: #f5b945;
+
+  /* Neutral surfaces */
+  --canvas: #f7f8fa;
   --surface: #ffffff;
-  --text: #111113;
-  --muted: #6d6d73;
-  --border: #d4d4d8;
-  --success: #16a34a;
-  --info: #0ea5e9;
-  --warning: #f97316;
-  --shadow-lg: 0 18px 50px rgba(4, 5, 6, 0.08);
-  --shadow-md: 0 6px 24px rgba(4, 5, 6, 0.06);
-  --radius-lg: 20px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
-  --nav-width: 260px;
+  --surface-muted: #f0f2f8;
+  --surface-translucent: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.45);
+
+  /* Typography */
+  --text-strong: #1a1a1a;
+  --text-body: #2e2f33;
+  --text-muted: #5e5e5e;
+  --text-subtle: #7c7f86;
+
+  /* Lines + elevation */
+  --border: #e5e5e5;
+  --divider: rgba(17, 24, 39, 0.06);
+  --shadow-lg: 0 35px 120px rgba(38, 52, 79, 0.12);
+  --shadow-md: 0 18px 60px rgba(30, 41, 82, 0.08);
+  --shadow-sm: 0 8px 28px rgba(23, 30, 56, 0.06);
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --glow-brand: 0 0 0 1px rgba(42, 76, 255, 0.25), 0 15px 40px rgba(38, 67, 185, 0.24);
+
+  /* Radii + spacing */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --radius-full: var(--radius-pill);
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* Motion */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-slow: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  --glass-blur: 26px;
+
+  /* Layout */
+  --nav-width: 248px;
+
+  /* Legacy aliases (until all modules adopt the new tokens) */
+  --orange: var(--brand-primary);
+  --orange-soft: var(--brand-soft);
+  --bg: var(--canvas);
+  --text: var(--text-body);
+  --muted: var(--text-muted);
 }
 
 *,
@@ -32,17 +72,30 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+  font-family: 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--canvas);
+  color: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga', 'tnum';
 }
 
 a {
-  color: var(--orange);
+  color: var(--brand-primary);
   text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--brand-primary-strong);
 }
 
 h1,
@@ -52,32 +105,60 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-weight: 700;
-  line-height: 1.2;
+  color: var(--text-strong);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.25rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+}
+
+h3 {
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.125rem);
+  font-weight: 500;
 }
 
 p {
   margin: 0;
-  line-height: 1.6;
+  color: var(--text-body);
+}
+
+small {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 ul,
 ol {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 1.25rem;
 }
 
 main {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--space-7) var(--space-6);
 }
 
-button {
+button,
+input,
+textarea,
+select {
   font: inherit;
+  color: inherit;
 }
 
 img {
   max-width: 100%;
   height: auto;
+}
+
+::selection {
+  background: rgba(42, 76, 255, 0.2);
+  color: var(--text-strong);
 }
