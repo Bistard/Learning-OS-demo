@@ -124,10 +124,16 @@ export class LearningOsView {
     toast.className = `toast ${tone}`;
     toast.textContent = message;
     this.toastHost.appendChild(toast);
+    this.toastHost.classList.add('active');
     requestAnimationFrame(() => toast.classList.add('show'));
     window.setTimeout(() => {
       toast.classList.remove('show');
-      window.setTimeout(() => toast.remove(), 200);
-    }, 2600);
+      window.setTimeout(() => {
+        toast.remove();
+        if (!this.toastHost.hasChildNodes()) {
+          this.toastHost.classList.remove('active');
+        }
+      }, 200);
+    }, 1500);
   }
 }

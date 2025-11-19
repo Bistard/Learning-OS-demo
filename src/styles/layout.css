@@ -1107,6 +1107,7 @@ body.is-resizing-nav {
   grid-template-columns: minmax(0, var(--reader-percent, 50%)) 12px minmax(0, var(--notes-percent, 50%));
   gap: 24px;
   align-items: stretch;
+  position: relative;
 }
 
 .learning-system-reader,
@@ -1208,11 +1209,40 @@ body.is-resizing-nav {
   gap: 8px;
   justify-content: center;
   margin-left: auto;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
 }
 
 .note-reader-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.toast-area {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 1200;
+  background: transparent;
+  transition: background 0.25s ease;
+}
+
+.toast-area.active {
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+.toast-area .toast {
+  pointer-events: auto;
+  max-width: min(420px, 90vw);
+  text-align: center;
 }
 
 @media (max-width: 1200px) {
@@ -1224,9 +1254,6 @@ body.is-resizing-nav {
     order: 2;
   }
 
-  .note-panel-expander {
-    margin-top: 12px;
-  }
 }
 
 .note-reader {
