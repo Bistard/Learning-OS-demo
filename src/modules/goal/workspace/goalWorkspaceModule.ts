@@ -1,4 +1,10 @@
-import { Page, PersonaSignal, StudyGoal, TaskNode } from '../../../models/learningOsModel';
+import {
+  Page,
+  PersonaSignal,
+  StudyGoal,
+  TaskNode,
+  TaskNodeTag,
+} from '../../../models/learningOsModel';
 import { LearningOsViewModel, ViewSnapshot } from '../../../viewModels/learningOsViewModel';
 import { bindListClick } from '../../../utils/dom';
 import { RenderRegions, UiModule } from '../../types';
@@ -41,6 +47,15 @@ const BENEFIT_LABEL: Record<TaskNode['benefitLevel'], string> = {
   low: '收益低',
 };
 
+const TAG_LABEL_TEXT: Record<string, string> = {
+  priorityLearning: '收益优先',
+  chunking: '拆题法',
+  feynman: '费曼讲法',
+  activeRecall: '主动回忆',
+  aiQuizLoop: '练测循环',
+  paceAdjust: '节奏调度',
+};
+
 class GoalWorkspaceViewModel {
   constructor(private readonly root: LearningOsViewModel) {}
 
@@ -75,10 +90,9 @@ class GoalWorkspaceViewModel {
       weaknesses: persona?.weaknesses ?? [],
       constraints: persona?.constraints ?? [],
       strategyLine:
-        persona?.strategyLine ??
-        '优先啃高收益节点 → Chunking 拆题 → Active Recall 快速回顾。',
+        persona?.strategyLine ?? '优先吃掉高收益节点 → 拆题三步走 → 主动回忆快复盘。',
       progress: this.computeEtaProgress(goal.taskTree),
-      cadenceNote: '每 1 小时自动触发 Quick Review / 重新规划学习节奏。',
+      cadenceNote: '每 1 小时自动触发快速回顾并重新规划节奏。',
     };
   }
 
@@ -131,6 +145,7 @@ class GoalWorkspaceView {
         <div class="panel-head">
           <p class="eyebrow">任务树</p>
           <h3>学习路径节点</h3>
+          <p class="microcopy">所有节点均可打标签，默认走收益优先 → 拆题 → 费曼讲法 → 主动回忆。</p>
         </div>
         <div>${this.renderTaskTree(state.goal.taskTree)}</div>
         ${state.showMockExamCta ? this.renderMockExamCta() : ''}
@@ -146,6 +161,14 @@ class GoalWorkspaceView {
       const id = element.getAttribute('data-node-complete');
       if (id) this.viewModel.markTaskNodeComplete(id);
     });
+
+    bindListClick(regions.content, '[data-node-toggle]', (element) => {
+      const id = element.getAttribute('data-node-toggle');
+      if (!id) return;
+      this.toggleNodeDetails(id, element as HTMLElement, regions.content);
+    });
+
+    this.primeCollapsibles(regions.content);
   }
 
   private renderPersonaPanel(panel: PersonaPanelState): string {
@@ -220,28 +243,30 @@ class GoalWorkspaceView {
       const statusClass = node.status === 'complete' ? 'complete' : '';
       return `
         <div class="tree-node ${statusClass}">
-          <header class="node-header">
-            <div>
-              <p class="label">${TASK_KIND_LABEL[node.type] ?? '任务'}</p>
-              <strong>${node.title}</strong>
+          <div class="node-body">
+            <div class="node-main">
+              <header class="node-header">
+                <div>
+                  <p class="label">${TASK_KIND_LABEL[node.type] ?? '任务'}</p>
+                  <strong>${node.title}</strong>
+                </div>
+                <div class="node-meta">
+                  <span class="pill node-eta">${node.etaMinutes} 分钟</span>
+                  <span class="pill benefit ${node.benefitLevel}">${BENEFIT_LABEL[node.benefitLevel]}</span>
+                </div>
+              </header>
+              <p class="microcopy">${node.summary}</p>
+              ${this.renderTagSequence(node.tagSequence)}
+              ${this.renderNodeDetails(node)}
             </div>
-            <div class="node-meta">
-              <span class="pill node-eta">${node.etaMinutes} 分钟</span>
-              <span class="pill benefit ${node.benefitLevel}">${BENEFIT_LABEL[node.benefitLevel]}</span>
+            <div class="node-actions">
+              <button class="btn primary slim" data-node-workspace="${node.id}" ${
+                startDisabled ? 'disabled' : ''
+              }>开始学习</button>
+              <button class="btn secondary slim" data-node-complete="${node.id}" ${
+                completeDisabled ? 'disabled' : ''
+              }>标记完成</button>
             </div>
-          </header>
-          <p class="microcopy">${node.summary}</p>
-          ${this.renderTagSequence(node.tagSequence)}
-          ${this.renderPersonaBindings(node.personaBindings)}
-          ${this.renderChunkSteps(node.chunkSteps)}
-          ${this.renderWhy(node.why)}
-          <div class="node-actions">
-            <button class="btn ghost" data-node-workspace="${node.id}" ${
-              startDisabled ? 'disabled' : ''
-            }>开始学习</button>
-            <button class="btn primary" data-node-complete="${node.id}" ${
-              completeDisabled ? 'disabled' : ''
-            }>标记完成</button>
           </div>
           ${
             node.children
@@ -255,21 +280,46 @@ class GoalWorkspaceView {
     return nodes.map(renderNode).join('');
   }
 
+  private renderNodeDetails(node: TaskNode): string {
+    const persona = this.renderPersonaBindings(node.personaBindings);
+    const chunk = this.renderChunkSteps(node.chunkSteps);
+    const why = this.renderWhy(node.why);
+    const details = [persona, chunk, why].filter(Boolean).join('');
+    if (!details) {
+      return '';
+    }
+    return `
+      <div class="node-details">
+        <button class="node-toggle" type="button" data-node-toggle="${node.id}" aria-expanded="true">
+          <span>学习依据</span>
+          <span class="node-toggle-icon" aria-hidden="true"></span>
+        </button>
+        <div class="node-collapsible" data-node-details="${node.id}">
+          ${details}
+        </div>
+      </div>
+    `;
+  }
+
   private renderTagSequence(tags: TaskNode['tagSequence']): string {
     if (!tags || tags.length === 0) return '';
     const sorted = [...tags].sort((a, b) => a.order - b.order);
     return `
       <div class="node-tags">
         ${sorted
-          .map(
-            (tag) =>
-              `<span class="tag-chip tag-${tag.type}" title="${tag.description}">
-                ${tag.label}
-              </span>`
-          )
+          .map((tag) => {
+            const label = this.formatTagLabel(tag);
+            return `<span class="tag-chip tag-${tag.type}" title="${tag.description}">
+              ${label}
+            </span>`;
+          })
           .join('')}
       </div>
     `;
+  }
+
+  private formatTagLabel(tag: TaskNodeTag): string {
+    return TAG_LABEL_TEXT[tag.id] ?? tag.label;
   }
 
   private renderPersonaBindings(bindings: TaskNode['personaBindings']): string {
@@ -296,7 +346,7 @@ class GoalWorkspaceView {
     if (!steps || steps.length === 0) return '';
     return `
       <div class="node-section chunk-plan">
-        <p class="section-label">Chunking 计划</p>
+        <p class="section-label">拆题计划</p>
         <ol class="chunk-steps">
           ${steps.map((step) => `<li>${step}</li>`).join('')}
         </ol>
@@ -320,10 +370,32 @@ class GoalWorkspaceView {
   private renderMockExamCta(): string {
     return `
       <div class="mock-exam-cta">
-        <p class="microcopy">需要整套检验？AI 将提供一键 Mock Exam（即将上线）。</p>
-        <button class="btn secondary" type="button" disabled>AI 生成 Mock Exam</button>
+        <p class="microcopy">需要整套检验？AI 将提供一键模考（即将上线）。</p>
+        <button class="btn secondary" type="button" disabled>AI 生成模考</button>
       </div>
     `;
+  }
+
+  private primeCollapsibles(scope: HTMLElement): void {
+    const containers = scope.querySelectorAll<HTMLElement>('.node-collapsible');
+    containers.forEach((container) => {
+      if (container.classList.contains('collapsed')) {
+        container.style.maxHeight = '0px';
+        return;
+      }
+      container.style.maxHeight = `${container.scrollHeight}px`;
+    });
+  }
+
+  private toggleNodeDetails(id: string, toggle: HTMLElement | null, scope: HTMLElement): void {
+    const container = scope.querySelector<HTMLElement>(`[data-node-details="${id}"]`);
+    if (!container) return;
+    const collapsed = container.classList.toggle('collapsed');
+    container.style.maxHeight = collapsed ? '0px' : `${container.scrollHeight}px`;
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+      toggle.classList.toggle('collapsed', collapsed);
+    }
   }
 }
 

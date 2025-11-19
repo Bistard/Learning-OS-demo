@@ -5,14 +5,14 @@
     "type": "concept",
     "status": "available",
     "etaMinutes": 90,
-    "summary": "AI 降维讲核心脑图 + 预测考点，带 3 张抽认卡。",
+    "summary": "AI 降维讲核心脑图 + 预测考点，配 3 张抽认卡。",
     "benefitLevel": "high",
     "origin": "aiGenerated",
     "personaBindings": [
       {
         "signal": "weakFoundation",
         "label": "基础薄弱",
-        "action": "放在路径顶部并拆成 4 个 chunk。"
+        "action": "放在路径顶部并拆成 4 步。"
       },
       {
         "signal": "prefersAiMentor",
@@ -28,7 +28,7 @@
     "tagSequence": [
       {
         "id": "priorityLearning",
-        "label": "Priority Learning",
+        "label": "收益优先",
         "description": "收益最高的节点提前处理。",
         "type": "strategy",
         "order": 1
@@ -56,10 +56,10 @@
       }
     ],
     "chunkSteps": [
-      "AI 讲 3 张矩阵/向量脑图，串联线性无关与维度。",
-      "Chunk 1：10 分钟复盘行列式定义，立即做 2 道例题。",
-      "Chunk 2：AI 操作行初等变换，你用 Feynman 复述。",
-      "Chunk 3：预测近三年真题入口，自动生成抽认卡。"
+      "AI 先给 3 张矩阵/向量脑图，串联线性无关与维度。",
+      "步骤 1：10 分钟复盘行列式定义，立即做 2 道例题。",
+      "步骤 2：AI 演示行初等变换，你用费曼讲法复述。",
+      "步骤 3：预测近三年真题入口，自动生成抽认卡。"
     ],
     "strategies": [
       "priorityLearning",
@@ -78,11 +78,11 @@
     "children": [
       {
         "id": "node-eigen",
-        "title": "特征值 & 相似对角化",
+        "title": "特征值与相似对角化",
         "type": "concept",
         "status": "available",
         "etaMinutes": 35,
-        "summary": "AI 讲 + 你讲（Feynman）+ quick quiz 校验。",
+        "summary": "AI 讲 + 你讲（费曼）+ 快问校验。",
         "benefitLevel": "high",
         "origin": "aiGenerated",
         "personaBindings": [
@@ -100,7 +100,7 @@
         "tagSequence": [
           {
             "id": "feynman",
-            "label": "Feynman 技巧",
+            "label": "费曼讲法",
             "description": "AI 讲解 → 你复述 → 小墨检查。",
             "type": "strategy",
             "order": 1
@@ -108,22 +108,22 @@
           {
             "id": "activeRecall",
             "label": "主动回忆",
-            "description": "段落结束前弹出 3 个 quick quiz。",
+            "description": "段落结束前弹出 3 个快问。",
             "type": "strategy",
             "order": 2
           },
           {
             "id": "priorityLearning",
-            "label": "Priority Learning",
-            "description": "特征值题决定 Mock 得分。",
+            "label": "收益优先",
+            "description": "特征值题决定模考得分。",
             "type": "strategy",
             "order": 3
           }
         ],
         "chunkSteps": [
           "AI 通过几何动画讲特征值含义。",
-          "你用 ELI5 方式复述，AI 纠错并补空。",
-          "做 2 道预测题并生成错因 flashcard。"
+          "你用“像讲给小孩听”的方式复述，AI 纠错并补空。",
+          "做 2 道预测题并生成错因抽认卡。"
         ],
         "strategies": [
           "priorityLearning",
@@ -132,10 +132,10 @@
           "activeRecall"
         ],
         "why": {
-          "statement": "特征值是最终 Mock 的 20 分大题核心。",
+          "statement": "特征值是最终模考 20 分大题的核心。",
           "evidence": [
             "冲刺 90+ 必须秒杀对角化变换。",
-            "抽认卡 + quiz 组合能提升记忆留存 30%。"
+            "抽认卡 + 快问组合能提升记忆留存 30%。"
           ]
         }
       },
@@ -145,7 +145,7 @@
         "type": "practice",
         "status": "locked",
         "etaMinutes": 45,
-        "summary": "用往年真题 + AI 变式，chunking 拆 3 步。",
+        "summary": "用往年真题 + AI 变式，拆题三步走。",
         "benefitLevel": "medium",
         "origin": "curated",
         "personaBindings": [
@@ -163,14 +163,14 @@
         "tagSequence": [
           {
             "id": "chunking",
-            "label": "Chunking",
+            "label": "拆题法",
             "description": "大题拆为 3 步模板。",
             "type": "strategy",
             "order": 1
           },
           {
             "id": "paceAdjust",
-            "label": "自动调节节奏",
+            "label": "节奏调度",
             "description": "做完一小时自动回顾 / 规划。",
             "type": "strategy",
             "order": 2
@@ -184,9 +184,9 @@
           }
         ],
         "chunkSteps": [
-          "Chunk 1：识别题干类型，列 rank-nullity 框架。",
-          "Chunk 2：AI 给提示，你完成核算并口头复述。",
-          "Chunk 3：生成错因标签 + Quick review。"
+          "步骤 1：识别题干类型，列出 rank-nullity 框架。",
+          "步骤 2：AI 给提示，你完成核算并口头复述。",
+          "步骤 3：生成错因标签和快问回顾。"
         ],
         "strategies": [
           "chunking",
@@ -194,7 +194,7 @@
           "paceAdjust"
         ],
         "why": {
-          "statement": "rank-nullity 是投影与最小二乘题的评分点。",
+          "statement": "Rank-Nullity 是投影与最小二乘题的评分点。",
           "evidence": [
             "掌握模板即可覆盖 2 道 15 分问法。",
             "逐题添加错因有助于下一次预测题。"
@@ -205,11 +205,11 @@
   },
   {
     "id": "node-application",
-    "title": "应用强化：最小二乘 & 投影",
+    "title": "应用强化：最小二乘与投影",
     "type": "project",
     "status": "locked",
     "etaMinutes": 120,
-    "summary": "AI 生成案例 + 大题讲解，包含 quiz / 抽认卡。",
+    "summary": "AI 生成案例 + 大题讲解，包含测验与抽认卡。",
     "benefitLevel": "high",
     "origin": "aiGenerated",
     "personaBindings": [
@@ -234,7 +234,7 @@
       },
       {
         "id": "aiQuizLoop",
-        "label": "Quiz + 抽认卡",
+        "label": "练测循环",
         "description": "题目、讲解、抽认卡全自动生成。",
         "type": "strategy",
         "order": 2
@@ -248,10 +248,10 @@
       }
     ],
     "chunkSteps": [
-      "Chunk 1：AI 生成案例 & 讲解最小二乘推导。",
-      "Chunk 2：你根据提示拆 4 步推导并录音复述。",
-      "Chunk 3：自动生成 5 题 quiz + 5 张抽认卡。",
-      "Chunk 4：小墨评估理解度并重排节奏。"
+      "步骤 1：AI 生成案例并讲解最小二乘推导。",
+      "步骤 2：你按提示拆 4 步推导并口头复述。",
+      "步骤 3：自动生成 5 题测验 + 5 张抽认卡。",
+      "步骤 4：小墨评估理解度并重排节奏。"
     ],
     "strategies": [
       "predictionBased",
@@ -260,27 +260,27 @@
       "paceAdjust"
     ],
     "why": {
-      "statement": "项目题直连 Mock 第三问，提分最快。",
+      "statement": "项目题直连模考第三问，提分最快。",
       "evidence": [
         "自动化讲解减少 40% 查资料时间。",
-        "Quiz + 抽认卡组合让记忆翻倍。"
+        "练测循环让记忆翻倍。"
       ]
     }
   },
   {
     "id": "node-mock",
-    "title": "终极 Mock + Active Recall",
+    "title": "终极模考 + 主动回忆",
     "type": "quiz",
     "status": "locked",
     "etaMinutes": 80,
-    "summary": "AI 拼 Mock，结束前弹出 3 个 Active Recall quick quiz。",
+    "summary": "AI 拼装模考，结束前弹出 3 个主动回忆快问。",
     "benefitLevel": "high",
     "origin": "aiGenerated",
     "personaBindings": [
       {
         "signal": "targetScore90",
         "label": "冲刺 90+",
-        "action": "Mock 难度自动提升一档。"
+        "action": "模考难度自动提升一档。"
       },
       {
         "signal": "remaining12h",
@@ -292,13 +292,13 @@
       {
         "id": "activeRecall",
         "label": "主动回忆",
-        "description": "模块结束前弹 quick quiz。",
+        "description": "模块结束前弹出快问。",
         "type": "strategy",
         "order": 1
       },
       {
         "id": "paceAdjust",
-        "label": "自动调节节奏",
+        "label": "节奏调度",
         "description": "每小时做快速回顾/规划。",
         "type": "strategy",
         "order": 2
@@ -306,15 +306,15 @@
       {
         "id": "aiAuto",
         "label": "AI 自动生成",
-        "description": "Mock + 脚本全部由 AI 生成。",
+        "description": "模考 + 讲解全部由 AI 生成。",
         "type": "origin",
         "order": 3
       }
     ],
     "chunkSteps": [
-      "Chunk 1：AI 生成 3 套 Mock 题库，按照 Priority Learning 排序。",
-      "Chunk 2：完成每套后启动 Feynman 复述 + quick quiz。",
-      "Chunk 3：AI 复盘错题，自动压缩或扩展后续路径。"
+      "步骤 1：AI 生成 3 套模考题库，按照收益优先排序。",
+      "步骤 2：完成每套后启动费曼复述 + 快问测验。",
+      "步骤 3：AI 复盘错题，自动压缩或扩展后续路径。"
     ],
     "strategies": [
       "predictionBased",
@@ -324,10 +324,10 @@
       "feynman"
     ],
     "why": {
-      "statement": "冲刺阶段需要用预测 Mock 来验证知识闭环。",
+      "statement": "冲刺阶段需要用预测模考来验证知识闭环。",
       "evidence": [
-        "Active Recall 能将保留率提升 25%。",
-        "AI 节奏重排防止时间被 Mock 吃光。"
+        "主动回忆能将保留率提升 25%。",
+        "AI 节奏重排防止时间被模考吃光。"
       ]
     }
   }

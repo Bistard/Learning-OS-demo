@@ -816,6 +816,19 @@ body.is-resizing-nav {
   background: var(--surface);
 }
 
+.task-tree .node-body {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.task-tree .node-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .task-tree .tree-node + .tree-node {
   margin-top: 10px;
 }
@@ -856,9 +869,10 @@ body.is-resizing-nav {
 
 .task-tree .node-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 150px;
 }
 
 .node-tags {
@@ -936,6 +950,58 @@ body.is-resizing-nav {
   border-left-color: rgba(22, 163, 74, 0.6);
 }
 
+.task-tree .node-details {
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  padding-top: 8px;
+}
+
+.node-toggle {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: rgba(17, 24, 39, 0.04);
+  padding: 6px 10px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  color: var(--text);
+}
+
+.node-toggle:hover {
+  border-color: var(--border);
+}
+
+.node-toggle.collapsed {
+  background: transparent;
+}
+
+.node-toggle-icon {
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.node-toggle.collapsed .node-toggle-icon {
+  transform: rotate(-135deg);
+}
+
+.node-collapsible {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  will-change: max-height;
+}
+
+.node-collapsible.collapsed {
+  opacity: 0;
+  margin-top: 0;
+}
+
 .task-tree .benefit.high {
   background: rgba(16, 185, 129, 0.18);
   color: var(--success);
@@ -961,6 +1027,11 @@ body.is-resizing-nav {
   flex-direction: column;
   gap: 12px;
   align-items: flex-start;
+}
+
+.btn.slim {
+  padding: 4px 12px;
+  font-size: 12px;
 }
 
 .note-reader {
@@ -1679,5 +1750,15 @@ body.is-resizing-nav {
   }
   .note-workspace {
     grid-template-columns: 1fr;
+  }
+
+  .task-tree .node-body {
+    flex-direction: column;
+  }
+
+  .task-tree .node-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    min-width: auto;
   }
 }
