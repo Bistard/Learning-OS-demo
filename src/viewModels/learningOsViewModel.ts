@@ -22,12 +22,15 @@ import {
   createGoalCreationFlowState,
   createGoalDraft,
   createInitialState,
+  createKnowledgeBase,
+  buildNotesFromKnowledgeBase,
   NEW_GOAL_CONNECTED_VAULTS,
   createStudyRoute,
   createTaskTree,
   createWeeklyPlan,
   nextDeadlineIso,
   KNOWLEDGE_NOTES_CATEGORY_ID,
+  getKnowledgeLibraryTemplate,
 } from '../models/learningOsModel';
 import {
   ensureAdvancedSettings,
@@ -337,6 +340,25 @@ export class LearningOsViewModel {
     return this.knowledgeManager.recordUpload(fileName);
   }
 
+  public setKnowledgeLibrary(libraryId: string): void {
+    if (!libraryId || this.state.knowledgeLibraryId === libraryId) {
+      return;
+    }
+    let knowledgeBase = this.state.knowledgeLibraryStates[libraryId];
+    if (!knowledgeBase) {
+      const template = getKnowledgeLibraryTemplate(libraryId);
+      knowledgeBase = createKnowledgeBase(template);
+    }
+    const notes =
+      this.state.knowledgeLibraryNotes?.[libraryId] ??
+      buildNotesFromKnowledgeBase(knowledgeBase);
+    this.updateState({
+      knowledgeLibraryId: libraryId,
+      knowledgeBase,
+      notes,
+    });
+  }
+
   private createGoalFromDraft(draft: GoalCreationDraft): StudyGoal {
     const id = `goal-${Date.now()}`;
     const preset = getGoalCreationPreset(draft.presetId);
@@ -630,7 +652,20 @@ export class LearningOsViewModel {
   }
 
   private updateState(partial: Partial<LearningOsState>): void {
-    this.assignState(partial);
+    const nextPartial: Partial<LearningOsState> = { ...partial };
+    const fallbackLibraryId = this.state.knowledgeLibraryId ?? 'knowledge-library-default';
+    const targetLibraryId = nextPartial.knowledgeLibraryId ?? fallbackLibraryId;
+    if (nextPartial.knowledgeBase) {
+      const states = { ...(this.state.knowledgeLibraryStates ?? {}) };
+      states[targetLibraryId] = nextPartial.knowledgeBase;
+      nextPartial.knowledgeLibraryStates = states;
+    }
+    if (nextPartial.notes) {
+      const notesMap = { ...(this.state.knowledgeLibraryNotes ?? {}) };
+      notesMap[targetLibraryId] = nextPartial.notes;
+      nextPartial.knowledgeLibraryNotes = notesMap;
+    }
+    this.assignState(nextPartial);
     this.publish();
   }
 

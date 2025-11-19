@@ -157,6 +157,14 @@ export interface KnowledgeBaseTemplate {
   categories: KnowledgeCategory[];
 }
 
+export interface KnowledgeLibrarySummary {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface KnowledgeLibraryTemplate extends KnowledgeBaseTemplate, KnowledgeLibrarySummary {}
+
 export interface AppConfiguration {
   notePreviewEnabled: boolean;
 }
@@ -192,6 +200,10 @@ export interface LearningOsState {
   creationDraft: GoalCreationDraft;
   creationFlow: GoalCreationFlowState;
   knowledgeBase: KnowledgeBaseState;
+  knowledgeLibraryId: string;
+  knowledgeLibraries: KnowledgeLibrarySummary[];
+  knowledgeLibraryStates: Record<string, KnowledgeBaseState>;
+  knowledgeLibraryNotes: Record<string, KnowledgeNote[]>;
   workspace: WorkspaceState;
   notes: KnowledgeNote[];
   configuration: AppConfiguration;

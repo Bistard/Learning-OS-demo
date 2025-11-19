@@ -1,9 +1,11 @@
-import { KnowledgeCategory } from '../../../models/learningOsModel';
+import { KnowledgeCategory, KnowledgeLibrarySummary } from '../../../models/learningOsModel';
 
 export interface KnowledgeBaseViewState {
   categories: KnowledgeCategory[];
   activeGoalName: string;
   editingCategoryId: string | null;
+  libraries: KnowledgeLibrarySummary[];
+  activeLibraryId: string;
 }
 
 export interface KnowledgeCategoryDraft {
@@ -11,4 +13,3 @@ export interface KnowledgeCategoryDraft {
   icon: string;
   color: string;
 }
-

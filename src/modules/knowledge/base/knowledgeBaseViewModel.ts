@@ -10,14 +10,16 @@ export class KnowledgeBaseViewModel {
 
   constructor(private readonly root: LearningOsViewModel) {}
 
-  public buildState(snapshot: ViewSnapshot): KnowledgeBaseViewState {
-    this.lastCategoryOrder = snapshot.knowledgeBase.categories.map((category) => category.id);
-    return {
-      categories: snapshot.knowledgeBase.categories,
+  public buildState(snapshot: ViewSnapshot): KnowledgeBaseViewState {
+    this.lastCategoryOrder = snapshot.knowledgeBase.categories.map((category) => category.id);
+    return {
+      categories: snapshot.knowledgeBase.categories,
       activeGoalName: snapshot.activeGoal?.name ?? '未绑定目标',
-      editingCategoryId: this.editingCategoryId,
-    };
-  }
+      editingCategoryId: this.editingCategoryId,
+      libraries: snapshot.knowledgeLibraries,
+      activeLibraryId: snapshot.knowledgeLibraryId,
+    };
+  }
 
   public addCategory(payload: KnowledgeCategoryDraft): void {
     this.root.addKnowledgeCategory(payload);
@@ -25,6 +27,10 @@ export class KnowledgeBaseViewModel {
 
   public recordUpload(fileName: string): string {
     return this.root.recordKnowledgeUpload(fileName);
+  }
+
+  public selectLibrary(libraryId: string): void {
+    this.root.setKnowledgeLibrary(libraryId);
   }
 
   public openNote(noteId: string): void {

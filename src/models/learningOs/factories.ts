@@ -18,6 +18,7 @@ import {
   KnowledgeCategory,
   KnowledgeItem,
   KnowledgeNote,
+  KnowledgeLibraryTemplate,
   LearningOsState,
   ResourceHighlight,
   StudyGoal,
@@ -29,6 +30,8 @@ import {
 import {
   goalSeed,
   knowledgeBaseTemplate,
+  knowledgeLibraryTemplates,
+  defaultKnowledgeLibraryId,
   resourceHighlightsData,
   studyRouteData,
   taskTreeData,
@@ -74,16 +77,16 @@ export const createTaskTree = (): TaskNode[] => taskTreeData.map(cloneTaskNode);
 export const createResourceHighlights = (): ResourceHighlight[] =>
   resourceHighlightsData.map((highlight) => ({ ...highlight }));
 
-export const createKnowledgeBase = (): KnowledgeBaseState => ({
-  categories: knowledgeBaseTemplate.categories.map<KnowledgeCategory>(
-    (category: KnowledgeCategory) => ({
-      ...category,
-      items: category.items.map((item: KnowledgeItem) => ({ ...item })),
-    })
-  ),
+export const createKnowledgeBase = (
+  template: KnowledgeLibraryTemplate = knowledgeBaseTemplate
+): KnowledgeBaseState => ({
+  categories: template.categories.map<KnowledgeCategory>((category: KnowledgeCategory) => ({
+    ...category,
+    items: category.items.map((item: KnowledgeItem) => ({ ...item })),
+  })),
 });
 
-const createNotesFromKnowledgeBase = (knowledgeBase: KnowledgeBaseState): KnowledgeNote[] => {
+export const buildNotesFromKnowledgeBase = (knowledgeBase: KnowledgeBaseState): KnowledgeNote[] => {
   const notesCategory = knowledgeBase.categories.find(
     (category) => category.id === KNOWLEDGE_NOTES_CATEGORY_ID
   );
@@ -169,8 +172,25 @@ const createWorkspaceState = (): WorkspaceState => ({
  * Provides the aggregate application state used by the view-model.
  */
 export const createInitialState = (): LearningOsState => {
-  const knowledgeBase = createKnowledgeBase();
-  const notes = createNotesFromKnowledgeBase(knowledgeBase);
+  const librarySummaries = knowledgeLibraryTemplates.map((template) => ({
+    id: template.id,
+    title: template.title,
+    description: template.description,
+  }));
+  const knowledgeLibraryStates: Record<string, KnowledgeBaseState> = {};
+  const knowledgeLibraryNotes: Record<string, KnowledgeNote[]> = {};
+  knowledgeLibraryTemplates.forEach((template) => {
+    const state = createKnowledgeBase(template);
+    knowledgeLibraryStates[template.id] = state;
+    knowledgeLibraryNotes[template.id] = buildNotesFromKnowledgeBase(state);
+  });
+  const preferredLibraryId =
+    knowledgeLibraryStates[defaultKnowledgeLibraryId]
+      ? defaultKnowledgeLibraryId
+      : librarySummaries[0]?.id ?? defaultKnowledgeLibraryId;
+  const knowledgeBase =
+    knowledgeLibraryStates[preferredLibraryId] ?? { categories: [] };
+  const notes = knowledgeLibraryNotes[preferredLibraryId] ?? [];
   const goal = createGoal();
   return {
     page: 'goalDashboard',
@@ -179,6 +199,10 @@ export const createInitialState = (): LearningOsState => {
     creationDraft: createGoalDraft(),
     creationFlow: createGoalCreationFlowState(),
     knowledgeBase,
+    knowledgeLibraryId: preferredLibraryId,
+    knowledgeLibraries: librarySummaries,
+    knowledgeLibraryStates,
+    knowledgeLibraryNotes,
     workspace: createWorkspaceState(),
     notes,
     configuration: createConfiguration(),

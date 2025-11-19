@@ -1,0 +1,165 @@
+﻿{
+  "id": "library-linear-algebra",
+  "title": "线性代数",
+  "description": "矩阵、向量空间与特征值的高频考点",
+  "connectedVaults": {
+    "activeGoal": ["kb-flashcards", "kb-mistakes", "kb-notes"],
+    "newGoal": ["kb-uncategorized", "kb-notes"]
+  },
+  "categories": [
+    {
+      "id": "kb-flashcards",
+      "title": "概念速记",
+      "kind": "flashcards",
+      "isFixed": false,
+      "icon": "🧠",
+      "color": "#f97316",
+      "items": [
+        {
+          "id": "kb-linear-card-1",
+          "summary": "特征值与特征向量",
+          "detail": "Av = λv；对任意非零向量 v 满足该关系即可称为特征向量。",
+          "source": "AI 解析",
+          "updatedAt": "今天 08:26",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-linear-card-2",
+          "summary": "秩与零空间",
+          "detail": "rank(A) + nullity(A) = 列数，来自秩-零度定理。",
+          "source": "AI 解析",
+          "updatedAt": "今天 08:32",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-linear-card-3",
+          "summary": "相似变换",
+          "detail": "若 B = P^{-1}AP，则 A 与 B 有相同特征值与行列式。",
+          "source": "课堂速记",
+          "updatedAt": "今天 08:41",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-linear-card-4",
+          "summary": "正交矩阵",
+          "detail": "Q^TQ = I；列向量构成标准正交基且 |det Q| = 1。",
+          "source": "课堂速记",
+          "updatedAt": "今天 08:45",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-mistakes",
+      "title": "易错警示",
+      "kind": "mistakes",
+      "isFixed": false,
+      "icon": "⚠️",
+      "color": "#facc15",
+      "items": [
+        {
+          "id": "kb-linear-mistake-1",
+          "summary": "列向量线性相关判定遗漏",
+          "detail": "忘记检查零向量或重复列，导致 rank 估计偏高。",
+          "source": "练习本",
+          "updatedAt": "昨天 22:41",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-linear-mistake-2",
+          "summary": "对角化条件误判",
+          "detail": "仅有不同特征值时可对角化，重根需保证特征向量充足。",
+          "source": "练习本",
+          "updatedAt": "昨天 21:18",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-linear-mistake-3",
+          "summary": "行列式分块计算出错",
+          "detail": "非三角块矩阵时不能直接把子块行列式相乘。",
+          "source": "练习本",
+          "updatedAt": "昨天 21:05",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-links",
+      "title": "延伸阅读",
+      "kind": "links",
+      "isFixed": true,
+      "icon": "🔗",
+      "color": "#38bdf8",
+      "items": [
+        {
+          "id": "kb-linear-link-1",
+          "summary": "MIT 18.06 Lecture 5",
+          "detail": "投影与最小二乘法的可视化推导。",
+          "source": "课程链接",
+          "updatedAt": "昨天 13:20",
+          "href": "https://ocw.mit.edu/18-06"
+        },
+        {
+          "id": "kb-linear-link-2",
+          "summary": "Sheldon Axler《Linear Algebra Done Right》",
+          "detail": "特征值章节（Chapter 7）",
+          "source": "书籍",
+          "updatedAt": "昨天 09:12",
+          "href": "https://linear.axler.net/"
+        }
+      ]
+    },
+    {
+      "id": "kb-uploads",
+      "title": "上传资料",
+      "kind": "uploads",
+      "isFixed": true,
+      "icon": "📂",
+      "color": "#a855f7",
+      "items": []
+    },
+    {
+      "id": "kb-notes",
+      "title": "推导笔记",
+      "kind": "notes",
+      "isFixed": true,
+      "icon": "📝",
+      "color": "#34d399",
+      "items": [
+        {
+          "id": "kb-linear-note-1",
+          "summary": "正交投影矩阵推导",
+          "detail": "P = A(A^TA)^{-1}A^T，记录证明每一步的意义。",
+          "source": "课堂手写",
+          "updatedAt": "今天 07:50",
+          "noteId": "note-linear-1"
+        },
+        {
+          "id": "kb-linear-note-2",
+          "summary": "LU 分解条件速查",
+          "detail": "主子式非零即可直接做 Doolittle 分解。",
+          "source": "课堂手写",
+          "updatedAt": "今天 07:45",
+          "noteId": "note-linear-2"
+        },
+        {
+          "id": "kb-linear-note-3",
+          "summary": "特征多项式套路",
+          "detail": "|A - λI| = 0；先列出系数与迹/行列式的关系。",
+          "source": "课堂手写",
+          "updatedAt": "今天 07:40",
+          "noteId": "note-linear-3"
+        }
+      ]
+    },
+    {
+      "id": "kb-uncategorized",
+      "title": "未分类",
+      "kind": "uncategorized",
+      "isFixed": true,
+      "icon": "📥",
+      "color": "#94a3b8",
+      "items": []
+    }
+  ]
+}

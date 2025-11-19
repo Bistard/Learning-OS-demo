@@ -6,3 +6,4 @@
 export * from './learningOs/types';
 export * from './learningOs/constants';
 export * from './learningOs/factories';
+export * from './learningOs/templates';

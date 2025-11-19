@@ -15,6 +15,7 @@ export class KnowledgeBaseView {
   private categoryColorInput: HTMLInputElement | null = null;
   private teardownCategoryInput: (() => void) | null = null;
   private readonly pendingHighlightIds = new Set<string>();
+  private libraryMenuOutsideHandler: ((event: MouseEvent) => void) | null = null;
 
   constructor(
     private readonly viewModel: KnowledgeBaseViewModel,
@@ -22,6 +23,7 @@ export class KnowledgeBaseView {
   ) {}
 
   public render(state: KnowledgeBaseViewState, regions: RenderRegions): void {
+    this.detachLibraryMenu();
     regions.content.innerHTML = this.renderLayout(state);
     this.host = regions.content;
     this.bindInteractions(state);
@@ -29,9 +31,11 @@ export class KnowledgeBaseView {
 
   private renderLayout(state: KnowledgeBaseViewState): string {
     const categories = state.categories.map((category) => this.renderCategory(category, state));
+    const librarySwitcher = this.renderLibrarySwitcher(state);
     return `
       <section class="knowledge-base">
         <header class="kb-toolbar">
+          ${librarySwitcher}
           <input type="file" id="kb-upload-input" hidden multiple />
           <div class="kb-toolbar-actions">
             <button class="btn ghost" id="kb-upload-btn" type="button">上传文件</button>
@@ -45,6 +49,58 @@ export class KnowledgeBaseView {
           </div>
         </div>
       </section>
+    `;
+  }
+
+  private renderLibrarySwitcher(state: KnowledgeBaseViewState): string {
+    if (!state.libraries.length) {
+      return `
+        <div class="kb-library-switcher">
+          <p class="kb-library-empty">暂无可用知识库</p>
+        </div>
+      `;
+    }
+    const active =
+      state.libraries.find((library) => library.id === state.activeLibraryId) ?? state.libraries[0];
+    const options = state.libraries
+      .map((library) => {
+        const isActive = library.id === active.id;
+        const activeClass = isActive ? ' active' : '';
+        const selected = isActive ? 'true' : 'false';
+        return `
+          <button
+            type="button"
+            class="kb-library-option${activeClass}"
+            data-library-option="${escapeHtml(library.id)}"
+            role="option"
+            aria-selected="${selected}"
+          >
+            <strong>${escapeHtml(library.title)}</strong>
+            <span>${escapeHtml(library.description)}</span>
+          </button>
+        `;
+      })
+      .join('');
+    return `
+      <div class="kb-library-switcher">
+        <div class="kb-library-summary">
+          <p class="microcopy">知识库</p>
+        </div>
+        <button
+          class="kb-library-button"
+          id="kb-library-trigger"
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+          <span class="kb-library-button-title">${escapeHtml(active.title)}</span>
+          <span class="kb-library-button-desc">${escapeHtml(active.description)}</span>
+          <span class="kb-library-chevron" aria-hidden="true">?</span>
+        </button>
+        <div class="kb-library-menu" id="kb-library-menu" role="listbox">
+          ${options}
+        </div>
+      </div>
     `;
   }
 
@@ -132,6 +188,7 @@ export class KnowledgeBaseView {
 
   private bindInteractions(state: KnowledgeBaseViewState): void {
     if (!this.host) return;
+    this.bindLibrarySwitcher(state);
     this.bindAddCategory();
     this.bindUploadAction();
     this.bindRenameForms();
@@ -140,6 +197,47 @@ export class KnowledgeBaseView {
     this.bindCategoryMenus(state);
     this.bindNoteShortcuts();
     this.applyHighlights();
+  }
+
+  private bindLibrarySwitcher(state: KnowledgeBaseViewState): void {
+    if (!this.host) return;
+    const trigger = this.host.querySelector<HTMLButtonElement>('#kb-library-trigger');
+    const menu = this.host.querySelector<HTMLDivElement>('#kb-library-menu');
+    if (!trigger || !menu) return;
+    const setExpanded = (expanded: boolean): void =>
+      trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    const closeMenu = (): void => {
+      menu.classList.remove('open');
+      setExpanded(false);
+      this.detachLibraryMenu();
+    };
+    const handleOutside = (event: MouseEvent): void => {
+      if (!menu.contains(event.target as Node) && !trigger.contains(event.target as Node)) {
+        closeMenu();
+      }
+    };
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      const opening = !menu.classList.contains('open');
+      if (opening) {
+        menu.classList.add('open');
+        setExpanded(true);
+        this.detachLibraryMenu();
+        this.libraryMenuOutsideHandler = handleOutside;
+        document.addEventListener('mousedown', handleOutside);
+      } else {
+        closeMenu();
+      }
+    });
+    menu.querySelectorAll<HTMLButtonElement>('[data-library-option]').forEach((button) =>
+      button.addEventListener('click', () => {
+        const libraryId = button.getAttribute('data-library-option');
+        if (libraryId && libraryId !== state.activeLibraryId) {
+          this.viewModel.selectLibrary(libraryId);
+        }
+        closeMenu();
+      })
+    );
   }
 
   private bindAddCategory(): void {
@@ -435,6 +533,12 @@ export class KnowledgeBaseView {
     }
     this.categoryInputForm?.reset();
     this.categoryInputPopover.hidden = true;
+  }
+
+  private detachLibraryMenu(): void {
+    if (!this.libraryMenuOutsideHandler) return;
+    document.removeEventListener('mousedown', this.libraryMenuOutsideHandler);
+    this.libraryMenuOutsideHandler = null;
   }
 
   private submitCategoryInput(): void {

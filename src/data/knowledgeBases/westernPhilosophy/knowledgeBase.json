@@ -1,0 +1,155 @@
+﻿{
+  "id": "library-western-philosophy",
+  "title": "西方哲学",
+  "description": "从古希腊到 20 世纪思想史的结构化提要",
+  "connectedVaults": {
+    "activeGoal": ["kb-flashcards", "kb-mistakes", "kb-notes"],
+    "newGoal": ["kb-uncategorized", "kb-notes"]
+  },
+  "categories": [
+    {
+      "id": "kb-flashcards",
+      "title": "哲学脉络",
+      "kind": "flashcards",
+      "isFixed": false,
+      "icon": "📚",
+      "color": "#f43f5e",
+      "items": [
+        {
+          "id": "kb-philo-card-1",
+          "summary": "柏拉图理念论",
+          "detail": "真实存在于理念界，感知世界只是影子；认识=回忆。",
+          "source": "课堂速记",
+          "updatedAt": "今天 10:05",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-philo-card-2",
+          "summary": "亚里士多德四因说",
+          "detail": "质料因、形式因、动力因、目的因解释事物生成。",
+          "source": "课堂速记",
+          "updatedAt": "今天 10:12",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-philo-card-3",
+          "summary": "笛卡尔方法论",
+          "detail": "普遍怀疑—我思故我在—演绎建构科学体系。",
+          "source": "AI 解析",
+          "updatedAt": "今天 10:20",
+          "goalId": "goal-linear"
+        },
+        {
+          "id": "kb-philo-card-4",
+          "summary": "康德三大批判",
+          "detail": "《纯粹理性》《实践理性》《判断力》构成批判哲学。",
+          "source": "AI 解析",
+          "updatedAt": "今天 10:26",
+          "goalId": "goal-linear"
+        }
+      ]
+    },
+    {
+      "id": "kb-mistakes",
+      "title": "讨论盲点",
+      "kind": "mistakes",
+      "isFixed": false,
+      "icon": "💡",
+      "color": "#f97316",
+      "items": [
+        {
+          "id": "kb-philo-mistake-1",
+          "summary": "混淆经验论与理性论",
+          "detail": "前者强调感官经验，后者强调先天理性，不应简单对立。",
+          "source": "研讨记录",
+          "updatedAt": "昨天 19:40"
+        },
+        {
+          "id": "kb-philo-mistake-2",
+          "summary": "误解海德格尔存在论",
+          "detail": "其核心是此在经验，不是抽象本体论。",
+          "source": "研讨记录",
+          "updatedAt": "昨天 18:15"
+        }
+      ]
+    },
+    {
+      "id": "kb-links",
+      "title": "原典链接",
+      "kind": "links",
+      "isFixed": true,
+      "icon": "🔗",
+      "color": "#0ea5e9",
+      "items": [
+        {
+          "id": "kb-philo-link-1",
+          "summary": "斯坦福哲学百科",
+          "detail": "高质量哲学条目，入门与拓展兼顾。",
+          "source": "在线百科",
+          "updatedAt": "今天 09:00",
+          "href": "https://plato.stanford.edu/"
+        },
+        {
+          "id": "kb-philo-link-2",
+          "summary": "History of Philosophy without any gaps",
+          "detail": "按时间顺序梳理哲学史的播客。",
+          "source": "播客",
+          "updatedAt": "今天 08:50",
+          "href": "https://historyofphilosophy.net/"
+        }
+      ]
+    },
+    {
+      "id": "kb-uploads",
+      "title": "收集资料",
+      "kind": "uploads",
+      "isFixed": true,
+      "icon": "🗂️",
+      "color": "#8b5cf6",
+      "items": []
+    },
+    {
+      "id": "kb-notes",
+      "title": "札记",
+      "kind": "notes",
+      "isFixed": true,
+      "icon": "📝",
+      "color": "#10b981",
+      "items": [
+        {
+          "id": "kb-philo-note-1",
+          "summary": "《斐多篇》阅读摘录",
+          "detail": "灵魂不灭论与理念界论证结构。",
+          "source": "读书笔记",
+          "updatedAt": "今天 09:30",
+          "noteId": "note-philo-1"
+        },
+        {
+          "id": "kb-philo-note-2",
+          "summary": "洛克知识论",
+          "detail": "白板说+简单观念组合为复杂观念。",
+          "source": "读书笔记",
+          "updatedAt": "今天 09:20",
+          "noteId": "note-philo-2"
+        },
+        {
+          "id": "kb-philo-note-3",
+          "summary": "尼采永恒轮回",
+          "detail": "作为价值检验的“最大负担”。",
+          "source": "读书笔记",
+          "updatedAt": "今天 09:10",
+          "noteId": "note-philo-3"
+        }
+      ]
+    },
+    {
+      "id": "kb-uncategorized",
+      "title": "未分类",
+      "kind": "uncategorized",
+      "isFixed": true,
+      "icon": "📥",
+      "color": "#94a3b8",
+      "items": []
+    }
+  ]
+}
