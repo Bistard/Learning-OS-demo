@@ -73,11 +73,44 @@ class LearningWorkspaceView {
   private host: HTMLElement | null = null;
   private splitPercent = 50;
   private dragPointerId: number | null = null;
+  private selectionController: RectangleSelectionController | null = null;
+  private readonly selectionMenuGroups = [
+    {
+      label: '解释类',
+      actions: ['这段什么意思？', '能不能讲简单点？', '换一种讲法？', '拆一下步骤'],
+    },
+    {
+      label: '示例类',
+      actions: ['举几个例子', '给我一个生活中的例子？'],
+    },
+    {
+      label: '复习类',
+      actions: ['这是期末常考的吗？', '我剩 4 小时，这个要不要看？', '能不能 30 秒讲完重点？'],
+    },
+    {
+      label: '关联类',
+      actions: ['帮我找相关内容', '这和上一页的定义有什么关系？'],
+    },
+    {
+      label: '笔记/知识库相关',
+      actions: ['加入知识库', '转成精华笔记', '加入错题本'],
+    },
+    {
+      label: '练习类',
+      actions: ['出几道小题练练', '这能不能出一道期末大题？'],
+    },
+    {
+      label: '实用工具',
+      actions: ['复制文字', '翻译一下'],
+    },
+  ] as const;
 
   constructor(private readonly viewModel: LearningWorkspaceViewModel) {}
 
   public render(state: LearningWorkspaceViewState, regions: RenderRegions): HTMLElement | null {
     if (!state.asset) {
+      this.selectionController?.dispose();
+      this.selectionController = null;
       regions.content.innerHTML = this.renderEmpty();
       bindClick(regions.content, '#workspace-back', () => this.viewModel.backToGoalWorkspace());
       return null;
@@ -89,8 +122,28 @@ class LearningWorkspaceView {
     this.bindActions(regions.content, state);
     if (this.host) {
       this.bindResizer(this.host);
+      this.initSelectionController(this.host);
     }
     return regions.content.querySelector<HTMLElement>('[data-note-panel-body]');
+  }
+
+  private initSelectionController(scope: HTMLElement): void {
+    const stage = scope.querySelector<HTMLElement>('[data-selection-stage]');
+    const surface = scope.querySelector<HTMLElement>('[data-selection-surface]');
+    const toggle = scope.querySelector<HTMLButtonElement>('[data-selection-toggle]');
+    const region = scope.querySelector<HTMLElement>('[data-selection-region]');
+    const menu = scope.querySelector<HTMLElement>('[data-selection-menu]');
+    this.selectionController?.dispose();
+    this.selectionController = null;
+    if (stage && surface && toggle && region && menu) {
+      this.selectionController = new RectangleSelectionController({
+        stage,
+        surface,
+        toggle,
+        region,
+        menu,
+      });
+    }
   }
 
   private bindActions(scope: HTMLElement, state: LearningWorkspaceViewState): void {
@@ -201,14 +254,58 @@ class LearningWorkspaceView {
             <progress value="${asset.progress}" max="100"></progress>
             <span>${asset.progress}% 完成</span>
           </div>
-          <div class="note-reader-preview">
-            ${preview}
+          <div class="note-reader-tools">
+            <button
+              class="btn ghost slim selection-toggle"
+              data-selection-toggle
+              type="button"
+              aria-pressed="false"
+            >
+              <span class="selection-toggle-dot" aria-hidden="true"></span>
+              <span>自由选框模式</span>
+              <span class="selection-toggle-hint">Alt</span>
+            </button>
+            <span class="selection-toggle-helper"
+              >按住 Alt 或点击按钮即可框选内容，点击空白处退出</span
+            >
+          </div>
+          <div class="reader-selection-stage" data-selection-stage>
+            <div class="note-reader-preview" data-selection-surface>
+              ${preview}
+            </div>
+            <div class="selection-region" data-selection-region hidden></div>
+            <div class="selection-menu" data-selection-menu hidden>
+              ${this.renderSelectionMenu()}
+            </div>
           </div>
         </article>
         <div class="note-reader-actions">
           <button class="btn primary" id="workspace-back" type="button">返回任务树</button>
         </div>
       </section>
+    `;
+  }
+
+  private renderSelectionMenu(): string {
+    return `
+      <p class="selection-menu-title">我想问老师：</p>
+      <div class="selection-menu-groups">
+        ${this.selectionMenuGroups
+          .map(
+            (group) => `
+              <section class="selection-menu-group">
+                <p class="selection-menu-label">${group.label}</p>
+                ${group.actions
+                  .map(
+                    (action) =>
+                      `<button type="button" class="selection-menu-action" data-selection-action>${action}</button>`
+                  )
+                  .join('')}
+              </section>
+            `
+          )
+          .join('')}
+      </div>
     `;
   }
 
@@ -257,6 +354,244 @@ class LearningWorkspaceView {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+}
+
+interface RectangleSelectionElements {
+  stage: HTMLElement;
+  surface: HTMLElement;
+  toggle: HTMLButtonElement;
+  region: HTMLElement;
+  menu: HTMLElement;
+}
+
+type SelectionPoint = { x: number; y: number };
+type SelectionBox = { left: number; top: number; width: number; height: number };
+
+class RectangleSelectionController {
+  private readonly stage: HTMLElement;
+  private readonly surface: HTMLElement;
+  private readonly toggle: HTMLButtonElement;
+  private readonly region: HTMLElement;
+  private readonly menu: HTMLElement;
+  private readonly MIN_BOX_SIZE = 18;
+  private isLocked = false;
+  private altActive = false;
+  private isPointerSelecting = false;
+  private pointerId: number | null = null;
+  private startPoint: SelectionPoint | null = null;
+  private box: SelectionBox | null = null;
+
+  constructor(elements: RectangleSelectionElements) {
+    this.stage = elements.stage;
+    this.surface = elements.surface;
+    this.toggle = elements.toggle;
+    this.region = elements.region;
+    this.menu = elements.menu;
+    this.toggle.setAttribute('aria-pressed', 'false');
+    this.menu.hidden = true;
+    this.region.hidden = true;
+    this.bind();
+  }
+
+  public dispose(): void {
+    this.surface.removeEventListener('pointerdown', this.handlePointerDown);
+    this.toggle.removeEventListener('click', this.handleToggleClick);
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
+    window.removeEventListener('blur', this.handleWindowBlur);
+    document.removeEventListener('pointerdown', this.handleOutsidePointer, true);
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('pointerup', this.handlePointerUp);
+  }
+
+  private bind(): void {
+    this.surface.addEventListener('pointerdown', this.handlePointerDown);
+    this.toggle.addEventListener('click', this.handleToggleClick);
+    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
+    window.addEventListener('blur', this.handleWindowBlur);
+    document.addEventListener('pointerdown', this.handleOutsidePointer, true);
+  }
+
+  private handleToggleClick = (event: MouseEvent): void => {
+    event.preventDefault();
+    this.isLocked = !this.isLocked;
+    if (!this.isLocked) {
+      this.clearSelection();
+    }
+    this.updateModeState();
+  };
+
+  private handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Alt') return;
+    if (this.altActive) return;
+    this.altActive = true;
+    this.updateModeState();
+  };
+
+  private handleKeyUp = (event: KeyboardEvent): void => {
+    if (event.key !== 'Alt') return;
+    if (!this.altActive) return;
+    this.altActive = false;
+    this.updateModeState();
+  };
+
+  private handleWindowBlur = (): void => {
+    this.altActive = false;
+    this.updateModeState();
+  };
+
+  private handleOutsidePointer = (event: PointerEvent): void => {
+    if (this.isPointerSelecting) return;
+    if (!this.isLocked && !this.box) return;
+    const target = event.target as Node | null;
+    if (!target) return;
+    if (this.stage.contains(target) || this.toggle.contains(target)) {
+      return;
+    }
+    const hadLock = this.isLocked;
+    const hadSelection = Boolean(this.box);
+    if (hadSelection) {
+      this.clearSelection();
+    }
+    this.isLocked = false;
+    if (hadLock || hadSelection) {
+      this.updateModeState();
+    }
+  };
+
+  private handlePointerDown = (event: PointerEvent): void => {
+    if (event.button !== 0) {
+      return;
+    }
+    if (!this.canDraw()) {
+      return;
+    }
+    event.preventDefault();
+    this.clearSelection();
+    this.isPointerSelecting = true;
+    this.pointerId = event.pointerId;
+    this.startPoint = this.translateToStage(event);
+    this.menu.hidden = true;
+    this.region.hidden = false;
+    this.applyBox(this.startPoint);
+    this.updateModeState();
+    try {
+      this.surface.setPointerCapture(event.pointerId);
+    } catch {
+      // ignore capture errors (e.g., Safari)
+    }
+    window.addEventListener('pointermove', this.handlePointerMove);
+    window.addEventListener('pointerup', this.handlePointerUp);
+  };
+
+  private handlePointerMove = (event: PointerEvent): void => {
+    if (!this.isPointerSelecting || event.pointerId !== this.pointerId) {
+      return;
+    }
+    event.preventDefault();
+    const point = this.translateToStage(event);
+    this.applyBox(point);
+  };
+
+  private handlePointerUp = (event: PointerEvent): void => {
+    if (!this.isPointerSelecting || event.pointerId !== this.pointerId) {
+      return;
+    }
+    this.isPointerSelecting = false;
+    this.pointerId = null;
+    try {
+      this.surface.releasePointerCapture(event.pointerId);
+    } catch {
+      // ignore
+    }
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('pointerup', this.handlePointerUp);
+    if (!this.box || this.box.width < this.MIN_BOX_SIZE || this.box.height < this.MIN_BOX_SIZE) {
+      this.clearSelection();
+    } else {
+      this.positionMenu();
+    }
+    this.updateModeState();
+  };
+
+  private translateToStage(event: PointerEvent): SelectionPoint {
+    const rect = this.stage.getBoundingClientRect();
+    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
+    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+    return { x, y };
+  }
+
+  private applyBox(point: SelectionPoint): void {
+    if (!this.startPoint) {
+      return;
+    }
+    const left = Math.min(this.startPoint.x, point.x);
+    const top = Math.min(this.startPoint.y, point.y);
+    const width = Math.abs(this.startPoint.x - point.x);
+    const height = Math.abs(this.startPoint.y - point.y);
+    this.box = { left, top, width, height };
+    this.region.hidden = false;
+    this.region.style.left = `${left}px`;
+    this.region.style.top = `${top}px`;
+    this.region.style.width = `${width}px`;
+    this.region.style.height = `${height}px`;
+    this.stage.classList.add('selection-has-box');
+  }
+
+  private positionMenu(): void {
+    if (!this.box) return;
+    this.menu.hidden = false;
+    this.menu.style.visibility = 'hidden';
+    this.menu.style.left = '0px';
+    this.menu.style.top = '0px';
+    const menuWidth = this.menu.offsetWidth;
+    const menuHeight = this.menu.offsetHeight;
+    const stageWidth = this.stage.clientWidth;
+    const stageHeight = this.stage.clientHeight;
+    let left = this.box.left + this.box.width + 12;
+    if (left + menuWidth > stageWidth) {
+      left = Math.max(8, stageWidth - menuWidth - 8);
+    }
+    let top = this.box.top - menuHeight - 12;
+    if (top < 0) {
+      top = this.box.top + this.box.height + 12;
+      if (top + menuHeight > stageHeight) {
+        top = Math.max(8, stageHeight - menuHeight - 8);
+      }
+    }
+    this.menu.style.left = `${left}px`;
+    this.menu.style.top = `${top}px`;
+    this.menu.style.visibility = 'visible';
+  }
+
+  private canDraw(): boolean {
+    return this.isLocked || this.altActive;
+  }
+
+  private clearSelection(): void {
+    this.box = null;
+    this.startPoint = null;
+    this.region.hidden = true;
+    this.menu.hidden = true;
+    this.menu.style.visibility = '';
+    this.menu.style.left = '0px';
+    this.menu.style.top = '0px';
+    this.region.style.left = '0px';
+    this.region.style.top = '0px';
+    this.region.style.width = '0px';
+    this.region.style.height = '0px';
+    this.stage.classList.remove('selection-has-box');
+  }
+
+  private updateModeState(): void {
+    const ready = this.canDraw() || this.isPointerSelecting;
+    this.stage.classList.toggle('selection-mode-ready', ready);
+    this.stage.classList.toggle('selection-dragging', this.isPointerSelecting);
+    this.toggle.classList.toggle('is-active', this.isLocked);
+    this.toggle.classList.toggle('is-alt', !this.isLocked && this.altActive);
+    this.toggle.setAttribute('aria-pressed', String(this.isLocked));
   }
 }
 
