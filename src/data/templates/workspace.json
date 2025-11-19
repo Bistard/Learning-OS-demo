@@ -1,12 +1,14 @@
-﻿{
+{
   "activeAsset": {
     "id": "asset-markdown-reader",
-    "title": "微积分 · 反常积分精讲",
+    "title": "微积分 · 瑕积分判定",
     "type": "note",
-    "chapter": "第 5 章 · 积分应用",
+    "chapter": "第 5 章 · 级数与积分应用",
     "progress": 62,
-    "metadata": "AI 整理 · 预计 25 分钟",
-    "content": "# 反常积分\n\n## 学习目标\n- 区分上限无穷/被积函数无界两类反常积分\n- 掌握比较判别与柯西判别的使用\n\n## 例题\n- 评估 \\int_1^{+\\infty} \\frac{1}{x^p} dx 的敛散性。\n- 计算 \\int_0^{+\\infty} e^{-x^2} dx 并复述高斯积分思路。\n\n## 笔记\n在此记录判别步骤、易错点以及几何解释。",
+    "metadata": "AI 摘要 · 预计 25 分钟",
+    "content": "# 瑕积分判断\n\n## 学习目标\n- 区分比较判别法与极限比较判别法\n- 能够利用积分判别法判断级数敛散性\n\n## 推导\n- 证明 \\int_1^{+\\infty} \\frac{1}{x^p} dx 的敛散条件\n- 将高斯积分 \\int_0^{+\\infty} e^{-x^2} dx 与误差函数联系\n\n## 笔记\n记录你的比较函数选择、关键不等式以及推导细节。",
     "lastUpdated": "08:12"
-  }
+  },
+  "activeTaskId": null,
+  "activeNoteId": null
 }

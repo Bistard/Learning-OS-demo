@@ -4,7 +4,7 @@ import { bindClick } from '../../../utils/dom';
 import { renderMarkdown } from '../../../utils/markdown';
 import { RenderRegions, UiModule } from '../../types';
 
-interface NoteEditorViewState {
+export interface NoteEditorViewState {
   note: KnowledgeNote | null;
   createdLabel: string;
   updatedLabel: string;
@@ -12,11 +12,21 @@ interface NoteEditorViewState {
   showPreview: boolean;
 }
 
-class NoteEditorViewModel {
-  constructor(private readonly root: LearningOsViewModel) {}
+export type NoteResolver = (snapshot: ViewSnapshot) => KnowledgeNote | null;
+
+export interface NoteEditorViewModelOptions {
+  resolveNote: NoteResolver;
+  createNote?: () => void;
+}
+
+export class NoteEditorViewModel {
+  constructor(
+    private readonly root: LearningOsViewModel,
+    private readonly options: NoteEditorViewModelOptions
+  ) {}
 
   public buildState(snapshot: ViewSnapshot): NoteEditorViewState {
-    const note = this.resolveActiveNote(snapshot);
+    const note = this.options.resolveNote(snapshot);
     return {
       note,
       createdLabel: note ? this.formatTimestamp(note.createdAt) : '—',
@@ -35,21 +45,15 @@ class NoteEditorViewModel {
   }
 
   public createNote(): void {
+    if (this.options.createNote) {
+      this.options.createNote();
+      return;
+    }
     this.root.createNote();
   }
 
   public openKnowledgeBase(): void {
     this.root.navigate('knowledgeBase');
-  }
-
-  private resolveActiveNote(snapshot: ViewSnapshot): KnowledgeNote | null {
-    const activeTab = snapshot.tabs.find((tab) => tab.id === snapshot.activeTabId);
-    if (!activeTab || activeTab.view !== 'noteEditor') {
-      return null;
-    }
-    const noteId = activeTab.context?.noteId;
-    if (!noteId) return null;
-    return snapshot.notes.find((note) => note.id === noteId) ?? null;
   }
 
   private formatTimestamp(iso: string): string {
@@ -63,7 +67,7 @@ class NoteEditorViewModel {
   }
 }
 
-class NoteEditorView {
+export class NoteEditorView {
   private host: HTMLElement | null = null;
   private pendingFocus:
     | { noteId: string; field: 'title' | 'body'; selectionStart: number; selectionEnd: number }
@@ -236,13 +240,23 @@ class NoteEditorView {
   }
 }
 
+const resolveNoteFromActiveTab: NoteResolver = (snapshot: ViewSnapshot): KnowledgeNote | null => {
+  const activeTab = snapshot.tabs.find((tab) => tab.id === snapshot.activeTabId);
+  if (!activeTab || activeTab.view !== 'noteEditor') {
+    return null;
+  }
+  const noteId = activeTab.context?.noteId;
+  if (!noteId) return null;
+  return snapshot.notes.find((note) => note.id === noteId) ?? null;
+};
+
 export class NoteEditorModule implements UiModule {
   public readonly page: Page = 'noteEditor';
   private readonly viewModel: NoteEditorViewModel;
   private readonly view: NoteEditorView;
 
   constructor(root: LearningOsViewModel) {
-    this.viewModel = new NoteEditorViewModel(root);
+    this.viewModel = new NoteEditorViewModel(root, { resolveNote: resolveNoteFromActiveTab });
     this.view = new NoteEditorView(this.viewModel);
   }
 

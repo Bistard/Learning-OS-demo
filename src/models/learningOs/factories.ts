@@ -172,6 +172,8 @@ export const createGoalCreationFlowState = (): GoalCreationFlowState => ({
 
 const createWorkspaceState = (): WorkspaceState => ({
   activeAsset: { ...workspaceTemplate.activeAsset },
+  activeTaskId: workspaceTemplate.activeTaskId ?? null,
+  activeNoteId: workspaceTemplate.activeNoteId ?? null,
 });
 
 /**

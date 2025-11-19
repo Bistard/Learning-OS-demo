@@ -1102,6 +1102,133 @@ body.is-resizing-nav {
   font-size: 13px;
 }
 
+.learning-system {
+  display: grid;
+  grid-template-columns: minmax(0, var(--reader-percent, 50%)) 12px minmax(0, var(--notes-percent, 50%));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.learning-system-reader,
+.learning-system-notes {
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+.learning-system-reader .note-reader-card {
+  min-height: 0;
+}
+
+.learning-system-reader .note-reader-preview,
+.learning-note-body {
+  overflow: auto;
+}
+
+.learning-system-notes {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.learning-system-notes .note-empty {
+  margin: 0;
+}
+
+.learning-system-handle {
+  width: 12px;
+  cursor: col-resize;
+  border-radius: var(--radius-md);
+  background: transparent;
+  position: relative;
+}
+
+.learning-system-handle::after {
+  content: '';
+  position: absolute;
+  inset: 12px 4px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+}
+
+.learning-system.notes-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.learning-system.notes-collapsed .learning-system-notes,
+.learning-system.notes-collapsed .learning-system-handle {
+  display: none;
+}
+
+.learning-system.notes-collapsed .note-panel-expander {
+  display: inline-flex;
+}
+
+.note-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.note-panel-header .eyebrow {
+  margin-bottom: 2px;
+}
+
+.note-panel-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.note-panel-actions .btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.learning-note-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.note-panel-expander {
+  display: none;
+  border: 1px dashed var(--border);
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 14px;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.note-reader-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1200px) {
+  .learning-system {
+    grid-template-columns: 1fr;
+  }
+
+  .learning-system-notes {
+    order: 2;
+  }
+
+  .note-panel-expander {
+    margin-top: 12px;
+  }
+}
+
 .note-reader {
   display: flex;
   flex-direction: column;

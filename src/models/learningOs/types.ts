@@ -241,6 +241,7 @@ export interface KnowledgeNote {
   createdAt: string;
   updatedAt: string;
   knowledgeItemId: string;
+  linkedTaskId?: string;
 }
 
 export interface WorkspaceAsset {
@@ -256,6 +257,8 @@ export interface WorkspaceAsset {
 
 export interface WorkspaceState {
   activeAsset: WorkspaceAsset;
+  activeTaskId: string | null;
+  activeNoteId: string | null;
 }
 
 export interface LearningOsState {

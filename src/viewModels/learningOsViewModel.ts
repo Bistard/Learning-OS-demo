@@ -21,6 +21,7 @@ import {
   Toast,
   ToastTone,
   WorkspaceAsset,
+  WorkspaceState,
   createGoalCreationFlowState,
   createGoalDraft,
   createInitialState,
@@ -51,6 +52,17 @@ export type { ViewSnapshot } from './learningOs/types';
 
 export type ViewUpdateListener = (snapshot: ViewSnapshot) => void;
 export type ToastListener = (toast: Toast) => void;
+
+interface WorkspaceNoteContext {
+  title?: string;
+  summary?: string;
+}
+
+interface WorkspaceNoteLinkResult {
+  note: KnowledgeNote | null;
+  notes?: KnowledgeNote[];
+  knowledgeBase?: KnowledgeBaseState;
+}
 
 export class LearningOsViewModel {
   private state: LearningOsState = createInitialState();
@@ -212,37 +224,55 @@ export class LearningOsViewModel {
   }
 
   public startLearningWorkspace(taskId?: string): void {
-    if (!taskId) {
-      this.navigate('learningWorkspace');
-      return;
-    }
-    this.mutateActiveGoal((goal) => {
-      const todayRoute = goal.todayRoute.map((item) =>
-        item.id === taskId && item.status !== 'complete'
-          ? { ...item, status: 'in-progress' as const }
-          : item
-      );
-      return { ...goal, todayRoute };
-    });
-    const goal = this.getActiveGoal();
-    if (!goal) {
-      this.navigate('learningWorkspace');
-      return;
-    }
-    const routeItem = goal.todayRoute.find((item) => item.id === taskId);
-    if (routeItem) {
-      const activeAsset = this.buildWorkspaceAsset(routeItem);
-      this.updateState({ workspace: { activeAsset } });
-      this.navigate('learningWorkspace');
-      return;
-    }
-    const taskNode = this.findTaskNode(goal.taskTree, taskId);
-    if (taskNode) {
-      const lessonContent =
-        getTaskLessonContent(goal.profile.subjectId, taskNode.id) ??
-        this.composeTaskLessonMarkdown(taskNode);
-      const activeAsset = this.buildTaskWorkspaceAsset(taskNode, lessonContent);
-      this.updateState({ workspace: { activeAsset } });
+    if (taskId) {
+      this.mutateActiveGoal((goal) => {
+        const todayRoute = goal.todayRoute.map((item) =>
+          item.id === taskId && item.status !== 'complete'
+            ? { ...item, status: 'in-progress' as const }
+            : item
+        );
+        return { ...goal, todayRoute };
+      });
+      const goal = this.getActiveGoal();
+      if (goal) {
+        const partial: Partial<LearningOsState> = {};
+        let workspaceAsset: WorkspaceAsset | null = null;
+        let workspaceTaskId: string | null = null;
+        let noteContext: WorkspaceNoteContext | undefined;
+        const routeItem = goal.todayRoute.find((item) => item.id === taskId);
+        if (routeItem) {
+          workspaceAsset = this.buildWorkspaceAsset(routeItem);
+          workspaceTaskId = routeItem.id;
+          noteContext = { title: routeItem.title, summary: routeItem.detail };
+        } else {
+          const taskNode = this.findTaskNode(goal.taskTree, taskId);
+          if (taskNode) {
+            const lessonContent =
+              getTaskLessonContent(goal.profile.subjectId, taskNode.id) ??
+              this.composeTaskLessonMarkdown(taskNode);
+            workspaceAsset = this.buildTaskWorkspaceAsset(taskNode, lessonContent);
+            workspaceTaskId = taskNode.id;
+            noteContext = { title: taskNode.title, summary: taskNode.summary };
+          }
+        }
+        if (workspaceAsset || workspaceTaskId) {
+          const noteLink = this.ensureWorkspaceNoteLink(workspaceTaskId, noteContext);
+          const workspace: WorkspaceState = {
+            ...this.state.workspace,
+            activeAsset: workspaceAsset ?? this.state.workspace.activeAsset,
+            activeTaskId: workspaceTaskId ?? this.state.workspace.activeTaskId,
+            activeNoteId: noteLink.note?.id ?? this.state.workspace.activeNoteId ?? null,
+          };
+          partial.workspace = workspace;
+          if (noteLink.notes) {
+            partial.notes = noteLink.notes;
+          }
+          if (noteLink.knowledgeBase) {
+            partial.knowledgeBase = noteLink.knowledgeBase;
+          }
+          this.updateState(partial);
+        }
+      }
     }
     this.navigate('learningWorkspace');
   }
@@ -283,19 +313,56 @@ export class LearningOsViewModel {
   }
 
   public createNote(): void {
-    const timestamp = new Date().toISOString();
-    const note: KnowledgeNote = {
-      id: this.createNoteId(),
+    const note = this.buildNoteSeed({
       title: this.generateNoteTitle(),
-      content: '# 新建笔记\n\n在这里使用 **Markdown** 记录灵感、待办和学习要点。',
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      knowledgeItemId: `kb-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
-    };
+      content: this.getDefaultNoteContent(),
+    });
     const notes = [note, ...this.state.notes];
     const knowledgeBase = this.syncKnowledgeNoteEntry(note, true);
     this.updateState({ notes, knowledgeBase });
     this.openNote(note.id);
+  }
+
+  public createWorkspaceNote(): void {
+    const taskId = this.state.workspace.activeTaskId;
+    if (!taskId) {
+      this.emitToast('请先选择任务节点，再创建专属学习笔记。暂为你新建了一则通用笔记。', 'info');
+      this.createNote();
+      return;
+    }
+    const link = this.ensureWorkspaceNoteLink(taskId, this.getWorkspaceNoteContext());
+    if (!link.note) {
+      this.emitToast('请先选择任务节点后再创建学习笔记～', 'warning');
+      return;
+    }
+    const partial: Partial<LearningOsState> = {
+      workspace: { ...this.state.workspace, activeNoteId: link.note.id },
+    };
+    if (link.notes) {
+      partial.notes = link.notes;
+    }
+    if (link.knowledgeBase) {
+      partial.knowledgeBase = link.knowledgeBase;
+    }
+    this.updateState(partial);
+    this.emitToast(
+      link.notes
+        ? '新的学习笔记已创建，并同步到知识库「笔记」。'
+        : '已定位到当前任务的学习笔记～',
+      link.notes ? 'success' : 'info'
+    );
+  }
+
+  public captureWorkspaceNote(noteId?: string): void {
+    const targetId = noteId ?? this.state.workspace.activeNoteId;
+    const note = this.getNoteById(targetId);
+    if (!note) {
+      this.emitToast('暂无可收录的笔记，请先创建或选中一篇笔记。', 'warning');
+      return;
+    }
+    const knowledgeBase = this.syncKnowledgeNoteEntry(note, true);
+    this.updateState({ knowledgeBase });
+    this.emitToast('笔记已收录至知识库「笔记」。', 'success');
   }
 
   public openNote(noteId: string): void {
@@ -598,8 +665,82 @@ export class LearningOsViewModel {
     return compact.slice(0, 140);
   }
 
+  private buildNoteSeed(payload: {
+    title?: string;
+    content?: string;
+    linkedTaskId?: string | null;
+  }): KnowledgeNote {
+    const timestamp = new Date().toISOString();
+    const title = payload.title?.trim() || this.generateNoteTitle();
+    return {
+      id: this.createNoteId(),
+      title,
+      content: payload.content ?? this.getDefaultNoteContent(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      knowledgeItemId: this.createKnowledgeItemId(),
+      linkedTaskId: payload.linkedTaskId ?? undefined,
+    };
+  }
+
+  private getDefaultNoteContent(): string {
+    return '# 新建笔记\n\n在这里使用 **Markdown** 记录灵感、待办和学习要点。';
+  }
+
+  private ensureWorkspaceNoteLink(
+    taskId?: string | null,
+    context?: WorkspaceNoteContext
+  ): WorkspaceNoteLinkResult {
+    if (!taskId) {
+      return { note: null };
+    }
+    const existing = this.state.notes.find((note) => note.linkedTaskId === taskId);
+    if (existing) {
+      return { note: existing };
+    }
+    const note = this.buildWorkspaceNote(taskId, context ?? this.getWorkspaceNoteContext());
+    const notes = [note, ...this.state.notes];
+    const knowledgeBase = this.syncKnowledgeNoteEntry(note, true);
+    return { note, notes, knowledgeBase };
+  }
+
+  private getWorkspaceNoteContext(): WorkspaceNoteContext {
+    const asset = this.state.workspace?.activeAsset;
+    if (!asset) {
+      return {};
+    }
+    return {
+      title: asset.title,
+      summary: asset.chapter || asset.metadata,
+    };
+  }
+
+  private buildWorkspaceNote(taskId: string, context: WorkspaceNoteContext): KnowledgeNote {
+    const title = context.title?.trim() || '学习任务';
+    const summary = context.summary?.trim() || '记录推导、例题与反思';
+    const content = [
+      `# ${title} · 学习笔记`,
+      summary ? `> ${summary}` : '',
+      '## 核心步骤',
+      '- ',
+      '## 反思与待巩固',
+      '- ',
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+    return this.buildNoteSeed({
+      title: `${title} · 学习笔记`,
+      content,
+      linkedTaskId: taskId,
+    });
+  }
+
   private createNoteId(): string {
     return `note-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+
+  private createKnowledgeItemId(): string {
+    return `kb-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
   }
 
   private generateNoteTitle(): string {
