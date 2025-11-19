@@ -795,7 +795,27 @@ body.is-resizing-nav {
 
 .persona-progress progress {
   width: 100%;
-  height: 10px;
+  height: 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  appearance: none;
+  overflow: hidden;
+}
+
+.persona-progress progress::-webkit-progress-bar {
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+}
+
+.persona-progress progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  border-radius: 999px;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.35);
+}
+
+.persona-progress progress::-moz-progress-bar {
+  background: linear-gradient(90deg, #16a34a, #22c55e);
   border-radius: 999px;
 }
 
@@ -853,6 +873,19 @@ body.is-resizing-nav {
   justify-content: flex-end;
 }
 
+.task-tree .node-meta-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  opacity: 0.6;
+}
+
+.task-tree .node-meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .task-tree .node-eta {
   background: rgba(17, 17, 19, 0.05);
   color: var(--text);
@@ -873,13 +906,6 @@ body.is-resizing-nav {
   align-items: flex-end;
   gap: 8px;
   min-width: 150px;
-}
-
-.node-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0;
 }
 
 .tag-chip {
@@ -955,6 +981,76 @@ body.is-resizing-nav {
   padding-top: 8px;
 }
 
+.node-details-toggle {
+  width: auto;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: rgba(17, 24, 39, 0.04);
+  padding: 6px 10px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  color: var(--text);
+  gap: 6px;
+}
+
+.node-details-toggle:hover {
+  border-color: var(--border);
+}
+
+.node-details-toggle.collapsed {
+  background: transparent;
+}
+
+.node-toggle-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.node-toggle-icon::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.node-details-toggle.collapsed .node-toggle-icon::after {
+  transform: rotate(-135deg);
+}
+
+.node-collapsible {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  will-change: max-height;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 8px;
+}
+
+.node-collapsible:not(.collapsed) {
+  opacity: 1;
+}
+
+.node-collapsible.collapsed {
+  margin-top: 0;
+}
+
+.task-tree .node-details {
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  padding-top: 8px;
+}
+
 .node-toggle {
   width: 100%;
   border: 1px solid transparent;
@@ -972,34 +1068,6 @@ body.is-resizing-nav {
 
 .node-toggle:hover {
   border-color: var(--border);
-}
-
-.node-toggle.collapsed {
-  background: transparent;
-}
-
-.node-toggle-icon {
-  width: 12px;
-  height: 12px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  transition: transform 0.2s ease;
-}
-
-.node-toggle.collapsed .node-toggle-icon {
-  transform: rotate(-135deg);
-}
-
-.node-collapsible {
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  will-change: max-height;
-}
-
-.node-collapsible.collapsed {
-  opacity: 0;
-  margin-top: 0;
 }
 
 .task-tree .benefit.high {
@@ -1030,8 +1098,8 @@ body.is-resizing-nav {
 }
 
 .btn.slim {
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 6px 16px;
+  font-size: 13px;
 }
 
 .note-reader {
