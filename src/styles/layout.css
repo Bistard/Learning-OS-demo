@@ -467,14 +467,23 @@ body.is-resizing-nav {
 }
 
 .preset-card .preset-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-top: 12px;
 }
 
-.preset-copy {
+.preset-hint {
   margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field-summary {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  padding: 4px 0 8px;
 }
 
 .advanced-panel {
@@ -547,25 +556,39 @@ body.is-resizing-nav {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-items: center;
 }
 
 .upload-shell {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 640px;
+  width: 100%;
+  max-width: 760px;
+  align-items: center;
+  text-align: center;
+}
+
+.upload-shell .label,
+.upload-shell .microcopy {
+  text-align: center;
 }
 
 .upload-dropzone {
   border: 1px dashed var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 32px;
   background: #fafafa;
   display: flex;
   flex-direction: column;
   gap: 12px;
   position: relative;
   transition: border-color 0.2s ease, background 0.2s ease;
+  min-height: 320px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
 .upload-dropzone.dragover {
@@ -608,6 +631,7 @@ body.is-resizing-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
 }
 
 .stage-generation {

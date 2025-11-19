@@ -284,6 +284,15 @@ class GoalCreationView {
         `
       )
       .join('');
+    const subjectLabel =
+      state.subjects.find((subject) => subject.id === state.draft.subjectId)?.label ||
+      state.draft.subjectLabel ||
+      '未选择科目';
+    const baseSummary = [
+      subjectLabel,
+      `${state.draft.mastery}% 掌握度`,
+      `${state.draft.dailyMinutes} 分钟/天`,
+    ].join(' - ');
     const deadlineActive = state.draft.timeMode === 'deadline';
     const countdownActive = state.draft.timeMode === 'countdown';
     const countdownButtons = COUNTDOWN_PRESETS.map((hours) => {
@@ -300,14 +309,12 @@ class GoalCreationView {
     const timeControl = deadlineActive
       ? `<input type="datetime-local" id="goal-deadline" value="${state.draft.deadline}" />`
       : `<div class="chip-group" id="countdown-group">${countdownButtons}</div>`;
-    const timeDescription = deadlineActive ? '适合长期目标 / 考研等场景' : '3 / 5 / 12 小时冲刺';
     return `
       <div class="stage-base">
         <section class="card stack-card">
           <div class="field">
             <label>考试科目</label>
             <select id="goal-subject">${subjectOptions}</select>
-            <p class="microcopy">Demo 当前锁定「微积分」，其余科目即将开放。</p>
           </div>
           <div class="field">
             <label>期望掌握度 <span id="goal-mastery-value">${state.draft.mastery}%</span></label>
@@ -318,6 +325,7 @@ class GoalCreationView {
             <input type="number" id="goal-daily-minutes" min="30" step="10" value="${state.draft.dailyMinutes}" />
           </div>
         </section>
+        <div class="field-summary">${baseSummary}</div>
         <section class="card stack-card time-card" data-mode="${state.draft.timeMode}">
           <div class="time-mode-toggle">
             <button class="time-mode-option ${deadlineActive ? 'active' : ''}" data-time-mode="deadline">
@@ -331,21 +339,14 @@ class GoalCreationView {
           </div>
           <div class="time-body">
             ${timeControl}
-            <p class="microcopy">${timeDescription}</p>
           </div>
         </section>
         <section class="card stack-card preset-card">
           <label>目标类型 · 预设模板</label>
           <select id="goal-preset">${presetOptions}</select>
           <div class="preset-summary">
-            <div>
-              <p class="microcopy">系统路径</p>
-              <p class="preset-copy">${state.activePreset.systemFocus}</p>
-            </div>
-            <div>
-              <p class="microcopy">个性化老师</p>
-              <p class="preset-copy">${state.activePreset.ragFocus}</p>
-            </div>
+            <p class="preset-hint">系统路径 - ${state.activePreset.systemFocus}</p>
+            <p class="preset-hint">个性化老师 - ${state.activePreset.ragFocus}</p>
           </div>
           <button class="btn ghost" id="toggle-advanced">${
             state.flow.advancedOpen ? '收起高级设置' : '高级设置'
