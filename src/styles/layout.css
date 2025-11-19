@@ -132,7 +132,11 @@ body.is-resizing-nav {
 .ai-dialog {
   display: grid;
   grid-template-columns: minmax(280px, 340px) 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 24px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .ai-dialog-list-panel {
@@ -143,7 +147,13 @@ body.is-resizing-nav {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 680px;
+  min-height: min(680px, 100%);
+  height: 100%;
+  overflow: hidden;
+}
+
+.ai-dialog-list-panel > header {
+  flex-shrink: 0;
 }
 
 .ai-dialog-list {
@@ -152,6 +162,8 @@ body.is-resizing-nav {
   gap: 12px;
   overflow-y: auto;
   padding-right: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .ai-dialog-record {
@@ -175,7 +187,7 @@ body.is-resizing-nav {
 
 .ai-dialog-record.is-active {
   border-color: var(--orange);
-  box-shadow: 0 12px 32px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 12px 32px var(--orange-soft);
   background: #fff;
 }
 
@@ -215,7 +227,14 @@ body.is-resizing-nav {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 680px;
+  min-height: min(680px, 100%);
+  height: 100%;
+  overflow: hidden;
+}
+
+.ai-dialog-player-head,
+.ai-dialog-meta {
+  flex-shrink: 0;
 }
 
 .ai-dialog-player-head {
@@ -231,7 +250,7 @@ body.is-resizing-nav {
   border-radius: var(--radius-md);
   padding: 12px 16px;
   min-width: 200px;
-  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.2);
+  box-shadow: inset 0 0 0 1px var(--orange);
 }
 
 .ai-dialog-thinking .label {
@@ -313,8 +332,8 @@ body.is-resizing-nav {
 }
 
 .ai-message.ai {
-  border-color: rgba(249, 115, 22, 0.4);
-  background: rgba(249, 115, 22, 0.06);
+  border-color: var(--border);
+  background: var(--bg);
 }
 
 .ai-message header {
@@ -371,6 +390,7 @@ body.is-resizing-nav {
 @media (max-width: 1200px) {
   .ai-dialog {
     grid-template-columns: 1fr;
+    height: auto;
   }
 
   .ai-dialog-player-head {
@@ -379,6 +399,12 @@ body.is-resizing-nav {
 
   .ai-dialog-thinking {
     width: 100%;
+  }
+
+  .ai-dialog-list-panel,
+  .ai-dialog-stage {
+    height: auto;
+    min-height: 0;
   }
 }
 
@@ -511,6 +537,9 @@ body.is-resizing-nav {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: auto;
 }
 
 .main-stage > main {
@@ -520,6 +549,8 @@ body.is-resizing-nav {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .context-header {
@@ -1696,7 +1727,7 @@ body.is-resizing-nav {
 .selection-menu-action:hover,
 .selection-menu-action:focus-visible {
   border-color: var(--orange);
-  background: rgba(249, 115, 22, 0.12);
+  background: var(--orange-soft);
   transform: translateY(-1px);
   outline: none;
 }
