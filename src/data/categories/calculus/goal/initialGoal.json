@@ -1,55 +1,57 @@
-{
-  "id": "goal-linear",
-  "name": "线性代数期末冲刺",
-  "focus": "概念复盘 + 压轴 Mock",
+﻿{
+  "id": "goal-calculus",
+  "name": "微积分期末冲刺",
+  "focus": "极限 + 导数 + 积分混合题稳态输出",
   "status": "active",
   "profile": {
     "targetType": "期末考",
     "deadlineDaysFromNow": 18,
-    "mastery": 42,
+    "mastery": 48,
     "dailyMinutes": 150,
-    "materials": ["Lecture slides", "Past midterms", "助教答疑"],
+    "materials": ["讲义 PDF", "历年期末卷", "老师板书照"],
     "resourcesCaptured": 36,
+    "subjectId": "calculus",
+    "subjectLabel": "微积分",
     "persona": {
       "remainingHours": 12,
-      "targetScore": 90,
+      "targetScore": 92,
       "preferences": [
         {
           "id": "likesPractice",
           "label": "喜欢刷题",
-          "description": "题海手感好于纯听课。"
+          "description": "解题驱动比通读更有效"
         },
         {
           "id": "prefersAiMentor",
           "label": "先听 AI",
-          "description": "希望 AI 先讲逻辑再实操。"
+          "description": "希望 AI 先示范推导再练习"
         }
       ],
       "weaknesses": [
         {
           "id": "weakFoundation",
           "label": "基础薄弱",
-          "description": "矩阵、行列式反复卡壳。"
+          "description": "极限与连续性反例记不住"
         },
         {
           "id": "fearDifficulty",
           "label": "怕难",
-          "description": "需要由易到难的梯度。"
+          "description": "遇到多步骤积分容易放弃"
         }
       ],
       "constraints": [
         {
           "id": "remaining12h",
           "label": "剩余 12 小时",
-          "description": "冲刺期自动扩展高收益模块。"
+          "description": "冲刺阶段需要高收益安排"
         },
         {
           "id": "targetScore90",
           "label": "冲刺 90+",
-          "description": "自动添加压轴难题。"
+          "description": "需要加入压轴综合题"
         }
       ],
-      "strategyLine": "12 小时冲刺：AI 讲重点 → 拆题 3 步 → 费曼复述验收。"
+      "strategyLine": "12 小时冲刺：AI 讲重点 → 例题拆解 → 费曼复述 → 机考演练"
     }
   },
   "progress": {

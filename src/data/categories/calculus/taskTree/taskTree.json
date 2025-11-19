@@ -1,333 +1,280 @@
-[
+﻿[
   {
-    "id": "node-foundation",
-    "title": "矩阵刷新 + 行列式 / 向量空间",
+    "id": "calc-limit-foundation",
+    "title": "极限与连续性骨架",
     "type": "concept",
     "status": "available",
-    "etaMinutes": 90,
-    "summary": "AI 降维讲核心脑图 + 预测考点，配 3 张抽认卡。",
+    "etaMinutes": 80,
+    "summary": "AI 先搭公式地图，再用反例提醒连续/可导差异。",
     "benefitLevel": "high",
     "origin": "aiGenerated",
     "personaBindings": [
       {
         "signal": "weakFoundation",
         "label": "基础薄弱",
-        "action": "放在路径顶部并拆成 4 步。"
+        "action": "优先复盘 ε-δ 与反例库"
       },
       {
         "signal": "prefersAiMentor",
         "label": "先听 AI",
-        "action": "AI 讲完示例再让你复述。"
-      },
-      {
-        "signal": "remaining12h",
-        "label": "剩余 12 小时",
-        "action": "自动扩展高收益模块。"
+        "action": "AI 讲完模板再让你复述"
       }
     ],
     "tagSequence": [
       {
         "id": "priorityLearning",
         "label": "收益优先",
-        "description": "收益最高的节点提前处理。",
+        "description": "极限失分率 45%，放在路径最前",
         "type": "strategy",
         "order": 1
       },
       {
         "id": "benefitHigh",
         "label": "高收益",
-        "description": "覆盖 40+ 分权重。",
+        "description": "可覆盖判断题 + 证明题",
         "type": "benefit",
         "order": 2
       },
       {
         "id": "aiAuto",
         "label": "AI 自动生成",
-        "description": "讲解 / 题目 / 抽认卡由 AI 生成。",
+        "description": "概念图与卡片由 AI 生成",
         "type": "origin",
         "order": 3
-      },
-      {
-        "id": "foundationRescue",
-        "label": "基础补救",
-        "description": "薄弱项前置消化。",
-        "type": "persona",
-        "order": 4
       }
     ],
     "chunkSteps": [
-      "AI 先给 3 张矩阵/向量脑图，串联线性无关与维度。",
-      "步骤 1：10 分钟复盘行列式定义，立即做 2 道例题。",
-      "步骤 2：AI 演示行初等变换，你用费曼讲法复述。",
-      "步骤 3：预测近三年真题入口，自动生成抽认卡。"
+      "建立 ε-δ 模板：做一题正面，一题经典反例",
+      "连续性 → 可导性的必要条件反推",
+      "按题型总结：夹逼、洛必达、泰勒余项",
+      "用费曼复述输出 2 分钟语音"
     ],
-    "strategies": [
-      "priorityLearning",
-      "chunking",
-      "feynman",
-      "predictionBased",
-      "aiQuizLoop"
-    ],
+    "strategies": ["priorityLearning", "chunking", "feynman"],
     "why": {
-      "statement": "行列式与向量空间是特征值题的入口，误一个题整套崩。",
+      "statement": "极限概念支撑全部导数与积分推导。",
       "evidence": [
-        "近三年 70% 压轴题都以该模块为第一问。",
-        "掌握后能一次性拿回 40 分以上。"
+        "校内卷 12 分极限证明题",
+        "AI 预测：今年仍考复合极限"
       ]
     },
     "children": [
       {
-        "id": "node-eigen",
-        "title": "特征值与相似对角化",
-        "type": "concept",
+        "id": "calc-limit-drill",
+        "title": "极限典型题演练",
+        "type": "practice",
         "status": "available",
-        "etaMinutes": 35,
-        "summary": "AI 讲 + 你讲（费曼）+ 快问校验。",
+        "etaMinutes": 45,
+        "summary": "夹逼 + 等价无穷小 + 洛必达连练。",
         "benefitLevel": "high",
         "origin": "aiGenerated",
         "personaBindings": [
           {
             "signal": "likesPractice",
             "label": "喜欢刷题",
-            "action": "每段讲解后立刻给 2 题。"
-          },
-          {
-            "signal": "targetScore90",
-            "label": "冲刺 90+",
-            "action": "额外插入难度更高的预测题。"
-          }
-        ],
-        "tagSequence": [
-          {
-            "id": "feynman",
-            "label": "费曼讲法",
-            "description": "AI 讲解 → 你复述 → 小墨检查。",
-            "type": "strategy",
-            "order": 1
-          },
-          {
-            "id": "activeRecall",
-            "label": "主动回忆",
-            "description": "段落结束前弹出 3 个快问。",
-            "type": "strategy",
-            "order": 2
-          },
-          {
-            "id": "priorityLearning",
-            "label": "收益优先",
-            "description": "特征值题决定模考得分。",
-            "type": "strategy",
-            "order": 3
-          }
-        ],
-        "chunkSteps": [
-          "AI 通过几何动画讲特征值含义。",
-          "你用“像讲给小孩听”的方式复述，AI 纠错并补空。",
-          "做 2 道预测题并生成错因抽认卡。"
-        ],
-        "strategies": [
-          "priorityLearning",
-          "feynman",
-          "predictionBased",
-          "activeRecall"
-        ],
-        "why": {
-          "statement": "特征值是最终模考 20 分大题的核心。",
-          "evidence": [
-            "冲刺 90+ 必须秒杀对角化变换。",
-            "抽认卡 + 快问组合能提升记忆留存 30%。"
-          ]
-        }
-      },
-      {
-        "id": "node-rank",
-        "title": "Rank-Nullity 应用冲刺",
-        "type": "practice",
-        "status": "locked",
-        "etaMinutes": 45,
-        "summary": "用往年真题 + AI 变式，拆题三步走。",
-        "benefitLevel": "medium",
-        "origin": "curated",
-        "personaBindings": [
-          {
-            "signal": "likesPractice",
-            "label": "喜欢刷题",
-            "action": "连续 6 题手写推导。"
-          },
-          {
-            "signal": "fearDifficulty",
-            "label": "怕难",
-            "action": "从易到难自动调序。"
+            "action": "一次投放 3 道难度阶梯题"
           }
         ],
         "tagSequence": [
           {
             "id": "chunking",
-            "label": "拆题法",
-            "description": "大题拆为 3 步模板。",
+            "label": "拆题",
+            "description": "每题拆成 3 步提示",
             "type": "strategy",
             "order": 1
           },
           {
-            "id": "paceAdjust",
-            "label": "节奏调度",
-            "description": "做完一小时自动回顾 / 规划。",
+            "id": "aiQuizLoop",
+            "label": "练测循环",
+            "description": "AI 自动判分 + 追问",
             "type": "strategy",
             "order": 2
-          },
-          {
-            "id": "curated",
-            "label": "资料沉淀",
-            "description": "基于既有真题资料。",
-            "type": "origin",
-            "order": 3
           }
         ],
         "chunkSteps": [
-          "步骤 1：识别题干类型，列出 rank-nullity 框架。",
-          "步骤 2：AI 给提示，你完成核算并口头复述。",
-          "步骤 3：生成错因标签和快问回顾。"
+          "识别题型 → 挑选模板",
+          "写出关键中间量 (如 sinx≈x)",
+          "用 AI 检查逻辑漏洞"
         ],
-        "strategies": [
-          "chunking",
-          "aiQuizLoop",
-          "paceAdjust"
-        ],
+        "strategies": ["chunking", "aiQuizLoop"],
         "why": {
-          "statement": "Rank-Nullity 是投影与最小二乘题的评分点。",
+          "statement": "把模板迁移到题目才能真正稳固。",
           "evidence": [
-            "掌握模板即可覆盖 2 道 15 分问法。",
-            "逐题添加错因有助于下一次预测题。"
+            "历年 3 分题全是模板变体"
           ]
         }
       }
     ]
   },
   {
-    "id": "node-application",
-    "title": "应用强化：最小二乘与投影",
-    "type": "project",
-    "status": "locked",
-    "etaMinutes": 120,
-    "summary": "AI 生成案例 + 大题讲解，包含测验与抽认卡。",
+    "id": "calc-derivative-application",
+    "title": "导数与最值一条龙",
+    "type": "concept",
+    "status": "available",
+    "etaMinutes": 95,
+    "summary": "对齐定义 → 求导技巧 → 最值/单调/曲率联动。",
     "benefitLevel": "high",
     "origin": "aiGenerated",
     "personaBindings": [
       {
-        "signal": "targetScore90",
-        "label": "冲刺 90+",
-        "action": "自动插入更难的工业案例。"
+        "signal": "fearDifficulty",
+        "label": "怕难",
+        "action": "拆成“定义—技巧—应用”三级难度"
       },
       {
         "signal": "remaining12h",
         "label": "剩余 12 小时",
-        "action": "扩展练习并建议学习节奏。"
+        "action": "只保留压轴题必备技巧"
+      }
+    ],
+    "tagSequence": [
+      {
+        "id": "foundationRescue",
+        "label": "基础补救",
+        "description": "以一阶导 + 二阶导判别串联所有结论",
+        "type": "persona",
+        "order": 1
+      },
+      {
+        "id": "aiAuto",
+        "label": "AI 自动生成",
+        "description": "AI 绘制导函数草图 → 口述转写",
+        "type": "origin",
+        "order": 2
+      }
+    ],
+    "chunkSteps": [
+      "复盘链式、隐函数、参数方程三种求导",
+      "用 AI 生成函数图观察单调凹凸",
+      "最值题：列导数表 + 文字解释",
+      "压轴题：结合柯西中值或拉格朗日中值做估计"
+    ],
+    "strategies": ["priorityLearning", "feynman"],
+    "why": {
+      "statement": "导数题单题 10-12 分，覆盖证明+计算。",
+      "evidence": [
+        "历年卷 2 大题=导数综合",
+        "AI 预测：今年加入参数函数"
+      ]
+    }
+  },
+  {
+    "id": "calc-integral-sprint",
+    "title": "定积分与面积体积",
+    "type": "practice",
+    "status": "available",
+    "etaMinutes": 90,
+    "summary": "换元/分部/凑微分组合拳 + 应用题模板。",
+    "benefitLevel": "medium",
+    "origin": "aiGenerated",
+    "personaBindings": [
+      {
+        "signal": "likesPractice",
+        "label": "喜欢刷题",
+        "action": "题目以“方法标签”组织"
+      }
+    ],
+    "tagSequence": [
+      {
+        "id": "chunking",
+        "label": "拆题",
+        "description": "逐步提示：识别变量→选法→收敛检查",
+        "type": "strategy",
+        "order": 1
+      },
+      {
+        "id": "benefitHigh",
+        "label": "高收益",
+        "description": "面积/体积题常驻压轴",
+        "type": "benefit",
+        "order": 2
+      }
+    ],
+    "chunkSteps": [
+      "题目打标签（换元/分部/对称）",
+      "列积分上限下限 + 单位解释",
+      "AI 自动渲染几何图帮助理解",
+      "用费曼复述解释面积含义"
+    ],
+    "strategies": ["chunking", "feynman"],
+    "why": {
+      "statement": "积分题易失分在方法选择与几何含义。",
+      "evidence": [
+        "AI 统计：70% 错误来自方法判断",
+        "历年卷固定一道体积题"
+      ]
+    },
+    "children": [
+      {
+        "id": "calc-integral-checkpoint",
+        "title": "积分 checkpoint 测验",
+        "type": "quiz",
+        "status": "available",
+        "etaMinutes": 30,
+        "summary": "5 题限时机考，错题立刻补抽认卡。",
+        "benefitLevel": "medium",
+        "origin": "aiGenerated",
+        "personaBindings": [],
+        "tagSequence": [
+          {
+            "id": "aiQuizLoop",
+            "label": "练测循环",
+            "description": "AI 实时判错 + 追问原因",
+            "type": "strategy",
+            "order": 1
+          }
+        ],
+        "chunkSteps": [
+          "15 分钟做题",
+          "AI 解析 + 记录最容易错的方法",
+          "将错题推送到 Mistakes Vault"
+        ],
+        "strategies": ["aiQuizLoop"],
+        "why": {
+          "statement": "限时压力下检验积分模板是否熟练。",
+          "evidence": [
+            "模拟卷 3 分题全部来自此题库"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "calc-series-capstone",
+    "title": "级数与泰勒 Capstone",
+    "type": "project",
+    "status": "available",
+    "etaMinutes": 70,
+    "summary": "综合使用级数判别 + 泰勒展开解决应用题。",
+    "benefitLevel": "medium",
+    "origin": "aiGenerated",
+    "personaBindings": [
+      {
+        "signal": "remaining12h",
+        "label": "剩余 12 小时",
+        "action": "只保留压轴模板与速记表"
       }
     ],
     "tagSequence": [
       {
         "id": "predictionBased",
         "label": "预测试题",
-        "description": "依据往年题型生成重难点。",
+        "description": "AI 根据历年题预测 2 种情景",
         "type": "strategy",
         "order": 1
-      },
-      {
-        "id": "aiQuizLoop",
-        "label": "练测循环",
-        "description": "题目、讲解、抽认卡全自动生成。",
-        "type": "strategy",
-        "order": 2
-      },
-      {
-        "id": "benefitHigh",
-        "label": "高收益",
-        "description": "项目题 30 分占比。",
-        "type": "benefit",
-        "order": 3
       }
     ],
     "chunkSteps": [
-      "步骤 1：AI 生成案例并讲解最小二乘推导。",
-      "步骤 2：你按提示拆 4 步推导并口头复述。",
-      "步骤 3：自动生成 5 题测验 + 5 张抽认卡。",
-      "步骤 4：小墨评估理解度并重排节奏。"
+      "总结 4 种判别法 + 触发条件",
+      "把泰勒展开写成查表 + 误差界",
+      "完成一套综合题并用语音复述",
+      "将结果同步到知识库 note"
     ],
-    "strategies": [
-      "predictionBased",
-      "aiQuizLoop",
-      "chunking",
-      "paceAdjust"
-    ],
+    "strategies": ["predictionBased", "feynman"],
     "why": {
-      "statement": "项目题直连模考第三问，提分最快。",
+      "statement": "级数题虽占分不高，但常与证明题捆绑。",
       "evidence": [
-        "自动化讲解减少 40% 查资料时间。",
-        "练测循环让记忆翻倍。"
-      ]
-    }
-  },
-  {
-    "id": "node-mock",
-    "title": "终极模考 + 主动回忆",
-    "type": "quiz",
-    "status": "locked",
-    "etaMinutes": 80,
-    "summary": "AI 拼装模考，结束前弹出 3 个主动回忆快问。",
-    "benefitLevel": "high",
-    "origin": "aiGenerated",
-    "personaBindings": [
-      {
-        "signal": "targetScore90",
-        "label": "冲刺 90+",
-        "action": "模考难度自动提升一档。"
-      },
-      {
-        "signal": "remaining12h",
-        "label": "剩余 12 小时",
-        "action": "建议 1 小时节奏：完成后重规划。"
-      }
-    ],
-    "tagSequence": [
-      {
-        "id": "activeRecall",
-        "label": "主动回忆",
-        "description": "模块结束前弹出快问。",
-        "type": "strategy",
-        "order": 1
-      },
-      {
-        "id": "paceAdjust",
-        "label": "节奏调度",
-        "description": "每小时做快速回顾/规划。",
-        "type": "strategy",
-        "order": 2
-      },
-      {
-        "id": "aiAuto",
-        "label": "AI 自动生成",
-        "description": "模考 + 讲解全部由 AI 生成。",
-        "type": "origin",
-        "order": 3
-      }
-    ],
-    "chunkSteps": [
-      "步骤 1：AI 生成 3 套模考题库，按照收益优先排序。",
-      "步骤 2：完成每套后启动费曼复述 + 快问测验。",
-      "步骤 3：AI 复盘错题，自动压缩或扩展后续路径。"
-    ],
-    "strategies": [
-      "predictionBased",
-      "activeRecall",
-      "aiQuizLoop",
-      "paceAdjust",
-      "feynman"
-    ],
-    "why": {
-      "statement": "冲刺阶段需要用预测模考来验证知识闭环。",
-      "evidence": [
-        "主动回忆能将保留率提升 25%。",
-        "AI 节奏重排防止时间被模考吃光。"
+        "2024 卷把泰勒与导数结合",
+        "AI 预测此类组合题继续出现"
       ]
     }
   }

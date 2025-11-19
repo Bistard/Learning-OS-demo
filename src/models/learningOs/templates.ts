@@ -9,6 +9,7 @@ import {
   KnowledgeLibraryTemplate,
   ResourceHighlight,
   StudyRouteItem,
+  TaskNode,
   WeeklyPlanItem,
   WorkspaceState,
 } from './types';
@@ -37,3 +38,10 @@ export const defaultKnowledgeLibraryId = knowledgeBaseTemplate.id ?? 'knowledge-
 export const getKnowledgeLibraryTemplate = (libraryId: string): KnowledgeLibraryTemplate =>
   knowledgeLibraryTemplates.find((library) => library.id === libraryId) ?? knowledgeLibraryTemplates[0];
 export const workspaceTemplate = workspaceTemplateData as WorkspaceState;
+
+export const resolveTaskTreeTemplate = (categoryId?: string): TaskNode[] => {
+  if (!categoryId) {
+    return defaultTaskTreeDataset;
+  }
+  return getTaskTreeDataset(categoryId);
+};

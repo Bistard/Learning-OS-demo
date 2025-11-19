@@ -1,7 +1,7 @@
 ﻿{
-  "id": "library-linear-algebra",
-  "title": "线性代数",
-  "description": "矩阵、向量空间与特征值的高频考点",
+  "id": "library-calculus",
+  "title": "微积分智适应知识库",
+  "description": "围绕极限、导数、积分与应用题的高频考点，配合 AI 的推导路径与练测循环。",
   "connectedVaults": {
     "activeGoal": ["kb-flashcards", "kb-mistakes", "kb-notes"],
     "newGoal": ["kb-uncategorized", "kb-notes"]
@@ -9,43 +9,43 @@
   "categories": [
     {
       "id": "kb-flashcards",
-      "title": "概念速记",
+      "title": "概念快闪卡",
       "kind": "flashcards",
       "isFixed": false,
-      "icon": "🧠",
-      "color": "#f97316",
+      "icon": "📐",
+      "color": "#0ea5e9",
       "items": [
         {
-          "id": "kb-linear-card-1",
-          "summary": "特征值与特征向量",
-          "detail": "Av = λv；对任意非零向量 v 满足该关系即可称为特征向量。",
-          "source": "AI 解析",
-          "updatedAt": "今天 08:26",
-          "goalId": "goal-linear"
+          "id": "kb-calc-card-1",
+          "summary": "极限 ε-δ 语言",
+          "detail": "∀ε>0, ∃δ>0 使 0<|x-a|<δ ⇒ |f(x)-L|<ε，复述常见极限技巧。",
+          "source": "AI 推导",
+          "updatedAt": "今天 08:10",
+          "goalId": "goal-calculus"
         },
         {
-          "id": "kb-linear-card-2",
-          "summary": "秩与零空间",
-          "detail": "rank(A) + nullity(A) = 列数，来自秩-零度定理。",
-          "source": "AI 解析",
-          "updatedAt": "今天 08:32",
-          "goalId": "goal-linear"
+          "id": "kb-calc-card-2",
+          "summary": "导数四种理解",
+          "detail": "斜率、瞬时变化率、切线、极值判别；配图帮助记忆。",
+          "source": "抽认卡",
+          "updatedAt": "今天 08:18",
+          "goalId": "goal-calculus"
         },
         {
-          "id": "kb-linear-card-3",
-          "summary": "相似变换",
-          "detail": "若 B = P^{-1}AP，则 A 与 B 有相同特征值与行列式。",
-          "source": "课堂速记",
-          "updatedAt": "今天 08:41",
-          "goalId": "goal-linear"
+          "id": "kb-calc-card-3",
+          "summary": "常见积分模板",
+          "detail": "分部、凑微分、三角互化、换元；列出触发条件。",
+          "source": "AI 精炼",
+          "updatedAt": "今天 08:25",
+          "goalId": "goal-calculus"
         },
         {
-          "id": "kb-linear-card-4",
-          "summary": "正交矩阵",
-          "detail": "Q^TQ = I；列向量构成标准正交基且 |det Q| = 1。",
-          "source": "课堂速记",
-          "updatedAt": "今天 08:45",
-          "goalId": "goal-linear"
+          "id": "kb-calc-card-4",
+          "summary": "泰勒展开判定",
+          "detail": "以 e^x、ln(1+x)、sin x 为例，强调余项阶与近似区间。",
+          "source": "课堂记录",
+          "updatedAt": "今天 08:33",
+          "goalId": "goal-calculus"
         }
       ]
     },
@@ -55,57 +55,57 @@
       "kind": "mistakes",
       "isFixed": false,
       "icon": "⚠️",
-      "color": "#facc15",
+      "color": "#f97316",
       "items": [
         {
-          "id": "kb-linear-mistake-1",
-          "summary": "列向量线性相关判定遗漏",
-          "detail": "忘记检查零向量或重复列，导致 rank 估计偏高。",
-          "source": "练习本",
-          "updatedAt": "昨天 22:41",
-          "goalId": "goal-linear"
+          "id": "kb-calc-mistake-1",
+          "summary": "把可导误认作连续",
+          "detail": "证明题要求先给出连续性，再说明导数存在；不要逆推。",
+          "source": "错题本",
+          "updatedAt": "今天 09:05",
+          "goalId": "goal-calculus"
         },
         {
-          "id": "kb-linear-mistake-2",
-          "summary": "对角化条件误判",
-          "detail": "仅有不同特征值时可对角化，重根需保证特征向量充足。",
-          "source": "练习本",
-          "updatedAt": "昨天 21:18",
-          "goalId": "goal-linear"
+          "id": "kb-calc-mistake-2",
+          "summary": "积分常数遗忘",
+          "detail": "定积分求原函数时漏写 C，导致下一步代值错误。",
+          "source": "练习",
+          "updatedAt": "今天 09:12",
+          "goalId": "goal-calculus"
         },
         {
-          "id": "kb-linear-mistake-3",
-          "summary": "行列式分块计算出错",
-          "detail": "非三角块矩阵时不能直接把子块行列式相乘。",
-          "source": "练习本",
-          "updatedAt": "昨天 21:05",
-          "goalId": "goal-linear"
+          "id": "kb-calc-mistake-3",
+          "summary": "比较判别法条件写反",
+          "detail": "级数敛散判别要说明被比较的级数类型与非负性。",
+          "source": "AI 诊断",
+          "updatedAt": "今天 09:20",
+          "goalId": "goal-calculus"
         }
       ]
     },
     {
       "id": "kb-links",
-      "title": "延伸阅读",
+      "title": "可视化资源",
       "kind": "links",
       "isFixed": true,
       "icon": "🔗",
-      "color": "#38bdf8",
+      "color": "#34d399",
       "items": [
         {
-          "id": "kb-linear-link-1",
-          "summary": "MIT 18.06 Lecture 5",
-          "detail": "投影与最小二乘法的可视化推导。",
-          "source": "课程链接",
-          "updatedAt": "昨天 13:20",
-          "href": "https://ocw.mit.edu/18-06"
+          "id": "kb-calc-link-1",
+          "summary": "3Blue1Brown 微积分本质",
+          "detail": "用动画解释导数与积分互为逆过程。",
+          "source": "视频",
+          "updatedAt": "今天 07:40",
+          "href": "https://www.3blue1brown.com/lessons/essence-of-calculus"
         },
         {
-          "id": "kb-linear-link-2",
-          "summary": "Sheldon Axler《Linear Algebra Done Right》",
-          "detail": "特征值章节（Chapter 7）",
-          "source": "书籍",
-          "updatedAt": "昨天 09:12",
-          "href": "https://linear.axler.net/"
+          "id": "kb-calc-link-2",
+          "summary": "Paul's Online Math Notes",
+          "detail": "极限、链式法则、定积分例题整理。",
+          "source": "笔记",
+          "updatedAt": "今天 07:45",
+          "href": "https://tutorial.math.lamar.edu/"
         }
       ]
     },
@@ -114,47 +114,47 @@
       "title": "上传资料",
       "kind": "uploads",
       "isFixed": true,
-      "icon": "📂",
+      "icon": "🗂️",
       "color": "#a855f7",
       "items": []
     },
     {
       "id": "kb-notes",
-      "title": "推导笔记",
+      "title": "推导随手记",
       "kind": "notes",
       "isFixed": true,
       "icon": "📝",
-      "color": "#34d399",
+      "color": "#facc15",
       "items": [
         {
-          "id": "kb-linear-note-1",
-          "summary": "正交投影矩阵推导",
-          "detail": "P = A(A^TA)^{-1}A^T，记录证明每一步的意义。",
-          "source": "课堂手写",
-          "updatedAt": "今天 07:50",
-          "noteId": "note-linear-1"
+          "id": "kb-calc-note-1",
+          "summary": "洛必达适用 checklist",
+          "detail": "1)0/0 or ∞/∞；2)分子分母可导；3)必要时重复使用。",
+          "source": "课堂速记",
+          "updatedAt": "今天 08:50",
+          "noteId": "note-calc-1"
         },
         {
-          "id": "kb-linear-note-2",
-          "summary": "LU 分解条件速查",
-          "detail": "主子式非零即可直接做 Doolittle 分解。",
-          "source": "课堂手写",
-          "updatedAt": "今天 07:45",
-          "noteId": "note-linear-2"
+          "id": "kb-calc-note-2",
+          "summary": "分部积分模板",
+          "detail": "优先选取多项式做 u，指数/三角做 dv，逐次降低幂次。",
+          "source": "费曼复述",
+          "updatedAt": "今天 08:55",
+          "noteId": "note-calc-2"
         },
         {
-          "id": "kb-linear-note-3",
-          "summary": "特征多项式套路",
-          "detail": "|A - λI| = 0；先列出系数与迹/行列式的关系。",
-          "source": "课堂手写",
-          "updatedAt": "今天 07:40",
-          "noteId": "note-linear-3"
+          "id": "kb-calc-note-3",
+          "summary": "级数收敛策略",
+          "detail": "先判断正项/交错，再选择比值、根式或交错判别。",
+          "source": "AI 回放",
+          "updatedAt": "今天 09:00",
+          "noteId": "note-calc-3"
         }
       ]
     },
     {
       "id": "kb-uncategorized",
-      "title": "未分类",
+      "title": "未归档",
       "kind": "uncategorized",
       "isFixed": true,
       "icon": "📥",

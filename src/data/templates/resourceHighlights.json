@@ -1,24 +1,25 @@
 ﻿[
   {
     "id": "highlight-cards",
-    "title": "5 张精华卡片 · 线性无关速查",
+    "title": "5 张抽认卡 · 极限判别",
     "type": "card",
-    "excerpt": "AI 自动提炼定义 + 常考变式，已推送到 KB",
-    "source": "知识库 · 精华卡片",
-    "linkedTaskId": "node-foundation"
+    "excerpt": "AI 自动把 ε-δ、夹逼、洛必达整理成速查表。",
+    "source": "知识库 · 概念快闪卡",
+    "linkedTaskId": "calc-limit-foundation"
   },
   {
     "id": "highlight-notes",
-    "title": "即时笔记 · 拉格朗日乘子突破",
+    "title": "随手记 · 导数口述稿",
     "type": "note",
-    "excerpt": "已入错题本，AI 标记易错步骤，并提示复习时间",
-    "source": "左栏 Lecture slides W5"
+    "excerpt": "把单调/极值判别写成 3 步话术，方便费曼复述。",
+    "source": "课堂手写笔记"
   },
   {
     "id": "highlight-quiz",
-    "title": "自适应 Quiz · 正交投影",
+    "title": "限时 Quiz · 定积分",
     "type": "quiz",
-    "excerpt": "完成度 80%，AI 建议 2 天后复刷",
-    "source": "AI 个性化教师"
+    "excerpt": "15 分钟机考 + AI 扫描错因，自动回推 Mistakes Vault。",
+    "source": "AI 数学教练",
+    "linkedTaskId": "calc-integral-checkpoint"
   }
 ]

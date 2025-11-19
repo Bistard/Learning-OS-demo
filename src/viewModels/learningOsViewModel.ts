@@ -404,7 +404,7 @@ export class LearningOsViewModel {
       },
       todayRoute,
       weeklyPlan,
-      taskTree: createTaskTree(),
+      taskTree: createTaskTree(subjectId),
       highlights: [],
       connectedKnowledgeVaults: [...NEW_GOAL_CONNECTED_VAULTS],
     };

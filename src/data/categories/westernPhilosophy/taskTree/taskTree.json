@@ -1,0 +1,173 @@
+﻿[
+  {
+    "id": "philo-foundation",
+    "title": "哲学史脉络速通",
+    "type": "concept",
+    "status": "available",
+    "etaMinutes": 75,
+    "summary": "AI 以时间轴串联希腊→中世纪→现代三段核心议题。",
+    "benefitLevel": "high",
+    "origin": "aiGenerated",
+    "personaBindings": [
+      {
+        "signal": "weakFoundation",
+        "label": "基础薄弱",
+        "action": "用图谱解释概念演化并附带反例"
+      },
+      {
+        "signal": "prefersAiMentor",
+        "label": "先听 AI",
+        "action": "老师语速版讲完再布置复述"
+      }
+    ],
+    "tagSequence": [
+      {
+        "id": "priorityLearning",
+        "label": "收益优先",
+        "description": "覆盖 60% 论述题常考流派",
+        "type": "strategy",
+        "order": 1
+      },
+      {
+        "id": "foundationRescue",
+        "label": "基础补救",
+        "description": "用对照表比出理性/经验/批判",
+        "type": "persona",
+        "order": 2
+      }
+    ],
+    "chunkSteps": [
+      "希腊→罗马：梳理形而上学问题",
+      "中世纪→启蒙：整理神学与理性冲突",
+      "现代→当代：从康德到存在主义",
+      "费曼复述：2 分钟讲清三大线索"
+    ],
+    "strategies": ["priorityLearning", "feynman"],
+    "why": {
+      "statement": "史观清晰才能定位任何论述题。",
+      "evidence": [
+        "近三年考题均要求比较两个时代",
+        "AI 预测：继续考理性主义 vs 经验主义"
+      ]
+    },
+    "children": [
+      {
+        "id": "philo-flashcards",
+        "title": "概念抽认卡",
+        "type": "quiz",
+        "status": "available",
+        "etaMinutes": 20,
+        "summary": "10 张核心概念卡，阅读后立即自测。",
+        "benefitLevel": "medium",
+        "origin": "aiGenerated",
+        "personaBindings": [],
+        "tagSequence": [
+          {
+            "id": "aiQuizLoop",
+            "label": "练测循环",
+            "description": "答错立即跳转知识库详细解释",
+            "type": "strategy",
+            "order": 1
+          }
+        ],
+        "chunkSteps": [
+          "阅读卡片",
+          "用 1 句话解释概念",
+          "AI 判断理解程度"
+        ],
+        "strategies": ["aiQuizLoop"],
+        "why": {
+          "statement": "口头输出确保真正理解定义。",
+          "evidence": [
+            "错题统计：概念混淆占 40%"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "philo-argument-drill",
+    "title": "论证拆解演练",
+    "type": "practice",
+    "status": "available",
+    "etaMinutes": 60,
+    "summary": "两道真题演练：洞喻 vs. 笛卡尔怀疑 + 康德范畴。",
+    "benefitLevel": "high",
+    "origin": "aiGenerated",
+    "personaBindings": [
+      {
+        "signal": "likesPractice",
+        "label": "喜欢刷题",
+        "action": "题目按“立场-证法-反驳”模板输出"
+      }
+    ],
+    "tagSequence": [
+      {
+        "id": "chunking",
+        "label": "拆题",
+        "description": "每题拆成立场/论据/批判三个区块",
+        "type": "strategy",
+        "order": 1
+      },
+      {
+        "id": "aiAuto",
+        "label": "AI 自动生成",
+        "description": "AI 检查论证是否自洽",
+        "type": "origin",
+        "order": 2
+      }
+    ],
+    "chunkSteps": [
+      "阅读题干，标记关键词",
+      "使用模板写出立场与理由",
+      "提出反驳或局限",
+      "AI 给出反馈 + 推荐延伸"
+    ],
+    "strategies": ["chunking", "aiQuizLoop"],
+    "why": {
+      "statement": "论证题得分取决于结构化输出。",
+      "evidence": [
+        "教师评分标准：结构 > 观点新颖"
+      ]
+    }
+  },
+  {
+    "id": "philo-essay-capstone",
+    "title": "哲学写作冲刺",
+    "type": "project",
+    "status": "available",
+    "etaMinutes": 80,
+    "summary": "完成一篇 800 字议论文，含批判理论或存在主义视角。",
+    "benefitLevel": "medium",
+    "origin": "aiGenerated",
+    "personaBindings": [
+      {
+        "signal": "remaining12h",
+        "label": "剩余 12 小时",
+        "action": "优先完成能直接交作业的版本"
+      }
+    ],
+    "tagSequence": [
+      {
+        "id": "predictionBased",
+        "label": "预测试题",
+        "description": "AI 依据近期命题给出两个热题提示",
+        "type": "strategy",
+        "order": 1
+      }
+    ],
+    "chunkSteps": [
+      "选题：存在主义 or 批判理论",
+      "列提纲：论点/论据/案例",
+      "写初稿 → AI 批注逻辑",
+      "将终稿同步知识库"
+    ],
+    "strategies": ["predictionBased", "feynman"],
+    "why": {
+      "statement": "提前准备段落可直接复用在正式考试。",
+      "evidence": [
+        "往年优秀论文模板复用率 70%"
+      ]
+    }
+  }
+]

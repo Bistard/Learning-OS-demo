@@ -11,6 +11,7 @@ import calculusTaskTree from '../../data/categories/calculus/taskTree/taskTree.j
 import calculusKnowledgeBase from '../../data/categories/calculus/knowledgeBase/knowledgeBase.json';
 import westernMeta from '../../data/categories/westernPhilosophy/meta.json';
 import westernKnowledgeBase from '../../data/categories/westernPhilosophy/knowledgeBase/knowledgeBase.json';
+import westernTaskTree from '../../data/categories/westernPhilosophy/taskTree/taskTree.json';
 import {
   GoalAdvancedDimension,
   GoalCreationPreset,
@@ -41,6 +42,8 @@ export interface GoalSeed {
     dailyMinutes: number;
     materials: string[];
     resourcesCaptured: number;
+    subjectId?: string;
+    subjectLabel?: string;
     persona?: LearningPersona;
   };
   progress: {
@@ -75,6 +78,7 @@ const calculusCategory: LearningCategoryDefinition = {
 
 const westernPhilosophyCategory: LearningCategoryDefinition = {
   meta: westernMeta as CategoryMeta,
+  taskTree: westernTaskTree as TaskNode[],
   knowledgeBase: westernKnowledgeBase as KnowledgeLibraryTemplate,
 };
 

@@ -3,7 +3,7 @@
  */
 import {
   DEFAULT_DAILY_MINUTES,
-  GOAL_ID_LINEAR,
+  DEFAULT_GOAL_ID,
   KNOWLEDGE_UNSORTED_CATEGORY_ID,
   COUNTDOWN_LOOKAHEAD_DAYS,
   KNOWLEDGE_NOTES_CATEGORY_ID,
@@ -34,9 +34,9 @@ import {
   defaultKnowledgeLibraryId,
   resourceHighlightsData,
   studyRouteData,
-  taskTreeData,
   weeklyPlanData,
   workspaceTemplate,
+  resolveTaskTreeTemplate,
 } from './templates';
 import { defaultConfiguration } from '../../config/configuration';
 import {
@@ -72,7 +72,8 @@ const cloneTaskNode = (node: TaskNode): TaskNode => ({
   children: node.children?.map(cloneTaskNode),
 });
 
-export const createTaskTree = (): TaskNode[] => taskTreeData.map(cloneTaskNode);
+export const createTaskTree = (categoryId?: string): TaskNode[] =>
+  resolveTaskTreeTemplate(categoryId).map(cloneTaskNode);
 
 export const createResourceHighlights = (): ResourceHighlight[] =>
   resourceHighlightsData.map((highlight) => ({ ...highlight }));
@@ -111,6 +112,8 @@ export const buildNotesFromKnowledgeBase = (knowledgeBase: KnowledgeBaseState): 
 
 const createGoal = (): StudyGoal => {
   const deadline = nextDeadlineIso(goalSeed.profile.deadlineDaysFromNow);
+  const subjectId = goalSeed.profile.subjectId ?? 'calculus';
+  const subjectLabel = goalSeed.profile.subjectLabel ?? '微积分';
   const profile: GoalProfile = {
     targetType: goalSeed.profile.targetType,
     deadline,
@@ -118,6 +121,8 @@ const createGoal = (): StudyGoal => {
     dailyMinutes: goalSeed.profile.dailyMinutes,
     materials: [...goalSeed.profile.materials],
     resourcesCaptured: goalSeed.profile.resourcesCaptured,
+    subjectId,
+    subjectLabel,
     persona: goalSeed.profile.persona,
   };
   const progress: GoalProgress = {
@@ -126,7 +131,7 @@ const createGoal = (): StudyGoal => {
     remainingDays: daysUntil(deadline),
   };
   return {
-    id: goalSeed.id ?? GOAL_ID_LINEAR,
+    id: goalSeed.id ?? DEFAULT_GOAL_ID,
     name: goalSeed.name,
     focus: goalSeed.focus,
     status: goalSeed.status,
@@ -134,7 +139,7 @@ const createGoal = (): StudyGoal => {
     progress,
     todayRoute: createStudyRoute(),
     weeklyPlan: createWeeklyPlan(),
-    taskTree: createTaskTree(),
+    taskTree: createTaskTree(subjectId),
     highlights: createResourceHighlights(),
     connectedKnowledgeVaults: [...knowledgeBaseTemplate.connectedVaults.activeGoal],
   };
