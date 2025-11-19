@@ -9,8 +9,10 @@ import calculusInitialGoal from '../../data/categories/calculus/goal/initialGoal
 import calculusPresets from '../../data/categories/calculus/goal/presets.json';
 import calculusTaskTree from '../../data/categories/calculus/taskTree/taskTree.json';
 import calculusKnowledgeBase from '../../data/categories/calculus/knowledgeBase/knowledgeBase.json';
+import calculusLessons from '../../data/categories/calculus/lessons';
 import westernMeta from '../../data/categories/westernPhilosophy/meta.json';
 import westernKnowledgeBase from '../../data/categories/westernPhilosophy/knowledgeBase/knowledgeBase.json';
+import westernLessons from '../../data/categories/westernPhilosophy/lessons';
 import westernTaskTree from '../../data/categories/westernPhilosophy/taskTree/taskTree.json';
 import {
   GoalAdvancedDimension,
@@ -58,11 +60,14 @@ export interface CategoryGoalDataset {
   initialGoal: GoalSeed;
 }
 
+export type TaskLessonMap = Record<string, string>;
+
 export interface LearningCategoryDefinition {
   meta: CategoryMeta;
   goal?: CategoryGoalDataset;
   taskTree?: TaskNode[];
   knowledgeBase?: KnowledgeLibraryTemplate;
+  lessons?: TaskLessonMap;
 }
 
 const calculusCategory: LearningCategoryDefinition = {
@@ -74,12 +79,14 @@ const calculusCategory: LearningCategoryDefinition = {
   },
   taskTree: calculusTaskTree as TaskNode[],
   knowledgeBase: calculusKnowledgeBase as KnowledgeLibraryTemplate,
+  lessons: calculusLessons,
 };
 
 const westernPhilosophyCategory: LearningCategoryDefinition = {
   meta: westernMeta as CategoryMeta,
   taskTree: westernTaskTree as TaskNode[],
   knowledgeBase: westernKnowledgeBase as KnowledgeLibraryTemplate,
+  lessons: westernLessons,
 };
 
 export const learningCategories: LearningCategoryDefinition[] = [
@@ -109,6 +116,10 @@ const firstAvailableKnowledgeCategory =
 const firstAvailableTaskCategory =
   availableCategories.find((category) => category.taskTree) ??
   learningCategories.find((category) => category.taskTree);
+
+const firstAvailableLessonCategory =
+  availableCategories.find((category) => category.lessons) ??
+  learningCategories.find((category) => category.lessons);
 
 export const toGoalSubjectOptions = (): GoalSubjectOption[] =>
   learningCategories.map((category) => ({
@@ -163,4 +174,18 @@ export const getKnowledgeBaseTemplates = (): KnowledgeLibraryTemplate[] => {
   return learningCategories
     .filter((category) => Boolean(category.knowledgeBase))
     .map((category) => category.knowledgeBase as KnowledgeLibraryTemplate);
+};
+
+export const getTaskLessonContent = (
+  categoryId: string | undefined,
+  taskId: string
+): string | undefined => {
+  if (!taskId) return undefined;
+  if (categoryId) {
+    const match = getCategoryDefinition(categoryId);
+    const lesson = match?.lessons?.[taskId];
+    if (lesson) return lesson;
+  }
+  const fallbackLesson = firstAvailableLessonCategory?.lessons?.[taskId];
+  return fallbackLesson;
 };

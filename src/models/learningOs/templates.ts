@@ -18,6 +18,7 @@ import {
   getGoalDataset,
   getKnowledgeBaseTemplate,
   getKnowledgeBaseTemplates,
+  getTaskLessonContent as fetchTaskLessonContent,
   getTaskTreeDataset,
 } from './categoryRegistry';
 
@@ -45,3 +46,8 @@ export const resolveTaskTreeTemplate = (categoryId?: string): TaskNode[] => {
   }
   return getTaskTreeDataset(categoryId);
 };
+
+export const getTaskLessonContent = (
+  categoryId: string | undefined,
+  taskId: string
+): string | undefined => fetchTaskLessonContent(categoryId, taskId);

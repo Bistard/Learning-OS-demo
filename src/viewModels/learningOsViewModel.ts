@@ -30,6 +30,7 @@ import {
   createStudyRoute,
   createTaskTree,
   createWeeklyPlan,
+  getTaskLessonContent,
   nextDeadlineIso,
   KNOWLEDGE_NOTES_CATEGORY_ID,
   getKnowledgeLibraryTemplate,
@@ -211,8 +212,11 @@ export class LearningOsViewModel {
   }
 
   public startLearningWorkspace(taskId?: string): void {
+    if (!taskId) {
+      this.navigate('learningWorkspace');
+      return;
+    }
     this.mutateActiveGoal((goal) => {
-      if (!taskId) return goal;
       const todayRoute = goal.todayRoute.map((item) =>
         item.id === taskId && item.status !== 'complete'
           ? { ...item, status: 'in-progress' as const }
@@ -220,12 +224,25 @@ export class LearningOsViewModel {
       );
       return { ...goal, todayRoute };
     });
-    if (taskId) {
-      const routeItem = this.getActiveGoal()?.todayRoute.find((item) => item.id === taskId);
-      if (routeItem) {
-        const activeAsset = this.buildWorkspaceAsset(routeItem);
-        this.updateState({ workspace: { activeAsset } });
-      }
+    const goal = this.getActiveGoal();
+    if (!goal) {
+      this.navigate('learningWorkspace');
+      return;
+    }
+    const routeItem = goal.todayRoute.find((item) => item.id === taskId);
+    if (routeItem) {
+      const activeAsset = this.buildWorkspaceAsset(routeItem);
+      this.updateState({ workspace: { activeAsset } });
+      this.navigate('learningWorkspace');
+      return;
+    }
+    const taskNode = this.findTaskNode(goal.taskTree, taskId);
+    if (taskNode) {
+      const lessonContent =
+        getTaskLessonContent(goal.profile.subjectId, taskNode.id) ??
+        this.composeTaskLessonMarkdown(taskNode);
+      const activeAsset = this.buildTaskWorkspaceAsset(taskNode, lessonContent);
+      this.updateState({ workspace: { activeAsset } });
     }
     this.navigate('learningWorkspace');
   }
@@ -621,6 +638,64 @@ export class LearningOsViewModel {
       return node;
     });
     return [changed ? nextNodes : nodes, changed];
+  }
+
+  private findTaskNode(nodes: TaskNode[], targetId: string): TaskNode | null {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return node;
+      }
+      if (node.children && node.children.length > 0) {
+        const match = this.findTaskNode(node.children, targetId);
+        if (match) {
+          return match;
+        }
+      }
+    }
+    return null;
+  }
+
+  private buildTaskWorkspaceAsset(node: TaskNode, content: string): WorkspaceAsset {
+    const base = this.state.workspace.activeAsset;
+    const metadata = `${this.describeRouteKind(node.type as StudyRouteItem['kind'])} · 预计 ${node.etaMinutes} 分钟`;
+    const baseProgress = base?.progress ?? 25;
+    const progress = node.status === 'complete' ? 100 : Math.min(95, Math.max(25, baseProgress));
+    return {
+      ...base,
+      id: `task-${node.id}`,
+      title: node.title,
+      chapter: node.summary,
+      metadata,
+      progress,
+      content,
+      lastUpdated: this.formatTime(),
+    };
+  }
+
+  private composeTaskLessonMarkdown(node: TaskNode): string {
+    const steps =
+      node.chunkSteps && node.chunkSteps.length > 0
+        ? node.chunkSteps.map((step, index) => `${index + 1}. ${step}`).join('\n')
+        : '1. 根据节点提示完成任务。';
+    const personaHints =
+      node.personaBindings && node.personaBindings.length > 0
+        ? node.personaBindings.map((binding) => `- **${binding.label}**：${binding.action}`).join('\n')
+        : '';
+    const whySection = node.why
+      ? [`> ${node.why.statement}`, ...node.why.evidence.map((evidence) => `- ${evidence}`)].join('\n')
+      : '';
+    return [
+      `# ${node.title}`,
+      node.summary,
+      '## 推荐步骤',
+      steps,
+      personaHints ? '## 个性化提示' : '',
+      personaHints,
+      node.why ? '## 为什么要学' : '',
+      whySection,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
   }
 
   private appendHighlight(existing: ResourceHighlight[], routeId: string): ResourceHighlight[] {
