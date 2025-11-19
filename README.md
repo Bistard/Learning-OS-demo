@@ -55,6 +55,10 @@
 > 提示：该项目刻意保持“最小但可运行”，适合作为团队模板或 PoC 起点。根据实际业务逐步增加依赖与脚本即可。
 ## 数据驱动内容
 - 所有案例与模板数据统一存放在 `src/data/` 文件夹，以 JSON 形式集中管理。
-- `src/models/learningOsModel.ts` 仅负责读取这些数据并构建状态，不再硬编码任务树或知识库结构。
-- 当需要替换演示文案时，直接编辑对应 JSON（如 `initialGoal.json`、`templates/*.json`）即可被全局复用。
-- 「知识库」示例数据拆分存放在 `src/data/knowledgeBases/<library-id>/knowledgeBase.json`，默认内置“线性代数”和“西方哲学”，可以在 `src/models/learningOs/templates.ts` 中注册更多案例供 UI 下拉切换。
+- 「目标系统 / 任务树 / 知识库」三大模块的数据按照学科类别拆分在 `src/data/categories/<category-id>/` 中，便于统一维护：
+  - `goal/`：目标创建高级维度、预设模板、初始 Goal seed。
+  - `taskTree/`：该学科对应的任务树节点。
+  - `knowledgeBase/`：知识库模板（RAG Vault 结构）。
+  - `meta.json`：科目信息（可选）。
+- `src/models/learningOs/categoryRegistry.ts` 对上述分类目录做集中注册，其他模块通过该注册表获取默认数据并在新增类别时保持单一入口。
+- 仍需全局复用的通用模版（如 `templates/studyRoute.json`、`templates/weeklyPlan.json`）继续保留在 `src/data/templates/` 下。
