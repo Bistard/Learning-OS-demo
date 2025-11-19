@@ -14,6 +14,7 @@ import { SettingsModule } from '../modules/settings/settingsModule';
 import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
 import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
+import { AiDialogModule } from '../modules/learning/dialog/aiDialogModule';
 import { RenderRegions, UiModule } from '../modules/types';
 import { LearningOsViewModel, ViewSnapshot } from '../viewModels/learningOsViewModel';
 import { buildShellMarkup, SIDE_NAV } from './learningOs/navConfig';
@@ -69,6 +70,7 @@ export class LearningOsView {
       new GoalCreationModule(this.viewModel),
       new GoalWorkspaceModule(this.viewModel),
       new LearningWorkspaceModule(this.viewModel),
+      new AiDialogModule(this.viewModel),
       new KnowledgeBaseModule(this.viewModel),
       new NoteEditorModule(this.viewModel),
       new SettingsModule(this.viewModel),

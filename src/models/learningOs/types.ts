@@ -7,6 +7,7 @@ export type Page =
   | 'goalCreation'
   | 'goalWorkspace'
   | 'learningWorkspace'
+  | 'aiDialog'
   | 'knowledgeBase'
   | 'noteEditor'
   | 'settings';

@@ -11,6 +11,7 @@ export interface NavDefinition {
 
 export const PRIMARY_NAV: ReadonlyArray<NavDefinition> = [
   { icon: '📌', label: '目标', page: 'goalDashboard' },
+  { icon: '💬', label: 'AI 对话', page: 'aiDialog' },
   { icon: '📚', label: '知识库', page: 'knowledgeBase' },
 ];
 
