@@ -704,25 +704,30 @@ class ReviewLabExperience {
   }
 
   private composeQuestionCard(question: ReviewQuestion): string {
+    const focus = this.renderInlineRichText(question.focus);
+    const title = this.renderInlineRichText(question.title);
+    const ragSource = this.renderInlineRichText(question.ragSource);
+    const personaHint = this.renderInlineRichText(question.personaHint);
+    const reason = this.renderInlineRichText(question.reason);
     return `
       <article class="quiz-card" data-question="${question.id}">
         <header class="quiz-card-head">
           <div>
-            <p class="eyebrow">${question.focus}</p>
-            <h2>${question.title}</h2>
+            <p class="eyebrow quiz-md">${focus}</p>
+            <h2 class="quiz-card-title quiz-md">${title}</h2>
           </div>
           <div class="quiz-card-tags">
-            <span class="pill info">${personalize(question.ragSource, this.context)}</span>
-            <span class="pill warning">${personalize(question.personaHint, this.context)}</span>
-            <span class="pill ghost">${personalize(question.reason, this.context)}</span>
+            <span class="pill info quiz-md">${ragSource}</span>
+            <span class="pill warning quiz-md">${personaHint}</span>
+            <span class="pill ghost quiz-md">${reason}</span>
           </div>
         </header>
         <div class="quiz-interaction" data-interaction>
-          ${this.renderInteraction(question)}
+          ${this.renderInteraction(question, focus)}
         </div>
         <div class="quiz-feedback" data-feedback-block hidden>
           <p class="label">AI 反馈</p>
-          <div class="quiz-feedback-body" data-feedback-body></div>
+          <div class="quiz-feedback-body quiz-md" data-feedback-body></div>
         </div>
         <footer class="quiz-card-footer">
           <button class="btn ghost" data-nav="prev">上一题</button>
@@ -736,13 +741,27 @@ class ReviewLabExperience {
   private renderRichText(raw: string | undefined): string {
     const content = personalize(raw, this.context).trim();
     if (!content) return '';
-    return renderMarkdownContent(content, {
+    const html = renderMarkdownContent(content, {
       emptyClassName: 'quiz-md-empty',
       emptyMessage: '',
-    });
+    }).trim();
+    if (!html || /^<p class="quiz-md-empty">\s*<\/p>$/.test(html)) {
+      return '';
+    }
+    return html;
   }
 
-  private renderInteraction(question: ReviewQuestion): string {
+  private renderInlineRichText(raw: string | undefined): string {
+    const html = this.renderRichText(raw);
+    if (!html) return '';
+    const match = html.match(/^<p(?:\s+[^>]*)?>([\s\S]*)<\/p>$/);
+    if (match) {
+      return match[1];
+    }
+    return html;
+  }
+
+  private renderInteraction(question: ReviewQuestion, focusText: string): string {
     const answer = this.state.answers.get(question.id);
     switch (question.type) {
       case 'flashcard': {
@@ -751,7 +770,7 @@ class ReviewLabExperience {
         const back = this.renderRichText(data.back);
         const highlight = this.renderRichText(data.highlight);
         const isFlipped = this.getFlashcardFlipState(answer);
-        const focus = personalize(question.focus, this.context);
+        const focus = focusText || this.renderInlineRichText(question.focus);
         const hintBubble = highlight
           ? `
             <div class="flashcard-hint-bubble" data-flashcard-hint aria-hidden="true">
@@ -1221,8 +1240,8 @@ class ReviewLabExperience {
       feedbackNode.classList.remove('feedback-bounce', 'feedback-enter', 'is-visible');
       return;
     }
-    const text = personalize(this.pickFeedbackText(question.feedback, answer.status), this.context);
-    feedbackBody.textContent = text;
+    const html = this.renderRichText(this.pickFeedbackText(question.feedback, answer.status));
+    feedbackBody.innerHTML = html;
     feedbackNode.removeAttribute('hidden');
     feedbackNode.classList.add('is-visible');
     feedbackNode.classList.remove('feedback-enter');
