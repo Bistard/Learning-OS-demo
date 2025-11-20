@@ -53,7 +53,7 @@
     "children": [
       {
         "id": "philo-flashcards",
-        "title": "概念抽认卡",
+        "title": "概念记忆卡片",
         "type": "quiz",
         "status": "available",
         "etaMinutes": 20,

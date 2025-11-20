@@ -210,7 +210,7 @@
         "type": "quiz",
         "status": "available",
         "etaMinutes": 30,
-        "summary": "5 题限时机考，错题立刻补抽认卡。",
+        "summary": "5 题限时机考，错题立刻补记忆卡片。",
         "benefitLevel": "medium",
         "origin": "aiGenerated",
         "personaBindings": [],

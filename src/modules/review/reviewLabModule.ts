@@ -1,6 +1,7 @@
 import { Page, StudyGoal } from '../../models/learningOsModel';
 import { ViewSnapshot } from '../../viewModels/learningOsViewModel';
 import { RenderRegions, UiModule } from '../types';
+import { renderMarkdown as renderMarkdownContent } from '../../utils/markdown';
 
 type ReviewQuestionType =
   | 'flashcard'
@@ -569,7 +570,6 @@ class ReviewLabExperience {
   private timelineEl: HTMLElement | null = null;
   private progressValueEl: HTMLElement | null = null;
   private progressBarEl: HTMLElement | null = null;
-  private heroSubtitleEl: HTMLElement | null = null;
   private heroTitleEl: HTMLElement | null = null;
   private transitionToken = 0;
   private drafts = {
@@ -597,7 +597,6 @@ class ReviewLabExperience {
     this.timelineEl = regions.content.querySelector('[data-question-timeline]');
     this.progressValueEl = regions.content.querySelector('[data-progress-value]');
     this.progressBarEl = regions.content.querySelector('[data-progress-bar]');
-    this.heroSubtitleEl = regions.content.querySelector('[data-hero-subtitle]');
     this.heroTitleEl = regions.content.querySelector('[data-hero-title]');
   }
 
@@ -608,7 +607,6 @@ class ReviewLabExperience {
           <div>
             <p class="eyebrow">复习模式</p>
             <h1 data-hero-title></h1>
-            <p class="hero-subtitle" data-hero-subtitle></p>
           </div>
           <div class="review-hero-panel">
             <div class="review-progress">
@@ -637,13 +635,7 @@ class ReviewLabExperience {
 
   private updateHero(goal: StudyGoal | null): void {
     if (this.heroTitleEl) {
-      this.heroTitleEl.textContent = goal ? `${goal.name} · 复习工坊` : '当前目标 · 复习工坊';
-    }
-    if (this.heroSubtitleEl) {
-      this.heroSubtitleEl.textContent = personalize(
-        'AI 依据 {{resource}} 与错题本自动拼出 20 道题，让你在 {{deadlineDays}} 天内稳住 {{subject}} 重难点。',
-        this.context
-      );
+      this.heroTitleEl.textContent = goal ? `${goal.name} \u00b7 \u7ec3\u4e60\u5b9e\u9a8c` : '\u5f53\u524d\u76ee\u6807 \u00b7 \u7ec3\u4e60\u5b9e\u9a8c';
     }
     const deadline = this.heroTitleEl?.parentElement?.querySelector<HTMLElement>('[data-hero-deadline]');
     if (deadline) {
@@ -741,37 +733,79 @@ class ReviewLabExperience {
     `;
   }
 
+  private renderRichText(raw: string | undefined): string {
+    const content = personalize(raw, this.context).trim();
+    if (!content) return '';
+    return renderMarkdownContent(content, {
+      emptyClassName: 'quiz-md-empty',
+      emptyMessage: '',
+    });
+  }
+
   private renderInteraction(question: ReviewQuestion): string {
     const answer = this.state.answers.get(question.id);
     switch (question.type) {
       case 'flashcard': {
         const data = question as FlashcardQuestion;
-        return `
-          <div class="flashcard ${answer?.status === 'revealed' ? 'is-flipped' : ''}" data-flashcard>
-            <div class="flashcard-face flashcard-front">
-              <p>${personalize(data.front, this.context)}</p>
-              <span>${data.highlight}</span>
+        const front = this.renderRichText(data.front);
+        const back = this.renderRichText(data.back);
+        const highlight = this.renderRichText(data.highlight);
+        const isFlipped = this.getFlashcardFlipState(answer);
+        const focus = personalize(question.focus, this.context);
+        const hintBubble = highlight
+          ? `
+            <div class="flashcard-hint-bubble" data-flashcard-hint aria-hidden="true">
+              <span class="hint-label">AI 提示</span>
+              <div class="hint-body quiz-md">${highlight}</div>
             </div>
-            <div class="flashcard-face flashcard-back">
-              <pre>${personalize(data.back, this.context)}</pre>
+          `
+          : '';
+        const hintButtonAttrs = highlight ? '' : ' disabled';
+        return `
+          <div class="flashcard-shell">
+            <div class="flashcard ${isFlipped ? 'is-flipped' : ''}" data-flashcard>
+              <div class="flashcard-face flashcard-front">
+                <div class="flashcard-meta">
+                  <span class="pill subtle">记忆卡片</span>
+                  <span class="flashcard-focus">${focus}</span>
+                </div>
+                <div class="flashcard-content quiz-md">${front}</div>
+              </div>
+              <div class="flashcard-face flashcard-back">
+                <div class="flashcard-meta">
+                  <span class="pill subtle ghost">答案</span>
+                  <span class="flashcard-focus">${focus}</span>
+                </div>
+                <div class="flashcard-content quiz-md">${back}</div>
+              </div>
+            </div>
+            ${hintBubble}
+            <div class="flashcard-actions">
+              <button class="pill-btn" type="button" data-action="flip-card">翻转卡片</button>
+              <button class="pill-btn ghost" type="button" data-action="toggle-hint"${hintButtonAttrs} aria-pressed="false">AI 提示</button>
+              <button class="pill-btn ghost" type="button">收藏</button>
             </div>
           </div>
-          <button class="pill-btn" data-action="flip-card">翻转抽认卡</button>
         `;
       }
       case 'singleChoice': {
         const data = question as SingleChoiceQuestion;
+        const prompt = this.renderRichText(data.prompt);
         return `
-          <p class="quiz-prompt">${personalize(data.prompt, this.context)}</p>
+          <div class="quiz-prompt quiz-md">${prompt}</div>
           <div class="quiz-options" data-option-list>
             ${data.options
               .map(
-                (option) => `
-                  <button class="quiz-option" data-option="${option.id}" type="button">
-                    <strong>${option.label}</strong>
-                    <span>${option.detail ?? ''}</span>
-                  </button>
-                `
+                (option) => {
+                  const label = this.renderRichText(option.label);
+                  const detail = option.detail ? `<div class="quiz-option-detail quiz-md">${this.renderRichText(option.detail)}</div>` : '';
+                  return `
+                    <button class="quiz-option" data-option="${option.id}" type="button">
+                      <div class="quiz-option-label quiz-md">${label}</div>
+                      ${detail}
+                    </button>
+                  `;
+                }
               )
               .join('')}
           </div>
@@ -780,17 +814,23 @@ class ReviewLabExperience {
       case 'multiSelect': {
         const data = question as MultiSelectQuestion;
         const draft = this.drafts.multi.get(question.id);
+        const prompt = this.renderRichText(data.prompt);
         return `
-          <p class="quiz-prompt">${personalize(data.prompt, this.context)}</p>
+          <div class="quiz-prompt quiz-md">${prompt}</div>
           <div class="quiz-options multi" data-option-list>
             ${data.options
               .map(
-                (option) => `
-                  <button class="quiz-option ${draft?.has(option.id) ? 'is-selected' : ''}" data-option="${option.id}" type="button">
-                    <strong>${option.label}</strong>
-                    <span>${option.detail ?? ''}</span>
-                  </button>
-                `
+                (option) => {
+                  const isSelected = draft?.has(option.id) ? 'is-selected' : '';
+                  const label = this.renderRichText(option.label);
+                  const detail = option.detail ? `<div class="quiz-option-detail quiz-md">${this.renderRichText(option.detail)}</div>` : '';
+                  return `
+                    <button class="quiz-option ${isSelected}" data-option="${option.id}" type="button">
+                      <div class="quiz-option-label quiz-md">${label}</div>
+                      ${detail}
+                    </button>
+                  `;
+                }
               )
               .join('')}
           </div>
@@ -803,31 +843,34 @@ class ReviewLabExperience {
         const rightColumn = draft.order
           .map((id) => data.pairs.find((pair) => pair.id === id))
           .filter(Boolean) as MatchingPair[];
+        const prompt = this.renderRichText(data.prompt);
         return `
-          <p class="quiz-prompt">${personalize(data.prompt, this.context)}</p>
+          <div class="quiz-prompt quiz-md">${prompt}</div>
           <div class="matching-board" data-matching-board>
             <div class="matching-column left">
               ${data.pairs
-                .map(
-                  (pair) => `
+                .map((pair) => {
+                  const helper = personalize(pair.helper, this.context);
+                  return `
                     <button class="matching-chip" data-left="${pair.id}">
-                      <span>${pair.left}</span>
-                      <small>${pair.helper}</small>
+                      <div class="matching-chip-label quiz-md">${this.renderRichText(pair.left)}</div>
+                      <small>${helper}</small>
                     </button>
-                  `
-                )
+                  `;
+                })
                 .join('')}
             </div>
             <div class="matching-column right">
               ${rightColumn
-                .map(
-                  (pair) => `
+                .map((pair) => {
+                  const helper = personalize(pair.helper, this.context);
+                  return `
                     <button class="matching-chip" data-right="${pair.id}">
-                      <span>${pair.right}</span>
-                      <small>${pair.helper}</small>
+                      <div class="matching-chip-label quiz-md">${this.renderRichText(pair.right)}</div>
+                      <small>${helper}</small>
                     </button>
-                  `
-                )
+                  `;
+                })
                 .join('')}
             </div>
             <svg class="matching-lines" data-matching-svg></svg>
@@ -838,18 +881,21 @@ class ReviewLabExperience {
       case 'fillBlank': {
         const data = question as FillBlankQuestion;
         const draft = this.drafts.fill.get(question.id) ?? [];
+        const prompt = this.renderRichText(data.prompt);
         return `
-          <p class="quiz-prompt">${personalize(data.prompt, this.context)}</p>
+          <div class="quiz-prompt quiz-md">${prompt}</div>
           <div class="fill-grid">
             ${data.blanks
-              .map(
-                (blank, index) => `
+              .map((blank, index) => {
+                const label = personalize(blank.label, this.context);
+                const placeholder = personalize(blank.placeholder ?? '', this.context);
+                return `
                   <label class="fill-field">
-                    <span>${blank.label}</span>
-                    <input type="text" data-blank="${blank.id}" value="${draft[index] ?? ''}" placeholder="${blank.placeholder ?? ''}" />
+                    <span>${label}</span>
+                    <input type="text" data-blank="${blank.id}" value="${draft[index] ?? ''}" placeholder="${placeholder}" />
                   </label>
-                `
-              )
+                `;
+              })
               .join('')}
           </div>
           <button class="btn slim" data-action="submit-fill">提交答案</button>
@@ -858,15 +904,34 @@ class ReviewLabExperience {
       case 'shortAnswer': {
         const data = question as ShortAnswerQuestion;
         const draft = this.drafts.short.get(question.id) ?? '';
+        const prompt = this.renderRichText(data.prompt);
+        const guide = personalize(data.guide, this.context);
         return `
-          <p class="quiz-prompt">${personalize(data.prompt, this.context)}</p>
-          <textarea class="short-answer" data-short-answer placeholder="${data.guide}">${draft}</textarea>
+          <div class="quiz-prompt quiz-md">${prompt}</div>
+          <textarea class="short-answer" data-short-answer placeholder="${guide}">${draft}</textarea>
           <button class="btn slim" data-action="submit-short">提交答案</button>
         `;
       }
       default:
         return '';
     }
+  }
+  private getFlashcardFlipState(answer: ReviewAnswerState | undefined): boolean {
+    if (!answer) return false;
+    const payload = answer?.response as { flipped?: boolean } | undefined;
+    if (payload && typeof payload.flipped === 'boolean') {
+      return payload.flipped;
+    }
+    return answer.status === 'revealed';
+  }
+
+  private commitFlashcardReveal(questionId: string, flipped: boolean): void {
+    const previous = this.state.answers.get(questionId);
+    this.state.answers.set(questionId, {
+      status: 'revealed',
+      response: { flipped },
+      timestamp: previous?.timestamp ?? Date.now(),
+    });
   }
 
   private bindQuestionHandlers(question: ReviewQuestion): void {
@@ -903,16 +968,35 @@ class ReviewLabExperience {
 
   private bindFlashcard(card: HTMLElement, question: FlashcardQuestion): void {
     const flashcard = card.querySelector<HTMLElement>('[data-flashcard]');
-    const button = card.querySelector<HTMLButtonElement>('[data-action="flip-card"]');
-    const handler = () => {
-      flashcard?.classList.add('is-flipped');
-      this.state.answers.set(question.id, { status: 'revealed', timestamp: Date.now() });
+    const flipButton = card.querySelector<HTMLButtonElement>('[data-action="flip-card"]');
+    const hintButton = card.querySelector<HTMLButtonElement>('[data-action="toggle-hint"]');
+    const hintBubble = card.querySelector<HTMLElement>('[data-flashcard-hint]');
+    if (flashcard) {
+      const initialState = this.getFlashcardFlipState(this.state.answers.get(question.id));
+      flashcard.classList.toggle('is-flipped', initialState);
+    }
+    const handleFlip = (event?: Event) => {
+      event?.preventDefault();
+      if (!flashcard) return;
+      const shouldFlip = !flashcard.classList.contains('is-flipped');
+      flashcard.classList.toggle('is-flipped', shouldFlip);
+      this.commitFlashcardReveal(question.id, shouldFlip);
       this.updateFeedback(question);
       this.updateNavState(question);
       this.updateProgress();
     };
-    flashcard?.addEventListener('click', handler);
-    button?.addEventListener('click', handler);
+    flashcard?.addEventListener('click', handleFlip);
+    flipButton?.addEventListener('click', handleFlip);
+    if (hintButton && hintBubble && !hintButton.disabled) {
+      hintButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        const nextState = !hintBubble.classList.contains('is-visible');
+        hintBubble.classList.toggle('is-visible', nextState);
+        hintBubble.setAttribute('aria-hidden', nextState ? 'false' : 'true');
+        hintButton.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+        hintButton.classList.toggle('is-active', nextState);
+      });
+    }
   }
 
   private bindSingleChoice(card: HTMLElement, question: SingleChoiceQuestion): void {
@@ -1134,12 +1218,16 @@ class ReviewLabExperience {
     if (!answer) {
       feedbackBody.textContent = '';
       feedbackNode.setAttribute('hidden', 'true');
-      feedbackNode.classList.remove('feedback-bounce');
+      feedbackNode.classList.remove('feedback-bounce', 'feedback-enter', 'is-visible');
       return;
     }
     const text = personalize(this.pickFeedbackText(question.feedback, answer.status), this.context);
     feedbackBody.textContent = text;
     feedbackNode.removeAttribute('hidden');
+    feedbackNode.classList.add('is-visible');
+    feedbackNode.classList.remove('feedback-enter');
+    void feedbackNode.offsetWidth;
+    feedbackNode.classList.add('feedback-enter');
   }
 
   private pickFeedbackText(
