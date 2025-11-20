@@ -39,7 +39,6 @@ class GoalDashboardView {
     regions.content.innerHTML = `
       <section class="panel hero-goal">
         <div>
-          <p class="eyebrow">Step 0</p>
           <h2>你现在最重要的学习目标是什么？</h2>
           <div class="cta-group">
             <button class="btn primary" id="dashboard-create-goal">创建目标</button>

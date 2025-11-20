@@ -53,7 +53,6 @@ export const buildShellMarkup = (navItems: ReadonlyArray<NavDefinition>): string
           <div class="side-resizer" data-resizer aria-hidden="true"></div>
         </aside>
         <div class="main-stage">
-          <header class="context-header" data-view="context-head"></header>
           <main data-view="content"></main>
         </div>
       </div>

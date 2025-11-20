@@ -2,7 +2,6 @@ import { Page } from '../models/learningOsModel';
 import { ViewSnapshot } from '../viewModels/learningOsViewModel';
 
 export interface RenderRegions {
-  header: HTMLElement;
   content: HTMLElement;
   sidebar: HTMLElement;
 }

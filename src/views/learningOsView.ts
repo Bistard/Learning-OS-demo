@@ -1,6 +1,6 @@
 /**
- * Shell view that wires navigation, context header, sidebar meta, and
- * delegates actual page rendering to feature modules (MVVM per module).
+ * Shell view that wires navigation, sidebar meta, and delegates actual
+ * page rendering to feature modules (MVVM per module).
  */
 
 import { Page } from '../models/learningOsModel';
@@ -11,7 +11,6 @@ import { LearningWorkspaceModule } from '../modules/learning/workspace/learningW
 import { KnowledgeBaseModule } from '../modules/knowledge/base/knowledgeBaseModule';
 import { NoteEditorModule } from '../modules/knowledge/notes/noteEditorModule';
 import { SettingsModule } from '../modules/settings/settingsModule';
-import { ContextHeaderModule } from '../modules/shell/contextHeader/contextHeaderModule';
 import { SidebarMetaModule } from '../modules/shell/sidebar/sidebarMetaModule';
 import { TabStripModule } from '../modules/shell/tabs/tabStripModule';
 import { AiDialogModule } from '../modules/learning/dialog/aiDialogModule';
@@ -25,13 +24,11 @@ export class LearningOsView {
   private readonly shellElement: HTMLElement;
   private readonly contentHost: HTMLElement;
   private readonly toastHost: HTMLElement;
-  private readonly headerHost: HTMLElement;
   private readonly tabStripHost: HTMLElement;
   private readonly sidebarMeta: HTMLElement;
   private readonly navButtons = new Map<Page, HTMLButtonElement>();
   private readonly modules = new Map<Page, UiModule>();
   private readonly regions: RenderRegions;
-  private readonly headerModule: ContextHeaderModule;
   private readonly sidebarModule: SidebarMetaModule;
   private readonly tabStripModule: TabStripModule;
   private navWidth = 248;
@@ -45,15 +42,12 @@ export class LearningOsView {
     this.shellElement = root.querySelector<HTMLElement>('.os-shell')!;
     this.contentHost = root.querySelector<HTMLElement>('[data-view="content"]')!;
     this.toastHost = root.querySelector<HTMLElement>('[data-view="toast"]')!;
-    this.headerHost = root.querySelector<HTMLElement>('[data-view="context-head"]')!;
     this.sidebarMeta = root.querySelector<HTMLElement>('[data-view="side-meta"]')!;
     this.tabStripHost = root.querySelector<HTMLElement>('[data-view="tab-strip"]')!;
     this.regions = {
-      header: this.headerHost,
       content: this.contentHost,
       sidebar: this.sidebarMeta,
     };
-    this.headerModule = new ContextHeaderModule(this.viewModel);
     this.sidebarModule = new SidebarMetaModule();
     this.tabStripModule = new TabStripModule(this.viewModel);
     this.applyNavWidth(this.navWidth);
@@ -109,7 +103,6 @@ export class LearningOsView {
   private render(snapshot: ViewSnapshot): void {
     this.tabStripModule.render(snapshot, this.tabStripHost);
     this.highlightNav(snapshot.page);
-    this.headerModule.render(snapshot, this.headerHost);
     this.sidebarModule.render(snapshot, this.sidebarMeta);
     const module = this.modules.get(snapshot.page);
     module?.render(snapshot, this.regions);
