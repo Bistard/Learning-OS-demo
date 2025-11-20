@@ -581,6 +581,8 @@ export class LearningOsViewModel {
         const assetTitle = this.state.workspace.activeAsset?.title;
         return assetTitle ? `${assetTitle} · 学习台` : '学习工作台';
       }
+      case 'reviewLab':
+        return activeGoal ? `${activeGoal.name} · 复习` : '复习模式';
       case 'knowledgeBase':
         return activeGoal ? `${activeGoal.name} · 知识库` : '知识库';
       case 'noteEditor': {

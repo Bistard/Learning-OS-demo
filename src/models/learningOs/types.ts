@@ -8,6 +8,7 @@ export type Page =
   | 'goalWorkspace'
   | 'learningWorkspace'
   | 'aiDialog'
+  | 'reviewLab'
   | 'knowledgeBase'
   | 'noteEditor'
   | 'settings';

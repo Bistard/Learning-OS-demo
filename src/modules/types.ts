@@ -4,6 +4,7 @@ import { ViewSnapshot } from '../viewModels/learningOsViewModel';
 export interface RenderRegions {
   content: HTMLElement;
   sidebar: HTMLElement;
+  header?: HTMLElement;
 }
 
 export interface UiModule {

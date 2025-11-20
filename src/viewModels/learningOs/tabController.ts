@@ -43,6 +43,7 @@ const TAB_BLUEPRINTS: Record<Page, TabBlueprint> = {
   goalWorkspace: { icon: '🗂️' },
   learningWorkspace: { icon: '🧠' },
   aiDialog: { icon: '💬' },
+  reviewLab: { icon: '🧾' },
   knowledgeBase: { icon: '📚' },
   noteEditor: { icon: '📝' },
   settings: { icon: '⚙️' },

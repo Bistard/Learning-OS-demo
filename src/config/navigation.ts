@@ -34,6 +34,13 @@ const ICON_KNOWLEDGE = svg(`
   <path d="M5.5 7.5h7.5" />
 `);
 
+const ICON_REVIEW = svg(`
+  <rect x="4.5" y="5" width="15" height="14" rx="3" />
+  <path d="M8 8h8" />
+  <path d="M8 12h5" />
+  <path d="M12 17l3 2 3-2" />
+`);
+
 export const ICON_SETTINGS = svg(`
   <circle cx="12" cy="12" r="3" />
   <path d="M4 12h2" />
@@ -47,6 +54,7 @@ export const ICON_SETTINGS = svg(`
 export const PRIMARY_NAV: ReadonlyArray<NavDefinition> = [
   { icon: ICON_GOAL, label: '目标', page: 'goalDashboard' },
   { icon: ICON_DIALOG, label: 'AI 对话', page: 'aiDialog' },
+  { icon: ICON_REVIEW, label: '复习', page: 'reviewLab' },
   { icon: ICON_KNOWLEDGE, label: '知识库', page: 'knowledgeBase' },
 ];
 
